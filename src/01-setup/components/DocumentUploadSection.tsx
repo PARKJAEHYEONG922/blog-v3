@@ -1,6 +1,7 @@
 import React from 'react';
 import SuccessModal from './SuccessModal';
 import { SavedDocument } from '../types/setup.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 interface DocumentUploadSectionProps {
   savedWritingStyles: SavedDocument[];
@@ -54,7 +55,7 @@ const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({
         });
       }
     } catch (error) {
-      console.error('URL 크롤링 실패:', error);
+      handleError(error, 'URL 크롤링 실패');
     } finally {
       setIsLoading(false);
     }
