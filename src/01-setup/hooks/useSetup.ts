@@ -201,12 +201,10 @@ export const useSetup = (): UseSetupReturn => {
 
       if (deleteDialog.type === 'writingStyle' && result.writingStyles) {
         setSavedWritingStyles(result.writingStyles);
-        setSelectedWritingStyles(selectedWritingStyles.filter(doc => doc.id !== deleteDialog.docId));
+        setSelectedWritingStyles(prev => prev.filter(doc => doc.id !== deleteDialog.docId));
       } else if (deleteDialog.type === 'seoGuide' && result.seoGuides) {
         setSavedSeoGuides(result.seoGuides);
-        if (selectedSeoGuide?.id === deleteDialog.docId) {
-          setSelectedSeoGuide(null);
-        }
+        setSelectedSeoGuide(prev => prev?.id === deleteDialog.docId ? null : prev);
       }
 
       setDeleteDialog({ isOpen: false, docId: '', docName: '', type: 'writingStyle' });
@@ -215,7 +213,7 @@ export const useSetup = (): UseSetupReturn => {
       console.error('문서 삭제 실패:', error);
       showAlert({ type: 'error', message: (error as Error).message });
     }
-  }, [deleteDialog, selectedWritingStyles, selectedSeoGuide, showAlert]);
+  }, [deleteDialog, showAlert]);
 
   // 삭제 다이얼로그 닫기
   const closeDeleteDialog = useCallback(() => {
