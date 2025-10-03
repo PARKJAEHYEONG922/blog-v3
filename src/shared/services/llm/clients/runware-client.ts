@@ -1,6 +1,6 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
-import { handleError } from '../../../utils/error-handler';
+import { handleError } from '@/shared/utils/error-handler';
 
 // Runware 스타일별 실제 모델 매핑
 const runwareStyleModels = {

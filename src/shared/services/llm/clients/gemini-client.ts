@@ -1,7 +1,7 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
-import { handleError } from '../../../utils/error-handler';
-import { withRetry } from '../../../utils/retry';
+import { handleError } from '@/shared/utils/error-handler';
+import { withRetry } from '@/shared/utils/retry';
 
 export class GeminiClient extends BaseLLMClient {
   async generateText(messages: LLMMessage[], options?: { tools?: LLMTool[] }): Promise<LLMResponse> {
