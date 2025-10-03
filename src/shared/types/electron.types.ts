@@ -23,10 +23,7 @@ export interface ElectronAPI {
   // 이미지 생성
   generateImagePrompts: (data: { content: string; imageCount: number }) => Promise<{ success: boolean; prompts: string[]; error?: string }>;
   generateImage: (prompt: string) => Promise<string>;
-  
-  // 블로그 발행
-  publishToBlog: (content: string) => Promise<{ success: boolean }>;
-  
+
   // LLM 설정
   getLLMSettings: () => Promise<any>;
   saveLLMSettings: (settings: any) => Promise<void>;

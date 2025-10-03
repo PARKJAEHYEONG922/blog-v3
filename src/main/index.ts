@@ -309,13 +309,6 @@ ipcMain.handle('image:generate', async (_event, prompt: string) => {
   }
 });
 
-// IPC handler for publishing to blog (reuse v2 logic)
-ipcMain.handle('blog:publish', async (_event, content: string) => {
-  // TODO: Integrate with existing v2 publishing logic
-  console.log('Publishing content:', content.slice(0, 100) + '...');
-  return { success: true };
-});
-
 // IPC handlers for file management
 ipcMain.handle('file:save-document', async (_event, type: 'writingStyle' | 'seoGuide', name: string, content: string) => {
   return await fileService.saveDocument(type, name, content);

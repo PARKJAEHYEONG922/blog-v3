@@ -69,16 +69,13 @@ export class GenerationAutomationService {
 
   /**
    * 네이버 블로그에 발행
+   * Note: 실제 발행 기능은 03-publish/platforms/naver에 구현되어 있습니다.
+   * 이 함수는 deprecated 예정입니다.
    */
   static publishToNaverBlog(htmlContent: string): void {
-    try {
-      console.log('📤 네이버 블로그 발행 시작...');
-      window.electronAPI.publishToBlog(htmlContent);
-      console.log('✅ 네이버 블로그 발행 요청 완료');
-    } catch (error) {
-      handleError(error, '❌ 네이버 블로그 발행 실패');
-      throw error;
-    }
+    console.warn('⚠️ publishToNaverBlog는 deprecated되었습니다. 03-publish 모듈을 사용하세요.');
+    console.log('📤 네이버 블로그 발행 콘텐츠 길이:', htmlContent.length);
+    // 실제 발행은 03-publish 단계에서 수행됨
   }
 
   /**
