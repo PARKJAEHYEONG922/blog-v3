@@ -1,4 +1,5 @@
 import { SelectedBlogTitle, BlogContent, CrawlingProgress } from '../types/setup.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 export class BlogCrawler {
   private progressCallback?: (progress: CrawlingProgress) => void;
@@ -71,7 +72,7 @@ export class BlogCrawler {
         }
         
       } catch (error) {
-        console.error(`❌ [${processedCount}/${selectedBlogs.length}] 크롤링 실패: ${blog.url}`, error);
+        handleError(error, `❌ [${processedCount}/${selectedBlogs.length}] 크롤링 실패: ${blog.url}`);
         
         // 실패한 경우에도 결과에 포함 (빈 콘텐츠로)
         results.push({
@@ -110,7 +111,7 @@ export class BlogCrawler {
       console.log(`🔍 URL 검증: "${url}" (길이: ${url?.length || 0})`);
       
       if (!url || typeof url !== 'string' || url.trim() === '') {
-        console.error(`❌ 빈 URL 또는 잘못된 URL 타입: ${JSON.stringify(url)}`);
+        handleError(new Error(`빈 URL 또는 잘못된 URL 타입: ${JSON.stringify(url)}`), '❌ URL 검증 실패');
         return {
           url: url || '',
           title,
@@ -126,7 +127,7 @@ export class BlogCrawler {
       const isTistory = cleanUrl.includes('.tistory.com');
       
       if (!isNaverBlog && !isTistory) {
-        console.error(`❌ 지원하지 않는 블로그 플랫폼: "${cleanUrl}"`);
+        handleError(new Error(`지원하지 않는 블로그 플랫폼: "${cleanUrl}"`), '❌ 플랫폼 검증 실패');
         return {
           url: cleanUrl,
           title,
@@ -182,7 +183,7 @@ export class BlogCrawler {
       throw new Error('모든 URL 시도 실패');
 
     } catch (error) {
-      console.error(`블로그 크롤링 오류 (${url}):`, error);
+      handleError(error, `블로그 크롤링 오류 (${url})`);
       throw error;
     }
   }
