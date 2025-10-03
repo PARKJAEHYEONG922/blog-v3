@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, shell, Menu, dialog } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ClaudeWebService } from './services/claude-web-service';
-import { ImageService } from '../shared/services/content/image-service';
+import { ImageService } from './services/image-service';
 import { registerPlaywrightHandlers, playwrightService } from './services/playwright-service';
 import { getDefaultSEOGuideContent } from '../shared/services/content/default-seo-guide';
 import { CookieService } from './services/cookie-service';
@@ -15,11 +15,11 @@ import { handleError } from '../shared/utils/error-handler';
 
 let mainWindow: BrowserWindow;
 const claudeWebService = new ClaudeWebService();
-const imageService = new ImageService();
 const cookieService = new CookieService();
 const fileService = new FileService();
 const appService = new AppService();
 const settingsService = new SettingsService();
+const imageService = new ImageService(settingsService);
 const naverTrendAPI = new NaverTrendAPIService(cookieService);
 
 // 콘솔 로그를 UI로 전송하는 함수
