@@ -5,7 +5,7 @@
 import { StorageService } from '@/shared/services/storage/storage-service';
 import { DocumentLoadResult } from '../types/setup.types';
 import {
-import { handleError } from '@/shared/utils/error-handler';
+  handleError,
   handleFileSystemError,
   handleAPIError,
   logError,
