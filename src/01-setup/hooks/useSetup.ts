@@ -78,10 +78,16 @@ export const useSetup = (): UseSetupReturn => {
         setSavedSeoGuides(result.seoGuides);
         setSelectedWritingStyles(result.selectedWritingStyles);
         setSelectedSeoGuide(result.selectedSeoGuide);
-        setIsInitialLoadComplete(true); // 초기 로드 완료 표시
+
+        // 다음 틱에 초기 로드 완료 표시 (현재 상태 변경이 먼저 적용되도록)
+        setTimeout(() => {
+          setIsInitialLoadComplete(true);
+        }, 0);
       } catch (error) {
         console.error('문서 로드 실패:', error);
-        setIsInitialLoadComplete(true); // 에러여도 플래그 설정
+        setTimeout(() => {
+          setIsInitialLoadComplete(true);
+        }, 0);
       }
     };
 
