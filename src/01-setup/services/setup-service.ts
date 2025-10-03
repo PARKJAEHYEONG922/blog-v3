@@ -2,7 +2,7 @@
  * Setup 기능 관련 비즈니스 로직 서비스
  */
 
-import { StorageService } from '@/shared/services/storage/storage-service';
+import { StorageService, SavedDocument } from '@/shared/services/storage/storage-service';
 import { DocumentLoadResult } from '../types/setup.types';
 import {
   handleError,

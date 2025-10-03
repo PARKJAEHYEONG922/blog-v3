@@ -280,6 +280,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       const accountInfo: SavedAccount = {
         id: accountId,
         username: username,
+        createdAt: new Date().toISOString(),
         lastUsed: Date.now()
       };
 
@@ -513,6 +514,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       const accountInfo: SavedAccount = {
         id: accountId,
         username: naverCredentials.username,
+        createdAt: new Date().toISOString(),
         lastUsed: Date.now()
       };
 

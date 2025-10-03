@@ -1,3 +1,5 @@
+import { handleError } from '@/shared/utils/error-handler';
+
 export interface ImagePrompt {
   index: number;
   position: string;

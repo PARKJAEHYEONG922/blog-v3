@@ -10,7 +10,6 @@ export interface LLMConfig {
 }
 
 export interface LLMResponse {
-  match(arg0: RegExp): unknown;
   content: string;
   usage?: {
     promptTokens: number;
@@ -39,5 +38,5 @@ export interface LLMGenerateOptions {
 export interface ImageGenerationOptions {
   quality?: 'low' | 'medium' | 'high';
   size?: '512x768' | '768x512' | '1024x1024' | '1024x1536' | '1536x1024' | '1920x1080';
-  style?: 'photographic' | 'minimalist' | 'kawaii' | 'artistic' | 'impressionist';
+  style?: 'photographic' | 'illustration' | 'minimalist' | 'natural';  // Gemini 스타일 4개로 통일
 }

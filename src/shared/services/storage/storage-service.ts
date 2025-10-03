@@ -26,6 +26,7 @@ export interface NaverAccount {
   username: string;
   blogUrl?: string;
   createdAt: string;
+  lastUsed?: number;  // SavedAccount와 호환성을 위해 추가
 }
 
 class StorageServiceClass {

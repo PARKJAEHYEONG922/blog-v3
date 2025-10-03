@@ -4,7 +4,6 @@ import WorkSummary from './WorkSummary';
 import ImageGenerator from './ImageGenerator';
 import { NaverPublishUI } from '@/03-publish/platforms/naver';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
-import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import Button from '@/shared/components/ui/Button';
 import { useDialog } from '@/app/DialogContext';
 import { useWorkflow } from '@/app/WorkflowContext';
@@ -89,7 +88,8 @@ const Step2Generation: React.FC = () => {
   useEffect(() => {
     const loadImageAIInfo = async () => {
       try {
-        const llmSettings = await GenerationAutomationService.getLLMSettings();
+        // IPC 직접 호출
+        const llmSettings = await window.electronAPI.getLLMSettings();
         if (llmSettings?.appliedSettings?.image) {
           const { provider, model } = llmSettings.appliedSettings.image;
           if (provider && model) {
@@ -140,23 +140,8 @@ const Step2Generation: React.FC = () => {
     }
   }, [editedContent]);
 
-  // 1단계에서 전달된 이미지 프롬프트들 초기화
-  useEffect(() => {
-    console.log('🔍 useEffect - setupData.imagePrompts:', setupData.imagePrompts);
-    console.log('🔍 useEffect - Array.isArray?', Array.isArray(setupData.imagePrompts));
-    console.log('🔍 useEffect - length:', setupData.imagePrompts?.length);
-
-    if (setupData.imagePrompts && setupData.imagePrompts.length > 0) {
-      console.log(`📋 1단계에서 생성된 이미지 프롬프트 ${setupData.imagePrompts.length}개 로드됨`);
-      setImagePrompts(setupData.imagePrompts);
-      setImagePromptError(null);
-    } else if (setupData.imagePromptGenerationFailed) {
-      console.warn('⚠️ 1단계에서 이미지 프롬프트 생성 실패');
-      setImagePromptError('1단계에서 이미지 프롬프트 생성에 실패했습니다.');
-    } else {
-      console.warn('⚠️ imagePrompts가 없거나 빈 배열입니다');
-    }
-  }, [setupData.imagePrompts, setupData.imagePromptGenerationFailed]);
+  // NOTE: 이미지 프롬프트 초기화는 useGeneration → useImageGeneration에서 자동 처리됨
+  // workflowData.imagePrompts → initialImagePrompts로 전달
 
   // v2와 동일한 CSS 스타일
   const sectionStyles = `

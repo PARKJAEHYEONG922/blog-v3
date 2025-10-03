@@ -155,6 +155,15 @@ export interface UseSetupReturn {
   isAnalyzing: boolean;
   analysisProgress: TrendAnalysisProgress | null;
 
+  // 추가 상태 (SetupContainer에서 사용)
+  blogContent: string;
+  isGeneratingTitles: boolean;
+  generatedTitles: string[];
+  selectedTitle: string;
+  generationStep: string;
+  progressSectionRef: React.RefObject<HTMLDivElement>;
+  deleteDialog: { isOpen: boolean; docId: string; docType: string };
+
   // 상태 업데이트 함수
   setMainKeyword: (keyword: string) => void;
   setSubKeywords: (keywords: string) => void;
@@ -164,6 +173,12 @@ export interface UseSetupReturn {
   setSelectedSeoGuide: (guide: SavedDocument | null) => void;
   setSavedWritingStyles: (styles: SavedDocument[]) => void;
   setSavedSeoGuides: (guides: SavedDocument[]) => void;
+
+  // 추가 setter (SetupContainer에서 사용)
+  setBlogContent: (content: string) => void;
+  setSelectedTitle: (title: string) => void;
+  setGeneratedTitles: (titles: string[]) => void;
+  setTrendAnalysisCache: (cache: any) => void;
 
   // 비즈니스 로직 함수
   handleFileUpload: (type: 'writingStyle' | 'seoGuide') => Promise<void>;
@@ -180,6 +195,17 @@ export interface UseSetupReturn {
   handleGenerateContent: () => Promise<void>;
   openCategoryModal: () => void;
   closeCategoryModal: () => void;
+
+  // 추가 비즈니스 로직 (SetupContainer에서 사용)
+  handleUrlCrawl: (url: string) => Promise<void>;
+  toggleWritingStyle: (id: string) => void;
+  toggleSeoGuide: (id: string) => void;
+  openDeleteDialog: (id: string, type: string) => void;
+  handleDeleteConfirm: () => Promise<void>;
+  closeDeleteDialog: () => void;
+  generateTitleRecommendations: () => Promise<void>;
+  handleStartGeneration: () => Promise<void>;
+  handleFileUploaded: (type: 'writingStyle' | 'seoGuide', file: File) => Promise<void>;
 }
 
 // ============================================

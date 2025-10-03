@@ -30,16 +30,16 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     runware: ''
   });
 
-  // LLM 설정
+  // LLM 설정 (UI에서 임시로 입력하는 값)
   const [settings, setSettings] = useState<LLMSettings>({
     writing: { provider: 'gemini', model: 'gemini-2.0-flash-exp', apiKey: '' },
     image: { provider: 'gemini', model: 'gemini-2.5-flash-image-preview', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' }
   });
 
-  // 실제 적용된 설정
+  // 실제 적용된 설정 (사용자가 저장한 기본 설정값)
   const [appliedSettings, setAppliedSettings] = useState<LLMSettings>({
-    writing: { provider: '', model: '', apiKey: '' },
-    image: { provider: '', model: '', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' }
+    writing: { provider: 'gemini', model: '', apiKey: '' },
+    image: { provider: 'gemini', model: '', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' }
   });
 
   // API 키 테스트 상태
@@ -134,7 +134,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     const newSettings = { ...settings };
     newSettings[tab] = {
       ...newSettings[tab],
-      provider,
+      provider: provider as 'openai' | 'claude' | 'gemini' | 'runware',
       model: '', // 모델 초기화
       apiKey: providerApiKeys[provider as keyof ProviderApiKeys] || ''
     };
@@ -290,7 +290,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
 
     // 적용된 설정에서도 제거
     const newAppliedSettings = { ...appliedSettings };
-    newAppliedSettings[category] = { provider: '', model: '', apiKey: '', style: 'realistic' };
+    newAppliedSettings[category] = { provider: 'gemini', model: '', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' };
     setAppliedSettings(newAppliedSettings);
 
     // 테스트 상태 초기화

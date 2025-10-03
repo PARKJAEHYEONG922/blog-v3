@@ -7,7 +7,6 @@
 import { handleError } from '@/shared/utils/error-handler';
 import { useState, useCallback } from 'react';
 import { useDialog } from '@/app/DialogContext';
-import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
 
 export interface UseContentRefreshParams {
@@ -40,8 +39,8 @@ export const useContentRefresh = ({
     try {
       console.log('🔄 Claude Web에서 수정된 글 가져오기 시작');
 
-      // Claude Web에서 다시 다운로드
-      const newContent = await GenerationAutomationService.downloadFromClaude();
+      // Claude Web에서 다시 다운로드 (IPC 직접 호출)
+      const newContent = await window.electronAPI.downloadFromClaude();
 
       if (newContent && newContent.trim()) {
         console.log('✅ 수정된 글 가져오기 성공');

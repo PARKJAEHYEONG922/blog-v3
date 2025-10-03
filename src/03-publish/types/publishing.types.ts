@@ -51,9 +51,5 @@ export interface BoardInfo {
   url?: string;
 }
 
-// 저장된 계정 타입
-export interface SavedAccount {
-  id: string;
-  username: string;
-  lastUsed: number;
-}
+// 저장된 계정 타입 - NaverAccount 재사용
+export type { NaverAccount as SavedAccount } from '@/shared/services/storage/storage-service';

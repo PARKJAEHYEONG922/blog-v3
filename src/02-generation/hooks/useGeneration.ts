@@ -7,7 +7,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { handleError } from '@/shared/utils/error-handler';
 import { useWorkflow } from '@/app/WorkflowContext';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
-import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 
 // 전문 훅들 임포트
 import { useContentEditor } from './useContentEditor';
@@ -101,7 +100,8 @@ export const useGeneration = (): UseGenerationReturn => {
   // 모델 상태 새로고침 함수
   const refreshModelStatus = useCallback(async () => {
     try {
-      const llmSettings = await GenerationAutomationService.getLLMSettings();
+      // IPC 직접 호출
+      const llmSettings = await window.electronAPI.getLLMSettings();
       if (llmSettings?.appliedSettings) {
         const { writing, image } = llmSettings.appliedSettings;
 

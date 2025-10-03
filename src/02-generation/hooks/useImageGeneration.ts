@@ -8,7 +8,6 @@ import { handleError } from '@/shared/utils/error-handler';
 
 import { useState, useCallback, useEffect } from 'react';
 import { useDialog } from '@/app/DialogContext';
-import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import { BlogWritingService } from '@/shared/services/content/blog-writing-service';
 
 export interface UseImageGenerationParams {
@@ -61,7 +60,24 @@ export const useImageGeneration = ({
     try {
       console.log(`🎨 이미지 생성 시작: ${imagePrompts.length}개 프롬프트 사용`);
 
-      const generatedImages = await GenerationAutomationService.generateImages(imagePrompts);
+      // 배치 이미지 생성 (인라인)
+      const generatedImages: { [key: string]: string } = {};
+
+      for (let i = 0; i < imagePrompts.length; i++) {
+        const imagePrompt = imagePrompts[i];
+        const imageKey = `이미지${i + 1}`;
+
+        console.log(`🖼️ 이미지 ${i + 1} 생성 중... 프롬프트: ${imagePrompt.prompt.substring(0, 50)}...`);
+
+        try {
+          const imageUrl = await window.electronAPI.generateImage(imagePrompt.prompt);
+          generatedImages[imageKey] = imageUrl;
+          console.log(`✅ 이미지 ${i + 1} 생성 완료`);
+        } catch (error) {
+          handleError(error, `❌ 이미지 ${i + 1} 생성 실패`);
+          throw error;
+        }
+      }
 
       setImages(generatedImages);
       console.log(`🎉 모든 이미지 생성 완료: ${Object.keys(generatedImages).length}개`);

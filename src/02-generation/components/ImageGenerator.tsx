@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Button from '@/shared/components/ui/Button';
-import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import { useDialog } from '@/app/DialogContext';
 import { IMAGE_GENERATION_OPTIONS } from '@/shared/utils/constants';
 import { handleError } from '@/shared/utils/error-handler';
@@ -120,28 +119,15 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   useEffect(() => {
     const loadImageSettingsFromAPI = async () => {
       try {
-        const imageSettings = await GenerationAutomationService.getImageSettings();
+        const llmSettings = await window.electronAPI.getLLMSettings();
+        const imageSettings = llmSettings?.appliedSettings?.image;
+
         if (imageSettings) {
           const { style, quality, size } = imageSettings;
 
-          if (style) {
-            console.log('🎨 API에서 불러온 이미지 스타일:', style);
-            // 옛날 스타일 값이면 기본값으로 변환
-            const validStyles = ['photographic', 'illustration', 'minimalist', 'natural'];
-            const finalStyle = validStyles.includes(style) ? style : 'photographic';
-            setImageStyle(finalStyle as typeof imageStyle);
-            if (style !== finalStyle) {
-              console.log('⚠️ 구버전 스타일 감지, 기본값으로 변환:', style, '→', finalStyle);
-            }
-          }
-          if (quality) {
-            console.log('🔧 API에서 불러온 이미지 품질:', quality);
-            setImageQuality(quality as typeof imageQuality);
-          }
-          if (size) {
-            console.log('📐 API에서 불러온 이미지 크기:', size);
-            setImageSize(size as typeof imageSize);
-          }
+          if (style) setImageStyle(style as typeof imageStyle);
+          if (quality) setImageQuality(quality as typeof imageQuality);
+          if (size) setImageSize(size as typeof imageSize);
         }
       } catch (error) {
         handleError(error, '이미지 설정 불러오기 실패');
@@ -149,28 +135,21 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     };
 
     loadImageSettingsFromAPI();
-  }, []); // 컴포넌트 마운트 시 한 번만 실행
+  }, []);
 
-  // API 설정 변경 이벤트 수신 (App.tsx에서 발생)
+  // API 설정 변경 이벤트 수신
   useEffect(() => {
     const handleSettingsChange = async () => {
       try {
-        const imageSettings = await GenerationAutomationService.getImageSettings();
+        const llmSettings = await window.electronAPI.getLLMSettings();
+        const imageSettings = llmSettings?.appliedSettings?.image;
+
         if (imageSettings) {
           const { style, quality, size } = imageSettings;
 
-          if (style) {
-            console.log('🎨 API 설정 변경 - 이미지 스타일 업데이트:', style);
-            setImageStyle(style as typeof imageStyle);
-          }
-          if (quality) {
-            console.log('🔧 API 설정 변경 - 이미지 품질 업데이트:', quality);
-            setImageQuality(quality as typeof imageQuality);
-          }
-          if (size) {
-            console.log('📐 API 설정 변경 - 이미지 크기 업데이트:', size);
-            setImageSize(size as typeof imageSize);
-          }
+          if (style) setImageStyle(style as typeof imageStyle);
+          if (quality) setImageQuality(quality as typeof imageQuality);
+          if (size) setImageSize(size as typeof imageSize);
         }
       } catch (error) {
         handleError(error, '설정 변경 시 이미지 설정 업데이트 실패');
@@ -178,7 +157,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     };
 
     window.addEventListener('app-llm-settings-changed', handleSettingsChange);
-    
+
     return () => {
       window.removeEventListener('app-llm-settings-changed', handleSettingsChange);
     };
@@ -489,8 +468,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
       // 이미지 옵션은 메인 프로세스에서 LLM 설정을 사용하므로 별도로 전달하지 않음
       console.log('프롬프트로 이미지 생성 요청:', enhancedPrompt);
 
-      // 실제 API 호출 (옵션은 저장된 LLM 설정 사용)
-      const imageUrl = await GenerationAutomationService.generateImage(enhancedPrompt);
+      // 실제 API 호출 (IPC 직접 호출, 옵션은 저장된 LLM 설정 사용)
+      const imageUrl = await window.electronAPI.generateImage(enhancedPrompt);
       
       // 정지 요청 확인 (배치 모드일 때만)
       if (shouldStopRef.current && isPartOfBatch) {
@@ -804,7 +783,22 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   // 이미지 설정을 API 설정에 저장
   const saveImageSettingToAPI = async (settingType: 'style' | 'quality' | 'size', value: string) => {
     try {
-      await GenerationAutomationService.updateImageSettings(settingType, value);
+      const currentSettings = await window.electronAPI.getLLMSettings();
+
+      if (currentSettings?.appliedSettings?.image) {
+        const updatedSettings = {
+          ...currentSettings,
+          appliedSettings: {
+            ...currentSettings.appliedSettings,
+            image: {
+              ...currentSettings.appliedSettings.image,
+              [settingType]: value
+            }
+          }
+        };
+
+        await window.electronAPI.saveLLMSettings(updatedSettings);
+      }
     } catch (error) {
       handleError(error, '이미지 설정 저장 실패');
     }

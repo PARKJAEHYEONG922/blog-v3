@@ -6,7 +6,6 @@
 
 import { useState, useCallback } from 'react';
 import { useDialog } from '@/app/DialogContext';
-import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 
 export interface UsePublishParams {
   editedContent: string;
@@ -64,8 +63,9 @@ export const usePublish = ({
     const finalContent = replaceImagesInContent();
 
     if (selectedPlatform === 'naver') {
-      // 네이버 블로그 발행
-      GenerationAutomationService.publishToNaverBlog(finalContent);
+      // 네이버 블로그 발행 (deprecated - Step3에서 처리)
+      console.log('📤 네이버 블로그 발행 콘텐츠 길이:', finalContent.length);
+      console.warn('⚠️ 이 기능은 deprecated되었습니다. Step3 Publish에서 발행하세요.');
     } else {
       showAlert({ type: 'info', message: `${getPlatformName(selectedPlatform)} 발행 기능은 곧 구현될 예정입니다.` });
     }
