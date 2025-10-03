@@ -32,6 +32,7 @@ class StorageServiceClass {
     WRITING_STYLES: 'savedWritingStyles',
     SEO_GUIDES: 'savedSeoGuides',
     SELECTED_WRITING_STYLES: 'selectedWritingStyles',
+    SELECTED_SEO_GUIDE: 'selectedSeoGuideId',
     TREND_CACHE: 'trendAnalysisCache',
     NAVER_ACCOUNTS: 'naverAccounts',
     NAVER_PASSWORD_PREFIX: 'naverPassword_',
@@ -150,6 +151,33 @@ class StorageServiceClass {
     const updated = documents.filter(doc => doc.id !== docId);
     this.saveSeoGuides(updated);
     return updated;
+  }
+
+  /**
+   * 선택된 SEO 가이드 ID 가져오기
+   */
+  getSelectedSeoGuideId(): string | null {
+    try {
+      return localStorage.getItem(this.KEYS.SELECTED_SEO_GUIDE);
+    } catch (error) {
+      console.error('선택된 SEO 가이드 ID 로드 실패:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 선택된 SEO 가이드 ID 저장
+   */
+  saveSelectedSeoGuideId(id: string | null): void {
+    try {
+      if (id === null) {
+        localStorage.removeItem(this.KEYS.SELECTED_SEO_GUIDE);
+      } else {
+        localStorage.setItem(this.KEYS.SELECTED_SEO_GUIDE, id);
+      }
+    } catch (error) {
+      console.error('선택된 SEO 가이드 ID 저장 실패:', error);
+    }
   }
 
   // ========== Selected Writing Styles ==========
