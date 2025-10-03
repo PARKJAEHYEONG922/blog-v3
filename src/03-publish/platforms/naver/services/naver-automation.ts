@@ -4,6 +4,7 @@ import { BaseBrowserAutomation } from '../../../services/base-automation';
 import type { LoginResult, PublishResult, INaverBlogAutomation } from '@/shared/types/automation.types';
 // @ts-ignore
 import '@/shared/types/electron.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 // URL 변경 감지 결과 타입
 interface URLChangeResult {
@@ -39,7 +40,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       console.log('아이디 입력 중...');
       const idFilled = await this.fill('#id', username);
       if (!idFilled) {
-        console.error('❌ 아이디 입력 실패');
+        handleError(new Error('❌ 아이디 입력 실패'), '❌ 아이디 입력 실패');
         return 'failed';
       }
       await this.waitForTimeout(500);
@@ -48,7 +49,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       console.log('비밀번호 입력 중...');
       const passwordFilled = await this.fill('#pw', password);
       if (!passwordFilled) {
-        console.error('❌ 비밀번호 입력 실패');
+        handleError(new Error('❌ 비밀번호 입력 실패'), '❌ 비밀번호 입력 실패');
         return 'failed';
       }
       await this.waitForTimeout(500);
@@ -70,7 +71,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         }
         
         if (!clicked) {
-          console.error('❌ 로그인 버튼을 찾을 수 없습니다');
+          handleError(new Error('❌ 로그인 버튼을 찾을 수 없습니다'), '❌ 로그인 버튼을 찾을 수 없습니다');
           return 'failed';
         }
       }
@@ -86,7 +87,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return loginResult;
 
     } catch (error) {
-      console.error('❌ 네이버 로그인 중 오류:', error);
+      handleError(error, '❌ 네이버 로그인 중 오류:');
       return 'failed';
     }
   }
@@ -222,7 +223,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
 
       return false;
     } catch (error) {
-      console.error('2단계 인증 페이지 확인 중 오류:', error);
+      handleError(error, '2단계 인증 페이지 확인 중 오류:');
       return false;
     }
   }
@@ -260,7 +261,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return false;
 
     } catch (error) {
-      console.error('❌ 기기 등록 건너뛰기 실패:', error);
+      handleError(error, '❌ 기기 등록 건너뛰기 실패:');
       return false;
     }
   }
@@ -289,7 +290,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
 
       return false;
     } catch (error) {
-      console.error('❌ 네이버 로그아웃 실패:', error);
+      handleError(error, '❌ 네이버 로그아웃 실패:');
       return false;
     }
   }
@@ -363,7 +364,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return true;
       
     } catch (error) {
-      console.error('❌ 글쓰기 페이지 이동 실패:', error);
+      handleError(error, '❌ 글쓰기 페이지 이동 실패:');
       return false;
     }
   }
@@ -386,7 +387,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       console.log('iframe 로드 상태:', result?.result);
       return result?.result?.hasEditor || false;
     } catch (error) {
-      console.error('iframe 로딩 상태 확인 실패:', error);
+      handleError(error, 'iframe 로딩 상태 확인 실패:');
       return false;
     }
   }
@@ -521,14 +522,14 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       // 제목 입력
       const titleFilled = await this.fillTitle(title);
       if (!titleFilled) {
-        console.error('❌ 제목 입력 실패');
+        handleError(new Error('❌ 제목 입력 실패'), '❌ 제목 입력 실패');
         return false;
       }
 
       // 본문 입력
       const contentFilled = await this.fillBody(content);
       if (!contentFilled) {
-        console.error('❌ 본문 입력 실패');
+        handleError(new Error('❌ 본문 입력 실패'), '❌ 본문 입력 실패');
         return false;
       }
 
@@ -543,7 +544,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return true;
 
     } catch (error) {
-      console.error('❌ 콘텐츠 입력 실패:', error);
+      handleError(error, '❌ 콘텐츠 입력 실패:');
       return false;
     }
   }
@@ -705,7 +706,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return true;
 
     } catch (error) {
-      console.error('❌ 본문 입력 실패:', error);
+      handleError(error, '❌ 본문 입력 실패:');
       return false;
     }
   }
@@ -778,7 +779,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return uploadedUrl;
 
     } catch (error) {
-      console.error('❌ 이미지 업로드 실패:', error);
+      handleError(error, '❌ 이미지 업로드 실패:');
       throw error;
     }
   }
@@ -823,7 +824,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             
             const saveResult = await window.electronAPI.saveTempFile(fileName, imageDataArray);
             if (!saveResult.success || !saveResult.filePath) {
-              console.error(`❌ 이미지 ${i} 임시 저장 실패:`, saveResult.error);
+              handleError(new Error(saveResult.error), `❌ 이미지 ${i} 임시 저장 실패`);
               continue;
             }
             
@@ -900,7 +901,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
                     };
                   }
                 } catch (error) {
-                  console.error('(이미지${i}) 찾기 오류:', error);
+                  handleError(error, '(이미지${i}) 찾기 오류:');
                   return { success: false, error: error.message };
                 }
               })()
@@ -1014,7 +1015,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             console.log(`🗑️ 이미지 ${i} 임시 파일 삭제 완료`);
 
           } catch (error) {
-            console.error(`❌ 이미지 ${i} 처리 중 오류:`, error);
+            handleError(error, `❌ 이미지 ${i} 처리 중 오류:`);
             continue;
           }
         }
@@ -1028,7 +1029,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return true;
 
     } catch (error) {
-      console.error('❌ 이미지 처리 실패:', error);
+      handleError(error, '❌ 이미지 처리 실패:');
       return false;
     }
   }
@@ -1144,7 +1145,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
                   };
                 }
               } catch (error) {
-                console.error('링크 찾기 오류:', error);
+                handleError(error, '링크 찾기 오류:');
                 return { success: false, error: error.message };
               }
             })()
@@ -1373,7 +1374,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           }
 
         } catch (error) {
-          console.error(`❌ 링크 ${i + 1} 처리 중 오류:`, error);
+          handleError(error, `❌ 링크 ${i + 1} 처리 중 오류:`);
           continue;
         }
       }
@@ -1381,7 +1382,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       console.log(`🎉 ${links.length}개 링크 카드 자동 변환 프로세스 완료`);
 
     } catch (error) {
-      console.error('❌ 링크 카드 변환 실패:', error);
+      handleError(error, '❌ 링크 카드 변환 실패:');
     }
   }
 
@@ -1399,7 +1400,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       }
 
     } catch (error) {
-      console.error('❌ 발행 실패:', error);
+      handleError(error, '❌ 발행 실패:');
       return 'failed';
     }
   }
@@ -1550,7 +1551,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       // 3단계: 발행 팝업에서 즉시/예약 설정 (게시판 선택 후)
       const publishSuccess = await this.handlePublishOption(option, scheduledTime);
       if (!publishSuccess) {
-        console.error('❌ 발행 옵션 설정 실패');
+        handleError(new Error('❌ 발행 옵션 설정 실패'), '❌ 발행 옵션 설정 실패');
         return 'failed';
       }
 
@@ -1611,7 +1612,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return 'success';
 
     } catch (error) {
-      console.error('❌ 발행 처리 실패:', error);
+      handleError(error, '❌ 발행 처리 실패:');
       return 'failed';
     }
   }
@@ -1879,7 +1880,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       
       return false;
     } catch (error) {
-      console.error(`❌ ${option} 발행 처리 실패:`, error);
+      handleError(error, `❌ ${option} 발행 처리 실패:`);
       return false;
     }
   }
@@ -1892,7 +1893,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       console.log('✅ 발행 완료 추정 (명시적 확인 실패하지만 진행)');
       return true;
     } catch (error) {
-      console.error('❌ 발행 성공 확인 실패:', error);
+      handleError(error, '❌ 발행 성공 확인 실패:');
       return false;
     }
   }
@@ -1904,7 +1905,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       const result = await this.selectCategoryIfSpecified(boardName);
       return result.success;
     } catch (error) {
-      console.error('게시판 선택 실패:', error);
+      handleError(error, '게시판 선택 실패:');
       return false;
     }
   }
@@ -2123,7 +2124,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       
       return false;
     } catch (error) {
-      console.error(`❌ ${publishOption} 발행 처리 실패:`, error);
+      handleError(error, `❌ ${publishOption} 발행 처리 실패:`);
       return false;
     }
   }
@@ -2268,7 +2269,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
                     };
                   }
                 } catch (error) {
-                  console.error('(이미지${i}) 찾기 오류:', error);
+                  handleError(error, '(이미지${i}) 찾기 오류:');
                   return { success: false, error: error.message };
                 }
               })()
@@ -2345,7 +2346,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             await this.waitForTimeout(1000);
             
           } catch (error) {
-            console.error(`❌ 이미지 ${i} 처리 중 오류:`, error);
+            handleError(error, `❌ 이미지 ${i} 처리 중 오류:`);
             continue;
           }
         }
@@ -2426,7 +2427,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
               editorFound: editor.className
             };
           } catch (error) {
-            console.error('붙여넣기 확인 오류:', error);
+            handleError(error, '붙여넣기 확인 오류:');
             return { success: false, error: error.message };
           }
         })()
@@ -2445,7 +2446,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       }
       
     } catch (error) {
-      console.error('❌ 콘텐츠 및 이미지 입력 실패:', error);
+      handleError(error, '❌ 콘텐츠 및 이미지 입력 실패:');
       return false;
     }
   }
@@ -2630,7 +2631,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         return result;
       
     } catch (error: any) {
-      console.error('로그인 또는 발행 실패:', error);
+      handleError(error, '로그인 또는 발행 실패:');
       const errorMessage = error instanceof Error ? error.message : '로그인 또는 발행에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
       
       onStatusUpdate?.({ 
@@ -2772,7 +2773,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             };
             
           } catch (error) {
-            console.error('카테고리 처리 중 오류:', error);
+            handleError(error, '카테고리 처리 중 오류:');
             return { success: false, error: error.message };
           }
         })()
@@ -2852,8 +2853,8 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           };
         }
       } else {
-        console.error('카테고리 확인 실패:', categoryResult?.result?.error);
-        
+        handleError(new Error(categoryResult?.result?.error), '카테고리 확인 실패');
+
         // 오류 발생 시에도 드롭다운 닫기 시도
         console.log('오류 발생으로 드롭다운 닫는 중...');
         const closeResult = await window.electronAPI.playwrightClickInFrames(
@@ -2894,7 +2895,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       }
       
     } catch (error) {
-      console.error('카테고리 선택 중 오류:', error);
+      handleError(error, '카테고리 선택 중 오류:');
       return { success: true, selectedCategory: '알 수 없음' };
     }
   }
@@ -3082,7 +3083,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return false;
       
     } catch (error) {
-      console.error('❌ 발행 완료 확인 중 오류:', error);
+      handleError(error, '❌ 발행 완료 확인 중 오류:');
       return false;
     }
   }
@@ -3168,7 +3169,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
       return false;
       
     } catch (error) {
-      console.error('❌ 임시저장 완료 확인 중 오류:', error);
+      handleError(error, '❌ 임시저장 완료 확인 중 오류:');
       return false;
     }
   }
