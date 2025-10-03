@@ -30,7 +30,7 @@ function useLocalStorage<T>(
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
+      handleError(error, `Error reading localStorage key "${key}"`);
       setError(error instanceof Error ? error.message : 'Unknown error');
       return initialValue;
     }

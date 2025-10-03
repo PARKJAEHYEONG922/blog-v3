@@ -75,7 +75,7 @@ function createWindow(): void {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // 개발자 도구 단축키 등록 (Ctrl+Shift+I, F12)
-  mainWindow.webContents.on('before-input-event', (event: any, input: any) => {
+  mainWindow.webContents.on('before-input-event', (_event, input: any) => {
     if (input.type === 'keyDown') {
       // Ctrl+Shift+I
       if (input.control && input.shift && input.key.toLowerCase() === 'i') {
@@ -98,7 +98,7 @@ app.whenReady().then(() => {
 
 // 메뉴 생성
 function createMenu() {
-  const template: any[] = [
+  const template: Electron.MenuItemConstructorOptions[] = [
     {
       label: 'File',
       submenu: [
@@ -217,7 +217,7 @@ ipcMain.handle('claude-web:open', async () => {
   return await claudeWebService.openBrowser();
 });
 
-ipcMain.handle('claude-web:send-prompt', async (event: any, writingStylePaths: string[], seoGuidePath: string, prompt: string) => {
+ipcMain.handle('claude-web:send-prompt', async (_event, writingStylePaths: string[], seoGuidePath: string, prompt: string) => {
   return await claudeWebService.sendPrompt(writingStylePaths, seoGuidePath, prompt);
 });
 
@@ -242,11 +242,11 @@ ipcMain.handle('claude-web:cleanup', async () => {
 });
 
 // IPC handlers for image generation
-ipcMain.handle('image:generate-prompts', async (event: any, data: { content: string; imageCount: number }) => {
+ipcMain.handle('image:generate-prompts', async (_event, data: { content: string; imageCount: number }) => {
   return await imageService.generateImagePrompts(data.content, data.imageCount);
 });
 
-ipcMain.handle('image:generate', async (event: any, prompt: string) => {
+ipcMain.handle('image:generate', async (_event, prompt: string) => {
   try {
     console.log('이미지 생성 시작 - LLMClientFactory 사용');
     
@@ -310,14 +310,14 @@ ipcMain.handle('image:generate', async (event: any, prompt: string) => {
 });
 
 // IPC handler for publishing to blog (reuse v2 logic)
-ipcMain.handle('blog:publish', async (event: any, content: string) => {
+ipcMain.handle('blog:publish', async (_event, content: string) => {
   // TODO: Integrate with existing v2 publishing logic
   console.log('Publishing content:', content.slice(0, 100) + '...');
   return { success: true };
 });
 
 // IPC handlers for file management
-ipcMain.handle('file:save-document', async (event: any, type: 'writingStyle' | 'seoGuide', name: string, content: string) => {
+ipcMain.handle('file:save-document', async (_event, type: 'writingStyle' | 'seoGuide', name: string, content: string) => {
   return await fileService.saveDocument(type, name, content);
 });
 
@@ -327,11 +327,11 @@ ipcMain.handle('file:create-default-seo', async () => {
   return true;
 });
 
-ipcMain.handle('file:delete-document', async (event: any, filePath: string) => {
+ipcMain.handle('file:delete-document', async (_event, filePath: string) => {
   return await fileService.deleteDocument(filePath);
 });
 
-ipcMain.handle('file:load-documents', async (event: any, type: 'writingStyle' | 'seoGuide') => {
+ipcMain.handle('file:load-documents', async (_event, type: 'writingStyle' | 'seoGuide') => {
   return await fileService.loadDocuments(type);
 });
 
@@ -340,16 +340,16 @@ ipcMain.handle('llm:get-settings', async () => {
   return await settingsService.getSettings();
 });
 
-ipcMain.handle('llm:save-settings', async (event: any, settings: any) => {
+ipcMain.handle('llm:save-settings', async (_event, settings: any) => {
   return await settingsService.saveSettings(settings);
 });
 
-ipcMain.handle('llm:test-config', async (event: any, config: any) => {
+ipcMain.handle('llm:test-config', async (_event, config: any) => {
   return await settingsService.testAPIConfig(config);
 });
 
 // 로그 IPC 핸들러
-ipcMain.on('log:add', (event: any, level: string, message: string) => {
+ipcMain.on('log:add', (_event, level: string, message: string) => {
   // 렌더러 프로세스로 로그 메시지 전송
   if (mainWindow && mainWindow.webContents) {
     mainWindow.webContents.send('log:message', {
@@ -364,7 +364,7 @@ ipcMain.on('log:add', (event: any, level: string, message: string) => {
 });
 
 // IPC handler for title generation via API
-ipcMain.handle('llm:generate-titles', async (event: any, data: { systemPrompt: string; userPrompt: string }) => {
+ipcMain.handle('llm:generate-titles', async (_event, data: { systemPrompt: string; userPrompt: string }) => {
   try {
     console.log('제목 생성 시작 - LLMClientFactory 사용');
     
@@ -429,16 +429,16 @@ ipcMain.handle('llm:generate-titles', async (event: any, data: { systemPrompt: s
 });
 
 // IPC handler for opening external URLs
-ipcMain.handle('open-external', async (event: any, url: string) => {
+ipcMain.handle('open-external', async (_event, url: string) => {
   await shell.openExternal(url);
 });
 
 // IPC handlers for temporary file operations
-ipcMain.handle('file:saveTempFile', async (event: any, { fileName, data }: { fileName: string; data: number[] }) => {
+ipcMain.handle('file:saveTempFile', async (_event, { fileName, data }: { fileName: string; data: number[] }) => {
   return await fileService.saveTempFile(fileName, data);
 });
 
-ipcMain.handle('clipboard:copyImage', async (event: any, filePath: string) => {
+ipcMain.handle('clipboard:copyImage', async (_event, filePath: string) => {
   const { clipboard, nativeImage } = require('electron');
   const fs = require('fs');
   
@@ -469,7 +469,7 @@ ipcMain.handle('clipboard:copyImage', async (event: any, filePath: string) => {
   }
 });
 
-ipcMain.handle('file:deleteTempFile', async (event: any, filePath: string) => {
+ipcMain.handle('file:deleteTempFile', async (_event, filePath: string) => {
   return await fileService.deleteTempFile(filePath);
 });
 
@@ -482,7 +482,7 @@ ipcMain.handle('app:check-for-updates', async () => {
   return await appService.checkForUpdates();
 });
 
-ipcMain.handle('app:download-update', async (event: any, downloadUrl: string) => {
+ipcMain.handle('app:download-update', async (_event, downloadUrl: string) => {
   return await appService.downloadUpdate(downloadUrl);
 });
 
@@ -494,7 +494,7 @@ ipcMain.handle('naver:get-cookies', async () => {
 });
 
 // 네이버 쿠키 저장
-ipcMain.handle('naver:save-cookies', async (event: any, cookies: string) => {
+ipcMain.handle('naver:save-cookies', async (_event, cookies: string) => {
   return await cookieService.saveCookies(cookies);
 });
 
@@ -529,12 +529,12 @@ ipcMain.handle('naver:open-login', async () => {
 });
 
 // 네이버 트렌드 가져오기
-ipcMain.handle('naver:get-trends', async (event: any, category?: string, limit: number = 20, date?: string) => {
+ipcMain.handle('naver:get-trends', async (_event, category?: string, limit: number = 20, date?: string) => {
   return await naverTrendAPI.getTrends(category, limit, date);
 });
 
 // 네이버 트렌드 콘텐츠 가져오기
-ipcMain.handle('naver:get-trend-contents', async (event, keyword: string, date: string, limit: number = 20) => {
+ipcMain.handle('naver:get-trend-contents', async (_event, keyword: string, date: string, limit: number = 20) => {
   return await naverTrendAPI.getTrendContents(keyword, date, limit);
 });
 
