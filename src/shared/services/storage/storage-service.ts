@@ -178,35 +178,6 @@ class StorageServiceClass {
     }
   }
 
-  // ========== Selected SEO Guide ==========
-
-  /**
-   * 선택된 SEO 가이드 ID 가져오기
-   */
-  getSelectedSeoGuideId(): string | null {
-    try {
-      return localStorage.getItem('selectedSeoGuideId');
-    } catch (error) {
-      console.error('선택된 SEO 가이드 로드 실패:', error);
-      return null;
-    }
-  }
-
-  /**
-   * 선택된 SEO 가이드 ID 저장
-   */
-  saveSelectedSeoGuideId(id: string | null): void {
-    try {
-      if (id) {
-        localStorage.setItem('selectedSeoGuideId', id);
-      } else {
-        localStorage.removeItem('selectedSeoGuideId');
-      }
-    } catch (error) {
-      console.error('선택된 SEO 가이드 저장 실패:', error);
-    }
-  }
-
   // ========== Trend Analysis Cache ==========
 
   /**

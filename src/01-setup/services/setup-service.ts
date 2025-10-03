@@ -51,20 +51,10 @@ class SetupServiceClass {
             doc.filePath === initialData.seoGuidePath
           ) || null;
         } else {
-          // localStorage에서 마지막 선택 상태 복원
-          const savedSeoGuideId = StorageService.getSelectedSeoGuideId();
-          if (savedSeoGuideId) {
-            selectedSeoGuide = seoGuides.find((doc: SavedDocument) =>
-              doc.id === savedSeoGuideId
-            ) || null;
-          }
-
-          // 복원 실패 시 기본 SEO 선택
-          if (!selectedSeoGuide) {
-            selectedSeoGuide = seoGuides.find((doc: SavedDocument) =>
-              doc.name.includes('기본')
-            ) || null;
-          }
+          // 기본 SEO 선택
+          selectedSeoGuide = seoGuides.find((doc: SavedDocument) =>
+            doc.name.includes('기본')
+          ) || null;
         }
       } else {
         // SEO 가이드가 없으면 기본 생성

@@ -68,9 +68,6 @@ export const useSetup = (): UseSetupReturn => {
     type: 'writingStyle'
   });
 
-  // 초기 로드 추적용 ref (useEffect 의존성 배열에서 제외하기 위함)
-  const isInitialLoadRef = useRef(true);
-
   // 문서 로드
   useEffect(() => {
     const loadSavedDocuments = async () => {
@@ -81,18 +78,10 @@ export const useSetup = (): UseSetupReturn => {
         setSavedSeoGuides(result.seoGuides);
         setSelectedWritingStyles(result.selectedWritingStyles);
         setSelectedSeoGuide(result.selectedSeoGuide);
-
-        setIsInitialLoadComplete(true);
-        // 다음 렌더 이후 초기 로드 플래그 해제
-        setTimeout(() => {
-          isInitialLoadRef.current = false;
-        }, 100);
+        setIsInitialLoadComplete(true); // 초기 로드 완료 표시
       } catch (error) {
         console.error('문서 로드 실패:', error);
-        setIsInitialLoadComplete(true);
-        setTimeout(() => {
-          isInitialLoadRef.current = false;
-        }, 100);
+        setIsInitialLoadComplete(true); // 에러여도 플래그 설정
       }
     };
 
@@ -101,17 +90,10 @@ export const useSetup = (): UseSetupReturn => {
 
   // 선택된 말투 변경 시 로컬 스토리지 저장 (초기 로드 이후에만)
   useEffect(() => {
-    if (!isInitialLoadRef.current) {
+    if (isInitialLoadComplete) {
       SetupService.saveSelectedWritingStyles(selectedWritingStyles);
     }
-  }, [selectedWritingStyles]);
-
-  // 선택된 SEO 가이드 변경 시 로컬 스토리지 저장 (초기 로드 이후에만)
-  useEffect(() => {
-    if (!isInitialLoadRef.current) {
-      StorageService.saveSelectedSeoGuideId(selectedSeoGuide?.id || null);
-    }
-  }, [selectedSeoGuide]);
+  }, [selectedWritingStyles, isInitialLoadComplete]);
 
   // URL 크롤링
   const handleUrlCrawl = useCallback(async (url: string): Promise<{ title: string; contentLength: number } | null> => {
