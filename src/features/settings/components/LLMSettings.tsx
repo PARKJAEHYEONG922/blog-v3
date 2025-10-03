@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@/shared/components/ui/Button';
 import { IMAGE_GENERATION_OPTIONS } from '@/shared/utils/constants';
+import { LLMConfig } from '@/shared/services/llm/types/llm.types';
 
 interface LLMSettingsProps {
   onClose: () => void;
   onSettingsChange?: () => void;
-}
-
-interface LLMConfig {
-  provider: string;
-  model: string;
-  apiKey: string;
-  quality?: string;
-  size?: string;
-  style?: string;
 }
 
 interface LLMSettings {

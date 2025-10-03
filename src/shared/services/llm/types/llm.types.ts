@@ -5,6 +5,8 @@ export interface LLMConfig {
   model: string;
   apiKey: string;
   style?: string;
+  quality?: string;
+  size?: string;
 }
 
 export interface LLMResponse {
