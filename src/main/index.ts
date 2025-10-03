@@ -1,9 +1,9 @@
 import { app, BrowserWindow, ipcMain, shell, Menu, dialog } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
-import { ClaudeWebService } from '../shared/services/automation/claude-web-service';
+import { ClaudeWebService } from './services/claude-web-service';
 import { ImageService } from '../shared/services/content/image-service';
-import { registerPlaywrightHandlers, playwrightService } from '../shared/services/automation/playwright-service';
+import { registerPlaywrightHandlers, playwrightService } from './services/playwright-service';
 import { getDefaultSEOGuideContent } from '../shared/services/content/default-seo-guide';
 import { CookieService } from './services/cookie-service';
 import { FileService } from './services/file-service';

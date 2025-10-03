@@ -4,6 +4,5 @@
  */
 
 export { default as PublishPlatformSection } from './platforms/PublishPlatformSection';
-export { default as NaverPublishUI } from './platforms/NaverPublishUI';
-export { NaverPublisher } from './services/naver-publisher';
+export { NaverPublishUI, NaverPublisher } from './platforms/naver';
 export { PublishManager } from './services/publish-manager';

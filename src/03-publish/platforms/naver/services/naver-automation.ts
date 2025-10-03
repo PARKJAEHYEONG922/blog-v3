@@ -3,7 +3,7 @@
 import { BaseBrowserAutomation } from './base-automation';
 import type { LoginResult, PublishResult, INaverBlogAutomation } from '@/shared/types/automation.types';
 // @ts-ignore
-import '../../types/electron.types';
+import '@/shared/types/electron.types';
 
 // URL 변경 감지 결과 타입
 interface URLChangeResult {

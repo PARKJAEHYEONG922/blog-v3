@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { marked } from 'marked';
 import WorkSummary from './WorkSummary';
 import ImageGenerator from './ImageGenerator';
-import NaverPublishUI from '@/03-publish/platforms/NaverPublishUI';
+import { NaverPublishUI } from '@/03-publish/platforms/naver';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
 import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import Button from '@/shared/components/ui/Button';

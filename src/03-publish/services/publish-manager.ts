@@ -1,7 +1,7 @@
 // 발행 관리자 - 모든 플랫폼의 발행을 통합 관리
 
 import { PublishResult, WorkflowData, PublishOption } from '../types/publishing.types';
-import { NaverPublisher } from './naver-publisher';
+import { NaverPublisher } from '../platforms/naver';
 
 export interface PublishConfig {
   platform: string;

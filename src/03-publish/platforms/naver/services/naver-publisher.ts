@@ -1,7 +1,7 @@
 // 네이버 블로그 발행 서비스
 
-import { PublishResult, WorkflowData, NaverCredentials, PublishOption } from '../types/publishing.types';
-import { NaverBlogAutomation } from '@/shared/services/automation/naver-automation';
+import { PublishResult, WorkflowData, NaverCredentials, PublishOption } from '../../../types/publishing.types';
+import { NaverBlogAutomation } from './naver-automation';
 import type { LoginResult, PublishResult as AutomationPublishResult } from '@/shared/types/automation.types';
 
 export interface NaverPublishConfig {
