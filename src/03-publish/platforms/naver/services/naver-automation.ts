@@ -2,8 +2,6 @@
 
 import { BaseBrowserAutomation } from '@/03-publish/services/base-automation';
 import type { LoginResult, PublishResult, INaverBlogAutomation } from '@/shared/types/automation.types';
-// @ts-ignore
-import '@/shared/types/electron.types';
 import { handleError } from '@/shared/utils/error-handler';
 
 // URL 변경 감지 결과 타입

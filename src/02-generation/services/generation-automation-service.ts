@@ -3,7 +3,6 @@
  * Playwright 기반 네이버 블로그 자동화 로직
  */
 
-import '@/shared/types/electron.types';
 import { handleError } from '@/shared/utils/error-handler';
 
 export class GenerationAutomationService {

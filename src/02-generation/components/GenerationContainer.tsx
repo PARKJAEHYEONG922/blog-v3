@@ -6,7 +6,6 @@ import { NaverPublishUI } from '@/03-publish/platforms/naver';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
 import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import Button from '@/shared/components/ui/Button';
-import '@/shared/types/electron.types';
 import { useDialog } from '@/app/DialogContext';
 import { useWorkflow } from '@/app/WorkflowContext';
 import { useGeneration } from '@/02-generation/hooks/useGeneration';

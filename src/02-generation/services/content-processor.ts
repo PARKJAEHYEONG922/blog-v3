@@ -1,7 +1,6 @@
 /**
  * 콘텐츠 자동 편집 처리를 위한 유틸리티 클래스
  */
-import '@/shared/types/electron.types';
 import { handleError } from '@/shared/utils/error-handler';
 
 export class ContentProcessor {
