@@ -4,6 +4,7 @@ import { PublishManager } from '../../../services/publish-manager';
 import Button from '@/shared/components/ui/Button';
 import { useDialog } from '@/app/DialogContext';
 import { StorageService } from '@/shared/services/storage/storage-service';
+import { handleError } from '@/shared/utils/error-handler';
 
 const NaverPublishUI: React.FC<PublishComponentProps> = ({
   data,
@@ -134,7 +135,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
 
       return result;
     } catch (error) {
-      console.error('발행 실패:', error);
+      handleError(error, '발행 실패:');
       const errorMessage = '발행 중 오류가 발생했습니다.';
       setPublishStatus(prev => ({ 
         ...prev, 
@@ -209,7 +210,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       // 전체 계정별 게시판 데이터 로드
       loadAllAccountBoards();
     } catch (error) {
-      console.error('저장된 계정 목록 로드 실패:', error);
+      handleError(error, '저장된 계정 목록 로드 실패:');
     }
   };
 
@@ -221,7 +222,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       const boards = StorageService.getAllAccountBoards();
       setAccountBoards(boards);
     } catch (error) {
-      console.error('계정별 게시판 데이터 로드 실패:', error);
+      handleError(error, '계정별 게시판 데이터 로드 실패:');
     }
   };
 
@@ -235,7 +236,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
         setAccountBoards(prev => ({ ...prev, [accountId]: boards }));
       }
     } catch (error) {
-      console.error('게시판 목록 로드 실패:', error);
+      handleError(error, '게시판 목록 로드 실패:');
     }
   };
 
@@ -265,7 +266,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
         setBoardCategory('');
       }
     } catch (error) {
-      console.error('계정 선택 실패:', error);
+      handleError(error, '계정 선택 실패:');
     }
   };
 
@@ -290,7 +291,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       setSavedAccounts(updatedAccounts);
       console.log('💾 네이버 계정 저장됨:', username);
     } catch (error) {
-      console.error('계정 저장 실패:', error);
+      handleError(error, '계정 저장 실패:');
     }
   };
 
@@ -310,7 +311,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
 
       console.log('🗑️ 네이버 계정 삭제됨:', accountId);
     } catch (error) {
-      console.error('계정 삭제 실패:', error);
+      handleError(error, '계정 삭제 실패:');
     }
   };
 
@@ -338,7 +339,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
 
       console.log(`📋 계정 ${accountId}에 게시판 "${trimmedBoardName}" 저장됨`);
     } catch (error) {
-      console.error('게시판 저장 실패:', error);
+      handleError(error, '게시판 저장 실패:');
     }
   };
 
@@ -360,7 +361,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
 
       console.log(`🗑️ 게시판 "${boardName}" 삭제됨`);
     } catch (error) {
-      console.error('게시판 삭제 실패:', error);
+      handleError(error, '게시판 삭제 실패:');
     }
   };
 
@@ -384,7 +385,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
 
       console.log('📋 게시판 순서 변경: 위로 이동');
     } catch (error) {
-      console.error('게시판 순서 변경 실패:', error);
+      handleError(error, '게시판 순서 변경 실패:');
     }
   };
 
@@ -409,7 +410,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
 
       console.log('📋 게시판 순서 변경: 아래로 이동');
     } catch (error) {
-      console.error('게시판 순서 변경 실패:', error);
+      handleError(error, '게시판 순서 변경 실패:');
     }
   };
 
@@ -494,7 +495,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       }
 
     } catch (error) {
-      console.error('발행 실패:', error);
+      handleError(error, '발행 실패:');
       setPublishStatus(prev => ({
         ...prev,
         isPublishing: false,
@@ -531,7 +532,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       setSavedAccounts(accounts);
       console.log('✅ 네이버 계정 정보 저장 완료');
     } catch (error) {
-      console.error('❌ 계정 정보 저장 실패:', error);
+      handleError(error, '❌ 계정 정보 저장 실패:');
     }
   };
 
@@ -544,7 +545,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       await window.electronAPI.playwrightCleanup();
       console.log('브라우저 정리 완료');
     } catch (error) {
-      console.error('브라우저 정리 실패:', error);
+      handleError(error, '브라우저 정리 실패:');
     }
     
     setPublishStatus(prev => ({
@@ -570,7 +571,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       });
       setSelectedBoardCategory('');
     } catch (error) {
-      console.error('로그아웃 실패:', error);
+      handleError(error, '로그아웃 실패:');
     }
   };
 
