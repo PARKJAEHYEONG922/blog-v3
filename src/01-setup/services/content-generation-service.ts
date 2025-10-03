@@ -4,6 +4,7 @@
 
 import { BlogPromptService } from '@/shared/services/content/blog-prompt-service';
 import { ContentGenerationParams, ImagePromptGenerationResult } from '../types/setup.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 class ContentGenerationServiceClass {
 
@@ -113,7 +114,7 @@ class ContentGenerationServiceClass {
       const result = await BlogWritingService.generateImagePrompts(content);
       imagePrompts = result.imagePrompts || [];  // 객체에서 imagePrompts 배열만 추출
     } catch (error) {
-      console.error('이미지 프롬프트 생성 실패:', error);
+      handleError(error, '이미지 프롬프트 생성 실패');
       imagePrompts = [];
     }
 
