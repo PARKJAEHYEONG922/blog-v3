@@ -253,6 +253,192 @@ export const TIMEOUTS = {
 
 ---
 
+## ⚡ Electron 구조 이해하기
+
+### 왜 Electron인가?
+**Electron = 데스크톱 앱을 웹 기술(HTML/CSS/JS)로 만드는 프레임워크**
+- VSCode, Discord, Slack 등이 Electron 기반
+- 우리 앱도 겉보기엔 데스크톱 앱, 내부는 크롬 브라우저 + React
+
+### 🔀 2개 프로세스 구조 (필수 개념!)
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Electron App                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────────────────┐      ┌──────────────────────┐ │
+│  │  Main Process       │◄────►│  Renderer Process    │ │
+│  │  (Node.js 환경)      │ IPC  │  (Browser 환경)      │ │
+│  └─────────────────────┘      └──────────────────────┘ │
+│                                                         │
+│  ✅ 파일 시스템 접근           ❌ 파일 접근 불가        │
+│  ✅ 네트워크 요청              ❌ 제한된 네트워크        │
+│  ✅ API 키 안전 보관           ⚠️ 보안 샌드박스        │
+│  ✅ Playwright 실행            ✅ React UI 렌더링       │
+│  ✅ 윈도우 관리                ✅ 사용자 인터랙션       │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 📁 프로세스별 파일 위치
+
+```
+src/
+├── main/                     ← Main Process (Node.js)
+│   ├── index.ts              ← Electron 앱 시작점, IPC 라우터
+│   ├── preload.ts            ← IPC 보안 브릿지
+│   └── services/             ← 실제 비즈니스 로직
+│       ├── settings-service.ts    (API 테스트 실제 구현)
+│       ├── file-service.ts        (파일 읽기/쓰기)
+│       ├── cookie-service.ts      (쿠키 관리)
+│       └── ...
+│
+└── [나머지 모든 폴더]         ← Renderer Process (React)
+    ├── app/                  ← React 앱 루트
+    ├── features/             ← 기능별 UI
+    │   └── settings/
+    │       └── components/
+    │           └── LLMSettings.tsx  (설정 화면 UI)
+    ├── 01-setup/             ← Step 1 UI
+    ├── 02-generation/        ← Step 2 UI
+    ├── 03-publish/           ← Step 3 UI
+    └── shared/               ← 공통 컴포넌트/서비스
+```
+
+### 🔌 IPC 통신 구조 (필수!)
+
+**IPC = Inter-Process Communication (프로세스 간 통신)**
+- Main과 Renderer는 완전히 분리됨 (보안상)
+- 서로 대화하려면 IPC 채널을 통해서만 가능
+
+#### 통신 흐름 예시: API 키 테스트
+
+```typescript
+// 1️⃣ React UI에서 버튼 클릭 (Renderer)
+// features/settings/components/LLMSettings.tsx
+const handleTest = async () => {
+  const result = await window.electronAPI.testLLMConfig({
+    provider: 'openai',
+    apiKey: 'sk-...'
+  });
+  console.log(result); // { success: true, message: '연결 성공' }
+};
+
+// ─────────── IPC 통신 ───────────
+
+// 2️⃣ Preload에서 브릿지 제공 (보안 레이어)
+// main/preload.ts
+contextBridge.exposeInMainWorld('electronAPI', {
+  testLLMConfig: (config) =>
+    ipcRenderer.invoke('llm:test-config', config)
+});
+
+// ─────────── IPC 통신 ───────────
+
+// 3️⃣ Main Process에서 받아서 처리
+// main/index.ts (IPC 라우터)
+ipcMain.handle('llm:test-config', async (event, config) => {
+  return await settingsService.testAPIConfig(config);
+});
+
+// 4️⃣ 실제 로직 실행 (Main Process)
+// main/services/settings-service.ts
+async testAPIConfig(config) {
+  const response = await fetch('https://api.openai.com/v1/models', {
+    headers: { Authorization: `Bearer ${config.apiKey}` }
+  });
+  return response.ok
+    ? { success: true, message: '연결 성공' }
+    : { success: false, message: '연결 실패' };
+}
+```
+
+### 📊 우리 앱의 IPC 핸들러 목록 (30개)
+
+| 카테고리 | IPC 채널 | 용도 | Main 서비스 |
+|---------|---------|------|------------|
+| **LLM** | `llm:test-config` | API 키 테스트 | settings-service.ts |
+| | `llm:get-settings` | 설정 로드 | settings-service.ts |
+| | `llm:save-settings` | 설정 저장 | settings-service.ts |
+| | `llm:generate-titles` | 제목 생성 | main/index.ts |
+| **파일** | `file:save-document` | 문서 저장 | file-service.ts |
+| | `file:load-documents` | 문서 로드 | file-service.ts |
+| | `file:delete-document` | 문서 삭제 | file-service.ts |
+| | `file:create-default-seo` | 기본 SEO 생성 | file-service.ts |
+| | `file:saveTempFile` | 임시 파일 저장 | main/index.ts |
+| | `file:deleteTempFile` | 임시 파일 삭제 | main/index.ts |
+| **네이버** | `naver:get-cookies` | 쿠키 조회 | cookie-service.ts |
+| | `naver:save-cookies` | 쿠키 저장 | cookie-service.ts |
+| | `naver:delete-cookies` | 쿠키 삭제 | cookie-service.ts |
+| | `naver:open-login` | 로그인 창 열기 | cookie-service.ts |
+| | `naver:get-trends` | 트렌드 조회 | naver-trend-api-service.ts |
+| | `naver:get-trend-contents` | 트렌드 콘텐츠 | naver-trend-api-service.ts |
+| **Playwright** | `playwright:*` | 브라우저 자동화 | playwright-service.ts |
+| **Claude** | `claude-web:*` | Claude Web | claude-web-service.ts |
+| **이미지** | `image:generate-prompts` | 프롬프트 생성 | image-service.ts |
+| | `image:generate` | 이미지 생성 | image-service.ts |
+| **앱** | `app:get-version` | 버전 조회 | app-service.ts |
+| | `app:check-for-updates` | 업데이트 확인 | app-service.ts |
+| | `app:download-update` | 업데이트 다운로드 | app-service.ts |
+| **기타** | `open-external` | 외부 링크 열기 | main/index.ts |
+| | `clipboard:copyImage` | 이미지 복사 | main/index.ts |
+
+### ⚠️ 중요한 규칙
+
+#### ✅ 해야 할 것
+1. **파일/네트워크 작업은 무조건 Main Process**
+   ```typescript
+   // ✅ 올바른 방법
+   const result = await window.electronAPI.saveDocument('...');
+   ```
+
+2. **IPC 호출은 직접 명시**
+   ```typescript
+   // ✅ 명확함
+   await window.electronAPI.testLLMConfig(config);
+
+   // ❌ 불필요한 wrapper (혼란)
+   await SettingsService.testAPIConnection(config);
+     // 내부에서 window.electronAPI 호출
+   ```
+
+3. **Main에서만 API 키 다룸**
+   - Renderer에서 API 키 노출 위험
+   - Main에서 파일로 암호화 저장
+
+#### ❌ 하지 말아야 할 것
+1. **Renderer에서 직접 파일 접근**
+   ```typescript
+   // ❌ 불가능 (Node.js fs 모듈 없음)
+   const fs = require('fs');
+   fs.readFileSync('...');
+   ```
+
+2. **Main Process에서 React 코드**
+   - Main은 Node.js 환경 (DOM 없음)
+   - React는 Renderer에서만
+
+3. **불필요한 서비스 레이어**
+   ```typescript
+   // ❌ features/settings/services/settings-service.ts
+   // 그냥 IPC만 호출하는 wrapper → 제거 가능
+   ```
+
+### 🎯 정리: 어디에 뭘 작성할까?
+
+| 작업 | 위치 | 이유 |
+|------|------|------|
+| **UI 컴포넌트** | `src/features/`, `src/0X-XXX/` | React 렌더링 |
+| **파일 저장/로드** | `main/services/file-service.ts` | fs 모듈 필요 |
+| **API 호출** | `main/services/` | API 키 보안 |
+| **브라우저 자동화** | `main/services/playwright-service.ts` | Playwright 실행 |
+| **상태 관리** | `src/hooks/`, React hooks | UI 상태 |
+| **비즈니스 로직** | `src/services/` (Renderer 계산) | 순수 함수 |
+| | `main/services/` (외부 리소스) | 파일/네트워크 |
+
+---
+
 ## 🏗️ 아키텍처 패턴
 
 ### 현재 적용된 패턴
