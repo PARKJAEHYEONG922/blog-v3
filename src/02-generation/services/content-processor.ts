@@ -2,6 +2,8 @@
  * 콘텐츠 자동 편집 처리를 위한 유틸리티 클래스
  */
 import '@/shared/types/electron.types';
+import { handleError } from '@/shared/utils/error-handler';
+
 export class ContentProcessor {
   /**
    * 원본 마크다운을 자동편집된 형태로 변환 (V2의 processMarkdown과 동일)
@@ -178,10 +180,11 @@ export class ContentProcessor {
       // 연속된 공백과 줄바꿈 정리
       cleanedContent = cleanedContent.replace(/\n\s*\n\s*\n/g, '\n\n');
       cleanedContent = cleanedContent.trim();
-      
+
       return cleanedContent;
     } catch (error) {
-      console.warn('콘텐츠 정리 중 오류:', error);
+      handleError(error, '콘텐츠 정리 실패 - 원본 콘텐츠로 복원됨');
+      console.warn('⚠️ 콘텐츠 정리 중 오류 발생, 원본 사용:', error);
       return content;
     }
   }
@@ -216,10 +219,11 @@ export class ContentProcessor {
         const tagsLine = uniqueHashtags.join(' ');
         return `${contentWithoutTags}\n\n${tagsLine}`;
       }
-      
+
       return contentWithoutTags;
     } catch (error) {
-      console.warn('해시태그 정리 중 오류:', error);
+      handleError(error, '해시태그 정리 실패 - 원본 콘텐츠로 복원됨');
+      console.warn('⚠️ 해시태그 정리 중 오류 발생, 원본 사용:', error);
       return content;
     }
   }

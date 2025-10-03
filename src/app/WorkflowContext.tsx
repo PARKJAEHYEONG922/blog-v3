@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import type { WorkflowData } from '@/shared/types/common.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 interface WorkflowContextType {
   // Workflow 데이터
@@ -76,11 +77,11 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (result.success) {
           console.log('✅ Claude Web 서비스 정리 완료');
         } else {
-          console.warn('⚠️ Claude Web 서비스 정리 실패:', result.error);
+          handleError(new Error(result.error), 'Claude Web 서비스 정리 실패');
         }
       }
     } catch (error) {
-      console.warn('⚠️ 브라우저 정리 중 오류:', error);
+      handleError(error, '브라우저 정리 중 오류');
     }
 
     // 상태 초기화

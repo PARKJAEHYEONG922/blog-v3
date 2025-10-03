@@ -53,7 +53,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     try {
       const saved = sessionStorage.getItem('step2-image-history');
       return saved ? JSON.parse(saved) : {};
-    } catch {
+    } catch (error) {
+      handleError(error, '이미지 히스토리 로드 실패');
       return {};
     }
   });
@@ -188,7 +189,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     try {
       sessionStorage.setItem('step2-image-history', JSON.stringify(imageHistory));
     } catch (error) {
-      console.warn('이미지 히스토리 저장 실패:', error);
+      handleError(error, '이미지 히스토리 저장 실패');
     }
   }, [imageHistory]);
 
