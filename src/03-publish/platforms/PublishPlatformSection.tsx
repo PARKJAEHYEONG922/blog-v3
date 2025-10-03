@@ -101,7 +101,7 @@ const PublishPlatformSection: React.FC<PublishPlatformSectionProps> = ({
                 throw new Error('에디터 참조를 찾을 수 없습니다');
               }
             } catch (err) {
-              console.error('복사 실패:', err);
+              handleError(err, '복사 실패:');
               // 대체 방법: editedContent로 텍스트 복사
               const tempDiv = document.createElement('div');
               tempDiv.innerHTML = editedContent;

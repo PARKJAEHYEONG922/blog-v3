@@ -99,8 +99,8 @@ export class RunwareClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ Runware API 상세 오류 (${attempt}/${maxRetries}):`, errorText);
-          console.error(`📝 요청 데이터:`, JSON.stringify({
+          handleError(new Error(errorText), `❌ Runware API 상세 오류 (${attempt}/${maxRetries}):`);
+          console.log(`📝 요청 데이터:`, JSON.stringify({
             taskType: 'imageInference',
             taskUUID: taskUUID,
             positivePrompt: prompt,
@@ -129,7 +129,7 @@ export class RunwareClient extends BaseLLMClient {
           console.log(`✅ Runware 이미지 생성 완료: ${data.data[0].imageURL}`);
           return data.data[0].imageURL;
         } else {
-          console.error('Runware 응답 구조:', JSON.stringify(data, null, 2));
+          handleError(new Error('Runware 응답에서 이미지 URL을 찾을 수 없음'), 'Runware 응답 구조:');
 
           if (attempt === maxRetries) {
             throw new Error('Runware에서 이미지 URL을 추출할 수 없습니다.');

@@ -43,7 +43,7 @@ export class GeminiClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ Gemini 오류 응답 (${attempt}/${maxRetries}):`, errorText);
+          handleError(new Error(errorText), `❌ Gemini 오류 응답 (${attempt}/${maxRetries}):`);
 
           if (attempt === maxRetries) {
             throw new Error(`Gemini API 오류: ${response.status} ${response.statusText}`);
@@ -129,7 +129,7 @@ export class GeminiClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ Gemini 오류 응답 (${attempt}/${maxRetries}):`, errorText);
+          handleError(new Error(errorText), `❌ Gemini 오류 응답 (${attempt}/${maxRetries}):`);
 
           if (attempt === maxRetries) {
             throw new Error(`Gemini Image API 오류: ${response.status} ${response.statusText}`);
@@ -162,7 +162,7 @@ export class GeminiClient extends BaseLLMClient {
           // Base64 데이터를 data URL로 변환
           return `data:image/png;base64,${imageData}`;
         } else {
-          console.error('Gemini 응답 구조:', JSON.stringify(data, null, 2));
+          handleError(new Error('Gemini 응답에서 이미지 데이터를 찾을 수 없음'), 'Gemini 응답 구조:');
 
           if (attempt === maxRetries) {
             throw new Error('Gemini에서 이미지 데이터를 추출할 수 없습니다.');

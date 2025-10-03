@@ -67,7 +67,7 @@ export class PublishManager {
       if (result.success) {
         console.log(`✅ ${platform} 발행 성공!`);
       } else {
-        console.error(`❌ ${platform} 발행 실패:`, result.message);
+        handleError(new Error(result.message), `❌ ${platform} 발행 실패:`);
       }
       
       return result;

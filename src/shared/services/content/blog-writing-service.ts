@@ -163,7 +163,7 @@ ${blogContent}
           
           imagePromptsData = JSON.parse(jsonContent);
         } catch (parseError) {
-          console.error(`❌ 시도 ${attempt}: JSON 파싱 실패:`, parseError);
+          handleError(parseError, `❌ 시도 ${attempt}: JSON 파싱 실패:`);
           
           // 대체 파싱 시도
           try {

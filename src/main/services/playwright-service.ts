@@ -121,10 +121,10 @@ class PlaywrightService {
       // 오류 유형별 상세 메시지
       const errorMessage = (error as Error).message;
       if (errorMessage.includes('Executable doesn\'t exist')) {
-        console.error('🚫 브라우저 실행 파일을 찾을 수 없습니다. Chrome, Edge, Whale 중 하나를 설치해주세요.');
+        handleError(error, '🚫 브라우저 실행 파일을 찾을 수 없습니다. Chrome, Edge, Whale 중 하나를 설치해주세요.');
         console.log('📋 지원하는 브라우저: Chrome (우선), Edge, Whale');
       } else if (errorMessage.includes('browserType.launch')) {
-        console.error('🔧 Playwright 브라우저 엔진 초기화 실패. 시스템 브라우저로 재시도합니다.');
+        handleError(error, '🔧 Playwright 브라우저 엔진 초기화 실패. 시스템 브라우저로 재시도합니다.');
         
         // 시스템 브라우저로 재시도
         return await this.initializeWithFallback();

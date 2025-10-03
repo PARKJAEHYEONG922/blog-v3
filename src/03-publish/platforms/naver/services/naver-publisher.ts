@@ -269,7 +269,7 @@ export class NaverPublisher {
             console.log('✅ 클립보드 복사 성공');
           }
         } catch (clipboardError) {
-          console.error('❌ 클립보드 복사 중 오류:', clipboardError);
+          handleError(clipboardError, '❌ 클립보드 복사 중 오류:');
           
           // 클립보드 복사 실패 시 사용자에게 알림
           onStatusUpdate?.({
@@ -461,7 +461,7 @@ export class NaverPublisher {
       try {
         await window.electronAPI.playwrightCleanup();
       } catch (cleanupError) {
-        console.error('브라우저 정리 실패:', cleanupError);
+        handleError(cleanupError, '브라우저 정리 실패:');
       }
       
       return { success: false, message: errorMessage };

@@ -68,7 +68,7 @@ const AppContent: React.FC = () => {
         console.log('업데이트 다운로드 시작됨');
         return { success: true };
       } else {
-        console.error('업데이트 다운로드 실패:', result?.error);
+        handleError(new Error(result?.error || '다운로드 실패'), '업데이트 다운로드 실패:');
         return { success: false, error: result?.error || '다운로드 실패' };
       }
     } catch (error) {

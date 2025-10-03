@@ -9,7 +9,7 @@ export class OpenAIClient extends BaseLLMClient {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`🔵 OpenAI ${this.config.model} 텍스트 생성 시작 (${attempt}/${maxRetries})`);
-        
+
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -29,7 +29,7 @@ export class OpenAIClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ OpenAI 오류 응답 (${attempt}/${maxRetries}):`, errorText);
+          handleError(new Error(errorText), `❌ OpenAI 오류 응답 (${attempt}/${maxRetries}):`);
           
           if (attempt === maxRetries) {
             throw new Error(`OpenAI API 오류: ${response.status} ${response.statusText}`);
@@ -135,7 +135,7 @@ export class OpenAIClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ OpenAI 오류 응답 (${attempt}/${maxRetries}):`, errorText);
+          handleError(new Error(errorText), `❌ OpenAI 오류 응답 (${attempt}/${maxRetries}):`);
           
           if (attempt === maxRetries) {
             throw new Error(`OpenAI Image API 오류: ${response.status} ${response.statusText}`);
@@ -157,7 +157,7 @@ export class OpenAIClient extends BaseLLMClient {
           }
         }
 
-        console.error('OpenAI 응답 구조:', JSON.stringify(data, null, 2));
+        handleError(new Error('OpenAI 응답에서 이미지 URL을 찾을 수 없음'), 'OpenAI 응답 구조:');
 
         if (attempt === maxRetries) {
           throw new Error('OpenAI에서 이미지 데이터를 받지 못했습니다.');

@@ -68,7 +68,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ isVisible, updateInfo, onClos
             console.log('앱이 곧 종료됩니다');
           }, 1000);
         } else {
-          console.error('다운로드 실패:', result);
+          handleError(new Error(result?.error || '다운로드 실패'), '다운로드 실패:');
           setIsDownloading(false);
           setDownloadProgress(null);
         }

@@ -29,7 +29,7 @@ export class ClaudeClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`❌ Claude 오류 응답 (${attempt}/${maxRetries}):`, errorText);
+          handleError(new Error(errorText), `❌ Claude 오류 응답 (${attempt}/${maxRetries}):`);
           
           if (attempt === maxRetries) {
             throw new Error(`Claude API 오류: ${response.status} ${response.statusText}`);
