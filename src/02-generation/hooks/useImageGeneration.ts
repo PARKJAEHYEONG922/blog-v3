@@ -4,6 +4,7 @@
  * - AI 이미지 생성
  * - 이미지 상태 관리
  */
+import { handleError } from '@/shared/utils/error-handler';
 
 import { useState, useCallback, useEffect } from 'react';
 import { useDialog } from '@/app/DialogContext';
@@ -66,7 +67,7 @@ export const useImageGeneration = ({
       console.log(`🎉 모든 이미지 생성 완료: ${Object.keys(generatedImages).length}개`);
 
     } catch (error) {
-      console.error('❌ 이미지 생성 실패:', error);
+      handleError(error, '❌ 이미지 생성 실패:');
       showAlert({ type: 'error', message: `이미지 생성 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}` });
     }
   }, [imagePrompts, showAlert]);
@@ -94,7 +95,7 @@ export const useImageGeneration = ({
         setImagePromptError(result.error || '이미지 프롬프트 재생성에 실패했습니다.');
       }
     } catch (error) {
-      console.error('❌ 이미지 프롬프트 재생성 중 오류:', error);
+      handleError(error, '❌ 이미지 프롬프트 재생성 중 오류:');
       setImagePromptError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
       setIsRegeneratingPrompts(false);

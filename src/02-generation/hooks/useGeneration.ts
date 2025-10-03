@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { handleError } from '@/shared/utils/error-handler';
 import { useWorkflow } from '@/app/WorkflowContext';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
 import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
@@ -112,7 +113,7 @@ export const useGeneration = (): UseGenerationReturn => {
         });
       }
     } catch (error) {
-      console.error('모델 상태 확인 실패:', error);
+      handleError(error, '모델 상태 확인 실패:');
     }
   }, []);
 

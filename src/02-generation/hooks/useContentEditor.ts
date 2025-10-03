@@ -4,6 +4,7 @@
  * - 포맷팅 (폰트 크기, 링크, 구분선)
  * - 클립보드 복사
  */
+import { handleError } from '@/shared/utils/error-handler';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDialog } from '@/app/DialogContext';
@@ -128,7 +129,7 @@ export const useContentEditor = ({
       }
     } catch (error) {
       showAlert({ type: 'error', message: '클립보드 복사에 실패했습니다.' });
-      console.error('클립보드 복사 실패:', error);
+      handleError(error, '클립보드 복사 실패:');
       return false;
     }
   }, [showAlert]);
@@ -164,7 +165,7 @@ export const useContentEditor = ({
 
       updateCharCount();
     } catch (error) {
-      console.error('폰트 크기 적용 실패:', error);
+      handleError(error, '폰트 크기 적용 실패:');
     }
   }, [updateCharCount]);
 

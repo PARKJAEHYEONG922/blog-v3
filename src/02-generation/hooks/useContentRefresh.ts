@@ -4,6 +4,7 @@
  * - 콘텐츠 재처리 및 상태 업데이트
  */
 
+import { handleError } from '@/shared/utils/error-handler';
 import { useState, useCallback } from 'react';
 import { useDialog } from '@/app/DialogContext';
 import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
@@ -74,7 +75,7 @@ export const useContentRefresh = ({
       }
 
     } catch (error) {
-      console.error('❌ 수정된 글 가져오기 실패:', error);
+      handleError(error, '❌ 수정된 글 가져오기 실패:');
       showAlert({
         type: 'error',
         message: `수정된 글 가져오기 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}\n\nClaude Web에서 마크다운을 다시 복사해보세요.`
