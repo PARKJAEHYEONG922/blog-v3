@@ -4,6 +4,7 @@
  */
 
 import '@/shared/types/electron.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 export class GenerationAutomationService {
   /**
@@ -14,7 +15,7 @@ export class GenerationAutomationService {
       const imageUrl = await window.electronAPI.generateImage(prompt);
       return imageUrl;
     } catch (error) {
-      console.error('이미지 생성 실패:', error);
+      handleError(error, '이미지 생성 실패');
       throw error;
     }
   }
@@ -43,7 +44,7 @@ export class GenerationAutomationService {
           onProgress(i + 1, prompts.length);
         }
       } catch (error) {
-        console.error(`❌ 이미지 ${i + 1} 생성 실패:`, error);
+        handleError(error, `❌ 이미지 ${i + 1} 생성 실패`);
         throw error;
       }
     }
@@ -61,7 +62,7 @@ export class GenerationAutomationService {
       console.log('✅ Claude Web 콘텐츠 다운로드 완료');
       return content;
     } catch (error) {
-      console.error('❌ Claude Web 다운로드 실패:', error);
+      handleError(error, '❌ Claude Web 다운로드 실패');
       throw error;
     }
   }
@@ -75,7 +76,7 @@ export class GenerationAutomationService {
       window.electronAPI.publishToBlog(htmlContent);
       console.log('✅ 네이버 블로그 발행 요청 완료');
     } catch (error) {
-      console.error('❌ 네이버 블로그 발행 실패:', error);
+      handleError(error, '❌ 네이버 블로그 발행 실패');
       throw error;
     }
   }
@@ -88,7 +89,7 @@ export class GenerationAutomationService {
       const settings = await window.electronAPI?.getLLMSettings?.();
       return settings;
     } catch (error) {
-      console.error('LLM 설정 가져오기 실패:', error);
+      handleError(error, 'LLM 설정 가져오기 실패');
       return null;
     }
   }
@@ -101,7 +102,7 @@ export class GenerationAutomationService {
       await window.electronAPI?.saveLLMSettings?.(settings);
       console.log('LLM 설정 저장 완료');
     } catch (error) {
-      console.error('LLM 설정 저장 실패:', error);
+      handleError(error, 'LLM 설정 저장 실패');
       throw error;
     }
   }
@@ -128,7 +129,7 @@ export class GenerationAutomationService {
         console.log(`이미지 ${settingType} 설정 저장됨:`, value);
       }
     } catch (error) {
-      console.error('이미지 설정 업데이트 실패:', error);
+      handleError(error, '이미지 설정 업데이트 실패');
       throw error;
     }
   }
@@ -144,7 +145,7 @@ export class GenerationAutomationService {
       }
       return null;
     } catch (error) {
-      console.error('이미지 설정 불러오기 실패:', error);
+      handleError(error, '이미지 설정 불러오기 실패');
       return null;
     }
   }
