@@ -1,5 +1,6 @@
 import { TrendKeyword, TrendCategory, TrendContent } from '../types/setup.types';
 import { StorageService } from '@/shared/services/storage/storage-service';
+import { handleError } from '@/shared/utils/error-handler';
 
 export class NaverTrendService {
 
@@ -101,7 +102,7 @@ export class NaverTrendService {
       if ((error as Error).message === 'NEED_LOGIN') {
         throw error;
       }
-      console.error('네이버 트렌드 가져오기 실패:', error);
+      handleError(error, '네이버 트렌드 가져오기 실패');
       throw new Error('트렌드를 가져올 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   }
@@ -146,7 +147,7 @@ export class NaverTrendService {
       if ((error as Error).message === 'NEED_LOGIN') {
         throw error;
       }
-      console.error('트렌드 콘텐츠 가져오기 실패:', error);
+      handleError(error, '트렌드 콘텐츠 가져오기 실패');
       throw new Error('블로그 글 목록을 가져올 수 없습니다.');
     }
   }
