@@ -185,7 +185,7 @@ export const useSetup = (): UseSetupReturn => {
   }, [selectedSeoGuide]);
 
   // 삭제 다이얼로그 열기
-  const openDeleteDialog = useCallback((docId: string, docName: string, type: 'writingStyle' | 'seoGuide') => {
+  const openDeleteDialog = useCallback((type: 'writingStyle' | 'seoGuide', docId: string, docName: string) => {
     setDeleteDialog({
       isOpen: true,
       docId,
