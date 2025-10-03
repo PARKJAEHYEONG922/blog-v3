@@ -177,3 +177,15 @@ export const catchHandler = (context: string) => (error: unknown) => {
   logError(error, context);
   showErrorAlert(error);
 };
+
+/**
+ * 통합 에러 핸들러 (간단한 버전)
+ * catch 블록에서 사용
+ */
+export const handleError = (error: unknown, context: string): void => {
+  const message = getErrorMessage(error);
+  console.error(`❌ ${context}:`, message);
+  if (error instanceof Error && error.stack) {
+    console.error('Stack:', error.stack);
+  }
+};

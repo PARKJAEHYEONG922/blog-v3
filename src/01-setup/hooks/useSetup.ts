@@ -10,6 +10,7 @@ import { StorageService } from '@/shared/services/storage/storage-service';
 import { SetupService } from '@/01-setup/services/setup-service';
 import { TitleGenerationService } from '@/01-setup/services/title-generation-service';
 import { ContentGenerationService } from '@/01-setup/services/content-generation-service';
+import { handleError } from '@/shared/utils/error-handler';
 import {
   SavedDocument,
   TrendAnalysisCache,
@@ -80,7 +81,7 @@ export const useSetup = (): UseSetupReturn => {
         setSelectedSeoGuide(result.selectedSeoGuide);
         setIsInitialLoadComplete(true); // 초기 로드 완료 표시
       } catch (error) {
-        console.error('문서 로드 실패:', error);
+        handleError(error, '문서 로드 실패');
         setIsInitialLoadComplete(true); // 에러여도 플래그 설정
       }
     };
@@ -138,7 +139,7 @@ export const useSetup = (): UseSetupReturn => {
         throw new Error('크롤링 실패');
       }
     } catch (error) {
-      console.error('URL 크롤링 실패:', error);
+      handleError(error, 'URL 크롤링 실패');
       showAlert({ type: 'error', message: `블로그 글 가져오기에 실패했습니다.\n오류: ${(error as Error).message}` });
       return null;
     }
@@ -162,7 +163,7 @@ export const useSetup = (): UseSetupReturn => {
         setSelectedSeoGuide(savedDoc);
       }
     } catch (error) {
-      console.error('파일 저장 실패:', error);
+      handleError(error, '파일 저장 실패');
       showAlert({ type: 'error', message: '파일 저장에 실패했습니다.' });
     }
   }, [selectedWritingStyles, showAlert]);
@@ -217,7 +218,7 @@ export const useSetup = (): UseSetupReturn => {
       setDeleteDialog({ isOpen: false, docId: '', docName: '', type: 'writingStyle' });
       showAlert({ type: 'success', message: '문서가 삭제되었습니다.' });
     } catch (error) {
-      console.error('문서 삭제 실패:', error);
+      handleError(error, '문서 삭제 실패');
       showAlert({ type: 'error', message: (error as Error).message });
     }
   }, [deleteDialog, showAlert]);
@@ -265,7 +266,7 @@ export const useSetup = (): UseSetupReturn => {
         setGeneratedTitles(titles);
       }
     } catch (error) {
-      console.error('제목 생성 실패:', error);
+      handleError(error, '제목 생성 실패');
       const errorMessage = TitleGenerationService.getErrorMessage(error as Error);
       showAlert({ type: 'error', message: errorMessage });
     } finally {
@@ -350,7 +351,7 @@ export const useSetup = (): UseSetupReturn => {
       }, 1000);
 
     } catch (error) {
-      console.error('생성 실패:', error);
+      handleError(error, '생성 실패');
       setGenerationStep('오류 발생: ' + (error as Error).message);
       setIsGenerating(false);
     }
@@ -408,7 +409,7 @@ export const useSetup = (): UseSetupReturn => {
       nextStep();
 
     } catch (error) {
-      console.error('파일 처리 실패:', error);
+      handleError(error, '파일 처리 실패');
       setGenerationStep('오류 발생: ' + (error as Error).message);
       setIsGenerating(false);
     }
