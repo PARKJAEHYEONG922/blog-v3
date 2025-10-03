@@ -224,7 +224,6 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
         }));
 
         // 커스텀 이벤트 발생 (2단계에서 실시간 감지용)
-        console.log('🚀 LLMSettings에서 이벤트 발생:', { category, provider, model });
         window.dispatchEvent(new CustomEvent('llm-settings-changed', {
           detail: { category, provider, model }
         }));
@@ -244,7 +243,6 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
             providerApiKeys,
             testingStatus
           });
-          console.log('테스트 성공 후 자동 저장 완료');
         } catch (error) {
           console.error('자동 저장 실패:', error);
         }
