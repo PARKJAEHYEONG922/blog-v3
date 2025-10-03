@@ -19,6 +19,13 @@ export interface TrendAnalysisCache {
   direction: string;
 }
 
+export interface NaverAccount {
+  id: string;
+  username: string;
+  blogUrl?: string;
+  createdAt: string;
+}
+
 class StorageServiceClass {
   // Storage Keys
   private readonly KEYS = {
@@ -26,6 +33,11 @@ class StorageServiceClass {
     SEO_GUIDES: 'savedSeoGuides',
     SELECTED_WRITING_STYLES: 'selectedWritingStyles',
     TREND_CACHE: 'trendAnalysisCache',
+    NAVER_ACCOUNTS: 'naverAccounts',
+    NAVER_PASSWORD_PREFIX: 'naverPassword_',
+    ACCOUNT_BOARDS: 'accountBoards',
+    NAVER_BOARDS_PREFIX: 'naverBoards_',
+    SELECTED_TREND_CATEGORIES: 'naver-trend-selected-categories',
   } as const;
 
   // ========== Writing Styles ==========
@@ -200,6 +212,200 @@ class StorageServiceClass {
       localStorage.removeItem(this.KEYS.TREND_CACHE);
     } catch (error) {
       console.error('트렌드 캐시 삭제 실패:', error);
+    }
+  }
+
+  // ========== Naver Accounts ==========
+
+  /**
+   * 네이버 계정 목록 가져오기
+   */
+  getNaverAccounts(): NaverAccount[] {
+    try {
+      const data = localStorage.getItem(this.KEYS.NAVER_ACCOUNTS);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('네이버 계정 로드 실패:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 네이버 계정 목록 저장
+   */
+  saveNaverAccounts(accounts: NaverAccount[]): void {
+    try {
+      localStorage.setItem(this.KEYS.NAVER_ACCOUNTS, JSON.stringify(accounts));
+    } catch (error) {
+      console.error('네이버 계정 저장 실패:', error);
+    }
+  }
+
+  /**
+   * 네이버 계정 추가
+   */
+  addNaverAccount(account: NaverAccount): NaverAccount[] {
+    const accounts = this.getNaverAccounts();
+    const existingIndex = accounts.findIndex(acc => acc.id === account.id);
+
+    let updated: NaverAccount[];
+    if (existingIndex !== -1) {
+      // 기존 계정 업데이트
+      updated = accounts.map((acc, idx) => idx === existingIndex ? account : acc);
+    } else {
+      // 새 계정 추가
+      updated = [...accounts, account];
+    }
+
+    this.saveNaverAccounts(updated);
+    return updated;
+  }
+
+  /**
+   * 네이버 계정 삭제
+   */
+  deleteNaverAccount(accountId: string): NaverAccount[] {
+    const accounts = this.getNaverAccounts();
+    const updated = accounts.filter(acc => acc.id !== accountId);
+    this.saveNaverAccounts(updated);
+
+    // 관련 비밀번호도 삭제
+    this.deleteNaverPassword(accountId);
+
+    // 관련 보드 정보도 삭제
+    this.deleteAccountBoards(accountId);
+
+    return updated;
+  }
+
+  /**
+   * 네이버 비밀번호 가져오기
+   */
+  getNaverPassword(accountId: string): string | null {
+    try {
+      return localStorage.getItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`);
+    } catch (error) {
+      console.error('비밀번호 로드 실패:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 네이버 비밀번호 저장
+   */
+  saveNaverPassword(accountId: string, password: string): void {
+    try {
+      localStorage.setItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`, password);
+    } catch (error) {
+      console.error('비밀번호 저장 실패:', error);
+    }
+  }
+
+  /**
+   * 네이버 비밀번호 삭제
+   */
+  deleteNaverPassword(accountId: string): void {
+    try {
+      localStorage.removeItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`);
+    } catch (error) {
+      console.error('비밀번호 삭제 실패:', error);
+    }
+  }
+
+  // ========== Account Boards ==========
+
+  /**
+   * 전체 계정 보드 정보 가져오기
+   */
+  getAllAccountBoards(): {[accountId: string]: string[]} {
+    try {
+      const data = localStorage.getItem(this.KEYS.ACCOUNT_BOARDS);
+      return data ? JSON.parse(data) : {};
+    } catch (error) {
+      console.error('계정 보드 정보 로드 실패:', error);
+      return {};
+    }
+  }
+
+  /**
+   * 전체 계정 보드 정보 저장
+   */
+  saveAllAccountBoards(boards: {[accountId: string]: string[]}): void {
+    try {
+      localStorage.setItem(this.KEYS.ACCOUNT_BOARDS, JSON.stringify(boards));
+    } catch (error) {
+      console.error('계정 보드 정보 저장 실패:', error);
+    }
+  }
+
+  /**
+   * 특정 계정의 보드 목록 가져오기
+   */
+  getAccountBoards(accountId: string): string[] {
+    try {
+      const data = localStorage.getItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('보드 목록 로드 실패:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 특정 계정의 보드 목록 저장
+   */
+  saveAccountBoards(accountId: string, boards: string[]): void {
+    try {
+      localStorage.setItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`, JSON.stringify(boards));
+
+      // accountBoards에도 업데이트
+      const allBoards = this.getAllAccountBoards();
+      allBoards[accountId] = boards;
+      this.saveAllAccountBoards(allBoards);
+    } catch (error) {
+      console.error('보드 목록 저장 실패:', error);
+    }
+  }
+
+  /**
+   * 특정 계정의 보드 정보 삭제
+   */
+  deleteAccountBoards(accountId: string): void {
+    try {
+      localStorage.removeItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`);
+
+      // accountBoards에서도 삭제
+      const allBoards = this.getAllAccountBoards();
+      delete allBoards[accountId];
+      this.saveAllAccountBoards(allBoards);
+    } catch (error) {
+      console.error('보드 정보 삭제 실패:', error);
+    }
+  }
+
+  // ========== Trend Categories ==========
+
+  /**
+   * 선택된 트렌드 카테고리 가져오기
+   */
+  getSelectedTrendCategories(): string[] {
+    try {
+      const data = localStorage.getItem(this.KEYS.SELECTED_TREND_CATEGORIES);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('선택된 카테고리 로드 실패:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 선택된 트렌드 카테고리 저장
+   */
+  saveSelectedTrendCategories(categories: string[]): void {
+    try {
+      localStorage.setItem(this.KEYS.SELECTED_TREND_CATEGORIES, JSON.stringify(categories));
+    } catch (error) {
+      console.error('선택된 카테고리 저장 실패:', error);
     }
   }
 

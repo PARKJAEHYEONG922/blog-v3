@@ -3,6 +3,7 @@
 import { PublishResult, WorkflowData, NaverCredentials, PublishOption } from '../../../types/publishing.types';
 import { NaverBlogAutomation } from './naver-automation';
 import type { LoginResult, PublishResult as AutomationPublishResult } from '@/shared/types/automation.types';
+import { StorageService } from '@/shared/services/storage/storage-service';
 
 export interface NaverPublishConfig {
   option: PublishOption;
@@ -140,13 +141,7 @@ export class NaverPublisher {
    * 저장된 계정 목록 가져오기
    */
   getSavedAccounts(): any[] {
-    try {
-      const saved = localStorage.getItem('naverAccounts');
-      return saved ? JSON.parse(saved) : [];
-    } catch (error) {
-      console.error('저장된 계정 목록 로드 실패:', error);
-      return [];
-    }
+    return StorageService.getNaverAccounts();
   }
 
   /**
@@ -165,14 +160,14 @@ export class NaverPublisher {
       let accounts = this.getSavedAccounts();
       accounts = accounts.filter(acc => acc.id !== accountId);
       accounts.unshift(accountInfo);
-      
+
       // 최대 5개까지만 저장
       if (accounts.length > 5) {
         accounts = accounts.slice(0, 5);
       }
 
-      localStorage.setItem('naverAccounts', JSON.stringify(accounts));
-      localStorage.setItem(`naverPassword_${accountId}`, credentials.password);
+      StorageService.saveNaverAccounts(accounts);
+      StorageService.saveNaverPassword(accountId, credentials.password);
 
       console.log('✅ 네이버 계정 정보 저장 완료');
     } catch (error) {

@@ -3,6 +3,7 @@ import { PublishComponentProps, PublishStatus, NaverCredentials, PublishOption, 
 import { PublishManager } from '../../../services/publish-manager';
 import Button from '@/shared/components/ui/Button';
 import { useDialog } from '@/app/DialogContext';
+import { StorageService } from '@/shared/services/storage/storage-service';
 
 const NaverPublishUI: React.FC<PublishComponentProps> = ({
   data,
@@ -176,23 +177,20 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const loadSavedAccounts = () => {
     try {
-      const saved = localStorage.getItem('naverAccounts');
-      if (saved) {
-        const accounts = JSON.parse(saved);
+      const accounts = StorageService.getNaverAccounts();
+      if (accounts.length > 0) {
         setSavedAccounts(accounts);
         // 가장 최근 사용한 계정을 기본으로 설정
-        if (accounts.length > 0) {
-          const mostRecent = accounts.sort((a: any, b: any) => b.lastUsed - a.lastUsed)[0];
-          const savedPassword = localStorage.getItem(`naverPassword_${mostRecent.id}`);
-          if (savedPassword) {
-            setNaverCredentials({
-              username: mostRecent.username,
-              password: savedPassword
-            });
-            setSaveCredentials(true);
-            // 해당 계정의 게시판 목록 로드
-            loadAccountBoards(mostRecent.id);
-          }
+        const mostRecent = accounts.sort((a: any, b: any) => b.lastUsed - a.lastUsed)[0];
+        const savedPassword = StorageService.getNaverPassword(mostRecent.id);
+        if (savedPassword) {
+          setNaverCredentials({
+            username: mostRecent.username,
+            password: savedPassword
+          });
+          setSaveCredentials(true);
+          // 해당 계정의 게시판 목록 로드
+          loadAccountBoards(mostRecent.id);
         }
       } else {
         // 기존 단일 자격증명 마이그레이션
@@ -207,7 +205,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
           }
         }
       }
-      
+
       // 전체 계정별 게시판 데이터 로드
       loadAllAccountBoards();
     } catch (error) {
@@ -220,11 +218,8 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const loadAllAccountBoards = () => {
     try {
-      const saved = localStorage.getItem('accountBoards');
-      if (saved) {
-        const boards = JSON.parse(saved);
-        setAccountBoards(boards);
-      }
+      const boards = StorageService.getAllAccountBoards();
+      setAccountBoards(boards);
     } catch (error) {
       console.error('계정별 게시판 데이터 로드 실패:', error);
     }
@@ -235,9 +230,8 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const loadAccountBoards = (accountId: string) => {
     try {
-      const saved = localStorage.getItem(`naverBoards_${accountId}`);
-      if (saved) {
-        const boards = JSON.parse(saved);
+      const boards = StorageService.getAccountBoards(accountId);
+      if (boards.length > 0) {
         setAccountBoards(prev => ({ ...prev, [accountId]: boards }));
       }
     } catch (error) {
@@ -250,7 +244,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const selectAccount = (account: SavedAccount) => {
     try {
-      const savedPassword = localStorage.getItem(`naverPassword_${account.id}`);
+      const savedPassword = StorageService.getNaverPassword(account.id);
       if (savedPassword) {
         setNaverCredentials({
           username: account.username,
@@ -258,14 +252,14 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
         });
         setSaveCredentials(true);
         setShowAccountSelector(false);
-        
+
         // 최근 사용 시간 업데이트
-        const accounts = savedAccounts.map(acc => 
+        const accounts = savedAccounts.map(acc =>
           acc.id === account.id ? {...acc, lastUsed: Date.now()} : acc
         );
         setSavedAccounts(accounts);
-        localStorage.setItem('naverAccounts', JSON.stringify(accounts));
-        
+        StorageService.saveNaverAccounts(accounts);
+
         // 해당 계정의 게시판 목록 로드하고 게시판 필드 초기화
         loadAccountBoards(account.id);
         setBoardCategory('');
@@ -281,29 +275,19 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
   const saveAccount = (username: string, password: string) => {
     try {
       const accountId = btoa(unescape(encodeURIComponent(username))); // UTF-8 안전한 base64 인코딩
-      const accounts = [...savedAccounts];
-      const existingIndex = accounts.findIndex(acc => acc.id === accountId);
-      
+
       const accountInfo: SavedAccount = {
         id: accountId,
         username: username,
         lastUsed: Date.now()
       };
 
-      if (existingIndex >= 0) {
-        // 기존 계정 업데이트
-        accounts[existingIndex] = accountInfo;
-      } else {
-        // 새 계정 추가
-        accounts.push(accountInfo);
-      }
-
       // 계정 목록 저장 (비밀번호 제외)
-      localStorage.setItem('naverAccounts', JSON.stringify(accounts));
+      const updatedAccounts = StorageService.addNaverAccount(accountInfo);
       // 비밀번호는 별도 저장
-      localStorage.setItem(`naverPassword_${accountId}`, password);
-      
-      setSavedAccounts(accounts);
+      StorageService.saveNaverPassword(accountId, password);
+
+      setSavedAccounts(updatedAccounts);
       console.log('💾 네이버 계정 저장됨:', username);
     } catch (error) {
       console.error('계정 저장 실패:', error);
@@ -315,17 +299,15 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const deleteAccount = (accountId: string) => {
     try {
-      const accounts = savedAccounts.filter(acc => acc.id !== accountId);
-      setSavedAccounts(accounts);
-      localStorage.setItem('naverAccounts', JSON.stringify(accounts));
-      localStorage.removeItem(`naverPassword_${accountId}`);
-      
-      // 해당 계정의 게시판 데이터도 삭제
+      // StorageService가 계정, 비밀번호, 보드 정보 모두 삭제
+      const updatedAccounts = StorageService.deleteNaverAccount(accountId);
+      setSavedAccounts(updatedAccounts);
+
+      // 로컬 상태에서 게시판 데이터 삭제
       const newAccountBoards = {...accountBoards};
       delete newAccountBoards[accountId];
       setAccountBoards(newAccountBoards);
-      localStorage.setItem('accountBoards', JSON.stringify(newAccountBoards));
-      
+
       console.log('🗑️ 네이버 계정 삭제됨:', accountId);
     } catch (error) {
       console.error('계정 삭제 실패:', error);
@@ -337,22 +319,23 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const saveBoardForAccount = (accountId: string, boardName: string) => {
     if (!boardName.trim()) return;
-    
+
     try {
       const trimmedBoardName = boardName.trim();
       const currentBoards = accountBoards[accountId] || [];
-      
+
       // 중복 체크 - 이미 있으면 맨 앞으로 이동, 없으면 추가
       const filteredBoards = currentBoards.filter(board => board !== trimmedBoardName);
       const newBoards = [trimmedBoardName, ...filteredBoards].slice(0, 10); // 최대 10개까지만 저장
-      
+
+      StorageService.saveAccountBoards(accountId, newBoards);
+
       const newAccountBoards = {
         ...accountBoards,
         [accountId]: newBoards
       };
-      
       setAccountBoards(newAccountBoards);
-      localStorage.setItem('accountBoards', JSON.stringify(newAccountBoards));
+
       console.log(`📋 계정 ${accountId}에 게시판 "${trimmedBoardName}" 저장됨`);
     } catch (error) {
       console.error('게시판 저장 실패:', error);
@@ -366,14 +349,15 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
     try {
       const currentBoards = accountBoards[accountId] || [];
       const newBoards = currentBoards.filter(board => board !== boardName);
-      
+
+      StorageService.saveAccountBoards(accountId, newBoards);
+
       const newAccountBoards = {
         ...accountBoards,
         [accountId]: newBoards
       };
-      
       setAccountBoards(newAccountBoards);
-      localStorage.setItem('accountBoards', JSON.stringify(newAccountBoards));
+
       console.log(`🗑️ 게시판 "${boardName}" 삭제됨`);
     } catch (error) {
       console.error('게시판 삭제 실패:', error);
@@ -385,18 +369,19 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
    */
   const moveBoardUp = (accountId: string, index: number) => {
     if (index === 0) return; // 이미 맨 위
-    
+
     try {
       const currentBoards = [...(accountBoards[accountId] || [])];
       [currentBoards[index - 1], currentBoards[index]] = [currentBoards[index], currentBoards[index - 1]];
-      
+
+      StorageService.saveAccountBoards(accountId, currentBoards);
+
       const newAccountBoards = {
         ...accountBoards,
         [accountId]: currentBoards
       };
-      
       setAccountBoards(newAccountBoards);
-      localStorage.setItem('accountBoards', JSON.stringify(newAccountBoards));
+
       console.log('📋 게시판 순서 변경: 위로 이동');
     } catch (error) {
       console.error('게시판 순서 변경 실패:', error);
@@ -409,18 +394,19 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
   const moveBoardDown = (accountId: string, index: number) => {
     const currentBoards = accountBoards[accountId] || [];
     if (index === currentBoards.length - 1) return; // 이미 맨 아래
-    
+
     try {
       const newBoards = [...currentBoards];
       [newBoards[index], newBoards[index + 1]] = [newBoards[index + 1], newBoards[index]];
-      
+
+      StorageService.saveAccountBoards(accountId, newBoards);
+
       const newAccountBoards = {
         ...accountBoards,
         [accountId]: newBoards
       };
-      
       setAccountBoards(newAccountBoards);
-      localStorage.setItem('accountBoards', JSON.stringify(newAccountBoards));
+
       console.log('📋 게시판 순서 변경: 아래로 이동');
     } catch (error) {
       console.error('게시판 순서 변경 실패:', error);
@@ -533,15 +519,15 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       let accounts = [...savedAccounts];
       accounts = accounts.filter(acc => acc.id !== accountId);
       accounts.unshift(accountInfo);
-      
+
       // 최대 5개까지만 저장
       if (accounts.length > 5) {
         accounts = accounts.slice(0, 5);
       }
 
-      localStorage.setItem('naverAccounts', JSON.stringify(accounts));
-      localStorage.setItem(`naverPassword_${accountId}`, naverCredentials.password);
-      
+      StorageService.saveNaverAccounts(accounts);
+      StorageService.saveNaverPassword(accountId, naverCredentials.password);
+
       setSavedAccounts(accounts);
       console.log('✅ 네이버 계정 정보 저장 완료');
     } catch (error) {

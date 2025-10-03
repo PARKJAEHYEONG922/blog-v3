@@ -1,4 +1,5 @@
 import { TrendKeyword, TrendCategory, TrendContent } from '../types/setup.types';
+import { StorageService } from '@/shared/services/storage/storage-service';
 
 export class NaverTrendService {
 
@@ -41,41 +42,26 @@ export class NaverTrendService {
   // 기본 선택 카테고리 (처음 사용 시)
   static readonly DEFAULT_SELECTED = ['비즈니스·경제', 'IT·컴퓨터', '영화'];
 
-  // localStorage 키
-  private static readonly STORAGE_KEY = 'naver-trend-selected-categories';
-
   /**
-   * localStorage에서 선택된 카테고리 가져오기
+   * 선택된 카테고리 가져오기
    */
   static getSelectedCategories(): string[] {
-    try {
-      const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // 유효성 검사: 배열이고 최소 1개 이상
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (error) {
-      console.error('선택된 카테고리 불러오기 실패:', error);
+    const saved = StorageService.getSelectedTrendCategories();
+    // 유효성 검사: 배열이고 최소 1개 이상
+    if (Array.isArray(saved) && saved.length > 0) {
+      return saved;
     }
     return this.DEFAULT_SELECTED;
   }
 
   /**
-   * localStorage에 선택 카테고리 저장
+   * 선택 카테고리 저장
    */
   static saveSelectedCategories(categories: string[]): void {
-    try {
-      if (categories.length === 0) {
-        throw new Error('최소 1개 이상의 카테고리를 선택해야 합니다.');
-      }
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(categories));
-    } catch (error) {
-      console.error('선택된 카테고리 저장 실패:', error);
-      throw error;
+    if (categories.length === 0) {
+      throw new Error('최소 1개 이상의 카테고리를 선택해야 합니다.');
     }
+    StorageService.saveSelectedTrendCategories(categories);
   }
 
   /**
