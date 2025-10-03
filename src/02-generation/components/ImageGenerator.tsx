@@ -3,6 +3,7 @@ import Button from '@/shared/components/ui/Button';
 import { GenerationAutomationService } from '@/02-generation/services/generation-automation-service';
 import { useDialog } from '@/app/DialogContext';
 import { IMAGE_GENERATION_OPTIONS } from '@/shared/utils/constants';
+import { handleError } from '@/shared/utils/error-handler';
 
 interface ImagePrompt {
   index: number;
@@ -142,7 +143,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
           }
         }
       } catch (error) {
-        console.error('이미지 설정 불러오기 실패:', error);
+        handleError(error, '이미지 설정 불러오기 실패');
       }
     };
 
@@ -171,7 +172,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
           }
         }
       } catch (error) {
-        console.error('설정 변경 시 이미지 설정 업데이트 실패:', error);
+        handleError(error, '설정 변경 시 이미지 설정 업데이트 실패');
       }
     };
 
@@ -355,7 +356,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
       closeUrlInputModal();
 
     } catch (error) {
-      console.error('이미지 URL 가져오기 실패:', error);
+      handleError(error, '이미지 URL 가져오기 실패');
       setImageStatus(prev => ({ ...prev, [imageIndex]: 'empty' }));
       showAlert({
         type: 'error',
@@ -458,7 +459,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('이미지 다운로드 실패:', error);
+      handleError(error, '이미지 다운로드 실패');
     }
   };
 
@@ -519,7 +520,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         throw new Error('이미지 생성 실패');
       }
     } catch (error) {
-      console.error(`이미지 ${imageIndex} 생성 실패:`, error);
+      handleError(error, `이미지 ${imageIndex} 생성 실패:`);
       setImageStatus(prev => ({ ...prev, [imageIndex]: 'empty' }));
     }
   };
@@ -729,7 +730,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
       setIsDragging(false);
 
     } catch (error) {
-      console.error('이미지 크롭 실패:', error);
+      handleError(error, '이미지 크롭 실패');
       showAlert({
         type: 'error',
         title: '❌ 자르기 실패',
@@ -804,7 +805,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     try {
       await GenerationAutomationService.updateImageSettings(settingType, value);
     } catch (error) {
-      console.error('이미지 설정 저장 실패:', error);
+      handleError(error, '이미지 설정 저장 실패');
     }
   };
 
