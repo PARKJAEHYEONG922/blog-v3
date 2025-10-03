@@ -1,15 +1,14 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
 import { handleError } from '../../../utils/error-handler';
+import { withRetry } from '../../../utils/retry';
 
 export class ClaudeClient extends BaseLLMClient {
   async generateText(messages: LLMMessage[], options?: { tools?: LLMTool[] }): Promise<LLMResponse> {
-    const maxRetries = 2;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
+    return withRetry(
+      async (attempt, maxRetries) => {
         console.log(`🟣 Claude ${this.config.model} 텍스트 생성 시작 (${attempt}/${maxRetries})`);
-        
+
         const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -29,19 +28,13 @@ export class ClaudeClient extends BaseLLMClient {
 
         if (!response.ok) {
           const errorText = await response.text();
-          handleError(new Error(errorText), `❌ Claude 오류 응답 (${attempt}/${maxRetries}):`);
-          
-          if (attempt === maxRetries) {
-            throw new Error(`Claude API 오류: ${response.status} ${response.statusText}`);
-          }
-          
-          await new Promise(resolve => setTimeout(resolve, 500 * attempt));
-          continue;
+          handleError(new Error(errorText), `❌ Claude 오류 응답 (${attempt}/${maxRetries})`);
+          throw new Error(`Claude API 오류: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
         console.log(`✅ Claude 응답 수신 완료`);
-        
+
         return {
           content: data.content[0]?.text || '',
           usage: {
@@ -50,19 +43,9 @@ export class ClaudeClient extends BaseLLMClient {
             totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0)
           }
         };
-        
-      } catch (error) {
-        handleError(error, `Claude API 호출 실패 (${attempt}/${maxRetries}):`);
-        
-        if (attempt === maxRetries) {
-          throw error;
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
-      }
-    }
-    
-    throw new Error('Claude 텍스트 생성에 실패했습니다.');
+      },
+      { maxRetries: 2, delayMs: 500, errorPrefix: 'Claude 텍스트 생성' }
+    );
   }
 
   async generateImage(prompt: string, options?: ImageGenerationOptions): Promise<string> {
