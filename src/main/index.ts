@@ -90,9 +90,9 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  registerPlaywrightHandlers();
   createWindow();
   createDefaultSEOGuide();
-  registerPlaywrightHandlers();
   createMenu();
 });
 
