@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { SettingsService, LLMSettings, LLMSettingsData, LLMConfig, SaveSettingsResult } from '../services/settings-service';
+import { handleError } from '@/shared/utils/error-handler';
 
 // 레거시 인터페이스 (기존 코드 호환성)
 export interface LLMSettingsLegacy {
@@ -31,7 +32,7 @@ export const useSettings = () => {
       const data = await SettingsService.loadSettings();
       setSettingsData(data);
     } catch (error) {
-      console.error('설정 로드 실패:', error);
+      handleError(error, '설정 로드 실패:');
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +47,7 @@ export const useSettings = () => {
       }
       return result;
     } catch (error) {
-      console.error('설정 저장 실패:', error);
+      handleError(error, '설정 저장 실패:');
       return { success: false, error: error instanceof Error ? error.message : '설정 저장 실패' };
     } finally {
       setIsLoading(false);

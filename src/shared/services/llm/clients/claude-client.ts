@@ -1,5 +1,6 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
+import { handleError } from '../../../utils/error-handler';
 
 export class ClaudeClient extends BaseLLMClient {
   async generateText(messages: LLMMessage[], options?: { tools?: LLMTool[] }): Promise<LLMResponse> {
@@ -51,7 +52,7 @@ export class ClaudeClient extends BaseLLMClient {
         };
         
       } catch (error) {
-        console.error(`Claude API 호출 실패 (${attempt}/${maxRetries}):`, error);
+        handleError(error, `Claude API 호출 실패 (${attempt}/${maxRetries}):`);
         
         if (attempt === maxRetries) {
           throw error;

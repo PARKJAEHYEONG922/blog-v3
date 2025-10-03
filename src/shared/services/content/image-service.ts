@@ -38,7 +38,7 @@ export class ImageService {
       return { prompts: prompts.slice(0, imageCount) };
 
     } catch (error) {
-      console.error('이미지 프롬프트 생성 실패:', error);
+      handleError(error, '이미지 프롬프트 생성 실패:');
       
       // 기본 프롬프트 반환 (fallback)
       const fallbackPrompts = Array.from({ length: imageCount }, (_, i) => 
@@ -61,7 +61,7 @@ export class ImageService {
       return imageUrl;
 
     } catch (error) {
-      console.error('이미지 생성 실패:', error);
+      handleError(error, '이미지 생성 실패:');
       
       // 실패한 경우 에러 메시지와 함께 placeholder 반환
       const errorMsg = error instanceof Error ? error.message : '알 수 없는 오류';

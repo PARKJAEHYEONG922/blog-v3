@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { app, BrowserWindow } from 'electron';
+import { handleError } from '../../shared/utils/error-handler';
 
 /**
  * 업데이트 정보
@@ -168,16 +169,16 @@ export class AppService {
             // 직접 다운로드
             this.handleDownload(downloadUrl, file, filePath, resolve);
           } else {
-            console.error('❌ HTTP 오류:', response.statusCode);
+            handleError(new Error(`HTTP ${response.statusCode}`), '❌ HTTP 오류');
             resolve({ success: false, error: `다운로드 실패: HTTP ${response.statusCode}` });
           }
         }).on('error', (err: any) => {
-          console.error('❌ 다운로드 요청 실패:', err);
+          handleError(err, '❌ 다운로드 요청 실패');
           resolve({ success: false, error: '다운로드 실패: ' + err.message });
         });
       });
     } catch (error) {
-      console.error('❌ 업데이트 다운로드 실패:', error);
+      handleError(error, '❌ 업데이트 다운로드 실패');
       return { success: false, error: (error as Error).message };
     }
   }
@@ -228,7 +229,7 @@ export class AppService {
           const { exec } = require('child_process');
           exec(`"${filePath}"`, (error: any, stdout: any, stderr: any) => {
             if (error) {
-              console.error('설치 프로그램 실행 오류:', error);
+              handleError(error, '설치 프로그램 실행 오류');
             } else {
               console.log('✅ 설치 프로그램 실행 성공');
             }
@@ -246,7 +247,7 @@ export class AppService {
           });
 
         } catch (installError) {
-          console.error('❌ 설치 실패:', installError);
+          handleError(installError, '❌ 설치 실패');
           resolve({
             success: false,
             error: '설치 실행 실패: ' + (installError as Error).message
@@ -256,11 +257,11 @@ export class AppService {
 
       file.on('error', (err: any) => {
         fs.unlink(filePath, () => { });
-        console.error('❌ 파일 쓰기 실패:', err);
+        handleError(err, '❌ 파일 쓰기 실패');
         resolve({ success: false, error: '파일 저장 실패: ' + err.message });
       });
     }).on('error', (err: any) => {
-      console.error('❌ 다운로드 요청 실패:', err);
+      handleError(err, '❌ 다운로드 요청 실패');
       resolve({ success: false, error: '다운로드 실패: ' + err.message });
     });
   }

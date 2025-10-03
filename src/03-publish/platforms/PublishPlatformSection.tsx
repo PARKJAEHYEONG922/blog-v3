@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { NaverPublishUI } from './naver';
 import type { WorkflowData, ImageUrls } from '@/shared/types/common.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 interface PublishPlatformSectionProps {
   selectedPlatform: string;

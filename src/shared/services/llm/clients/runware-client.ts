@@ -1,5 +1,6 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
+import { handleError } from '../../../utils/error-handler';
 
 // Runware 스타일별 실제 모델 매핑
 const runwareStyleModels = {
@@ -140,7 +141,7 @@ export class RunwareClient extends BaseLLMClient {
         }
 
       } catch (error) {
-        console.error(`Runware API 호출 실패 (${attempt}/${maxRetries}):`, error);
+        handleError(error, `Runware API 호출 실패 (${attempt}/${maxRetries}):`);
 
         if (attempt === maxRetries) {
           throw error;

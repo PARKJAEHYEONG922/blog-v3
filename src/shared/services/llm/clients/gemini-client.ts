@@ -1,5 +1,6 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
+import { handleError } from '../../../utils/error-handler';
 
 export class GeminiClient extends BaseLLMClient {
   async generateText(messages: LLMMessage[], options?: { tools?: LLMTool[] }): Promise<LLMResponse> {
@@ -65,7 +66,7 @@ export class GeminiClient extends BaseLLMClient {
         };
 
       } catch (error) {
-        console.error(`Gemini API 호출 실패 (${attempt}/${maxRetries}):`, error);
+        handleError(error, `Gemini API 호출 실패 (${attempt}/${maxRetries}):`);
 
         if (attempt === maxRetries) {
           throw error;
@@ -173,7 +174,7 @@ export class GeminiClient extends BaseLLMClient {
         }
 
       } catch (error) {
-        console.error(`Gemini Image API 호출 실패 (${attempt}/${maxRetries}):`, error);
+        handleError(error, `Gemini Image API 호출 실패 (${attempt}/${maxRetries}):`);
 
         if (attempt === maxRetries) {
           throw error;

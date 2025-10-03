@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { app } from 'electron';
+import { handleError } from '../../shared/utils/error-handler';
 
 /**
  * 네이버 쿠키 관리 서비스
@@ -28,7 +29,7 @@ export class CookieService {
       }
       return null;
     } catch (error) {
-      console.error('네이버 쿠키 로드 실패:', error);
+      handleError(error, '네이버 쿠키 로드 실패');
       return null;
     }
   }
@@ -46,7 +47,7 @@ export class CookieService {
       console.log('✅ 네이버 쿠키 저장 완료');
       return true;
     } catch (error) {
-      console.error('네이버 쿠키 저장 실패:', error);
+      handleError(error, '네이버 쿠키 저장 실패');
       throw error;
     }
   }
@@ -65,7 +66,7 @@ export class CookieService {
       }
       return true;
     } catch (error) {
-      console.error('네이버 쿠키 삭제 실패:', error);
+      handleError(error, '네이버 쿠키 삭제 실패');
       throw error;
     }
   }

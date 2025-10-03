@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
 import * as fs from 'fs';
+import { handleError } from '../../shared/utils/error-handler';
 
 export class ClaudeWebService {
   private browser: any;
@@ -100,7 +101,7 @@ export class ClaudeWebService {
       await this.page.waitForSelector('.ProseMirror', { timeout: 60000 });
       
     } catch (error) {
-      console.error('클로드 웹 브라우저 열기 실패:', error);
+      handleError(error, '클로드 웹 브라우저 열기 실패:');
       throw error;
     }
   }
@@ -169,7 +170,7 @@ export class ClaudeWebService {
       await this.sendMessage();
       
     } catch (error) {
-      console.error('프롬프트 전송 실패:', error);
+      handleError(error, '프롬프트 전송 실패:');
       throw error;
     }
   }
@@ -456,7 +457,7 @@ export class ClaudeWebService {
       console.log('✅ 아티팩트 완료 감지 완마!');
       
     } catch (error) {
-      console.error('AI 응답 대기 실패:', error);
+      handleError(error, 'AI 응답 대기 실패:');
       throw error;
     }
   }
@@ -612,7 +613,7 @@ export class ClaudeWebService {
       return content;
       
     } catch (error) {
-      console.error('콘텐츠 복사 실패:', error);
+      handleError(error, '콘텐츠 복사 실패:');
       throw error;
     }
   }

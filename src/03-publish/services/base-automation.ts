@@ -1,6 +1,7 @@
 // 기본 브라우저 자동화 클래스
 
 import { IBrowserAutomation, LoginResult, PublishResult as AutomationPublishResult, PlaywrightResult } from '@/shared/types/automation.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 export abstract class BaseBrowserAutomation implements IBrowserAutomation {
   protected isLoggedIn: boolean = false;
@@ -69,7 +70,7 @@ export abstract class BaseBrowserAutomation implements IBrowserAutomation {
       const result = await window.electronAPI.copyImageToClipboard(imagePath);
       return result.success;
     } catch (error) {
-      console.error('Failed to copy image to clipboard:', error);
+      handleError(error, 'Failed to copy image to clipboard:');
       return false;
     }
   }
@@ -84,7 +85,7 @@ export abstract class BaseBrowserAutomation implements IBrowserAutomation {
       const result = await window.electronAPI.saveTempFile(fileName, data);
       return result.filePath || '';
     } catch (error) {
-      console.error('Failed to save temp file:', error);
+      handleError(error, 'Failed to save temp file:');
       return '';
     }
   }
@@ -94,7 +95,7 @@ export abstract class BaseBrowserAutomation implements IBrowserAutomation {
       const result = await window.electronAPI.deleteTempFile(filePath);
       return result.success;
     } catch (error) {
-      console.error('Failed to delete temp file:', error);
+      handleError(error, 'Failed to delete temp file:');
       return false;
     }
   }
@@ -104,7 +105,7 @@ export abstract class BaseBrowserAutomation implements IBrowserAutomation {
       const result = await window.electronAPI.playwrightClickAt(x, y);
       return result.success;
     } catch (error) {
-      console.error('Failed to click at coordinates:', error);
+      handleError(error, 'Failed to click at coordinates:');
       return false;
     }
   }

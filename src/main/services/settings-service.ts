@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { app } from 'electron';
+import { handleError } from '../../shared/utils/error-handler';
 
 /**
  * LLM 설정 인터페이스
@@ -55,7 +56,7 @@ export class SettingsService {
 
       return null;
     } catch (error) {
-      console.error('LLM 설정 로드 실패:', error);
+      handleError(error, 'LLM 설정 로드 실패');
       return null;
     }
   }
@@ -72,7 +73,7 @@ export class SettingsService {
 
       return true;
     } catch (error) {
-      console.error('LLM 설정 저장 실패:', error);
+      handleError(error, 'LLM 설정 저장 실패');
       throw error;
     }
   }
@@ -109,7 +110,7 @@ export class SettingsService {
           return { success: false, message: '지원하지 않는 API 제공자입니다' };
       }
     } catch (error) {
-      console.error(`API 테스트 실패 (${config.provider}):`, error);
+      handleError(error, `API 테스트 실패 (${config.provider})`);
       return {
         success: false,
         message: error instanceof Error ? error.message : String(error)

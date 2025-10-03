@@ -6,6 +6,7 @@ import { BlogPromptService } from '@/shared/services/content/blog-prompt-service
 import { BlogTrendAnalyzer } from '@/01-setup/services/blog-trend-analyzer';
 import { TrendAnalysisResult, TitleGenerationParams, TrendAnalysisCache } from '../types/setup.types';
 import { handleAPIError } from '@/shared/utils/error-handler';
+import { handleError } from '@/shared/utils/error-handler';
 
 class TitleGenerationServiceClass {
 
@@ -27,7 +28,7 @@ class TitleGenerationServiceClass {
       }
       return null;
     } catch (error) {
-      console.error('글쓰기 API 설정 로드 실패:', error);
+      handleError(error, '글쓰기 API 설정 로드 실패:');
       return null;
     }
   }

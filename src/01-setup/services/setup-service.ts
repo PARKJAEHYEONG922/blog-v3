@@ -5,6 +5,7 @@
 import { StorageService } from '@/shared/services/storage/storage-service';
 import { DocumentLoadResult } from '../types/setup.types';
 import {
+import { handleError } from '@/shared/utils/error-handler';
   handleFileSystemError,
   handleAPIError,
   logError,
@@ -30,7 +31,7 @@ class SetupServiceClass {
         StorageService.saveWritingStyles(writingStyles);
       }
     } catch (error) {
-      console.error('말투 문서 로드 실패, localStorage에서 복원:', error);
+      handleError(error, '말투 문서 로드 실패, localStorage에서 복원:');
       writingStyles = StorageService.getWritingStyles();
     }
 

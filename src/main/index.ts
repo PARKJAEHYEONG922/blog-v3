@@ -11,6 +11,7 @@ import { AppService } from './services/app-service';
 import { SettingsService } from './services/settings-service';
 import { NaverTrendAPIService } from './services/naver-trend-api-service';
 import * as https from 'https';
+import { handleError } from '../shared/utils/error-handler';
 
 let mainWindow: BrowserWindow;
 const claudeWebService = new ClaudeWebService();
@@ -158,14 +159,14 @@ function createMenu() {
               }
 
               if (updateInfo.error) {
-                console.error('업데이트 확인 실패:', updateInfo.error);
+                handleError(new Error(updateInfo.error), '업데이트 확인 실패');
               } else if (updateInfo.hasUpdate) {
                 console.log(`새 버전 발견: ${updateInfo.latestVersion}`);
               } else {
                 console.log('최신 버전을 사용 중입니다.');
               }
             } catch (error) {
-              console.error('업데이트 확인 실패:', error);
+              handleError(error, '업데이트 확인 실패');
               if (mainWindow && mainWindow.webContents) {
                 mainWindow.webContents.send('update-check-result', {
                   hasUpdate: false,
@@ -235,7 +236,7 @@ ipcMain.handle('claude-web:cleanup', async () => {
     console.log('✅ Claude Web 서비스 정리 완료');
     return { success: true };
   } catch (error) {
-    console.error('❌ Claude Web 서비스 정리 실패:', error);
+    handleError(error, '❌ Claude Web 서비스 정리 실패');
     return { success: false, error: (error as Error).message };
   }
 });
@@ -287,10 +288,10 @@ ipcMain.handle('image:generate', async (event: any, prompt: string) => {
     });
     
     return imageUrl;
-    
+
   } catch (error) {
-    console.error('이미지 생성 실패:', error);
-    
+    handleError(error, '이미지 생성 실패');
+
     // 실패한 경우 에러 메시지와 함께 SVG 에러 이미지 반환
     const errorMsg = error instanceof Error ? error.message : '알 수 없는 오류';
     const errorSvg = `data:image/svg+xml;base64,${Buffer.from(`
@@ -403,10 +404,10 @@ ipcMain.handle('llm:generate-titles', async (event: any, data: { systemPrompt: s
     ]);
     
     return { success: true, content: response.content };
-    
+
   } catch (error) {
-    console.error('제목 생성 실패:', error);
-    
+    handleError(error, '제목 생성 실패');
+
     let errorMessage = error instanceof Error ? error.message : String(error);
     
     // 사용자 친화적인 에러 메시지 변환
@@ -461,9 +462,9 @@ ipcMain.handle('clipboard:copyImage', async (event: any, filePath: string) => {
     
     console.log(`✅ 클립보드에 이미지 복사 완료: ${filePath}`);
     return { success: true };
-    
+
   } catch (error) {
-    console.error('클립보드 이미지 복사 실패:', error);
+    handleError(error, '클립보드 이미지 복사 실패');
     return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 });
@@ -521,7 +522,7 @@ ipcMain.handle('naver:open-login', async () => {
     return { success: true, cookies: result.cookies };
 
   } catch (error) {
-    console.error('네이버 로그인 실패:', error);
+    handleError(error, '네이버 로그인 실패');
     await playwrightService.cleanup();
     return { success: false, error: (error as Error).message };
   }

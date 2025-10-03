@@ -2,6 +2,7 @@
 
 import { PublishResult, WorkflowData, PublishOption } from '../types/publishing.types';
 import { NaverPublisher } from '../platforms/naver';
+import { handleError } from '@/shared/utils/error-handler';
 
 export interface PublishConfig {
   platform: string;
@@ -72,7 +73,7 @@ export class PublishManager {
       return result;
 
     } catch (error) {
-      console.error(`❌ ${platform} 발행 중 오류:`, error);
+      handleError(error, `❌ ${platform} 발행 중 오류:`);
       return {
         success: false,
         message: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'
@@ -155,7 +156,7 @@ export class PublishManager {
       return result;
 
     } catch (error) {
-      console.error('네이버 발행 중 오류:', error);
+      handleError(error, '네이버 발행 중 오류:');
       return {
         success: false,
         message: error instanceof Error ? error.message : '네이버 발행 중 오류가 발생했습니다.'

@@ -3,6 +3,8 @@
  * 모든 localStorage 작업을 중앙화하여 관리
  */
 
+import { handleError } from '../../utils/error-handler';
+
 export interface SavedDocument {
   id: string;
   name: string;
@@ -51,7 +53,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.WRITING_STYLES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('말투 문서 로드 실패:', error);
+      handleError(error, '말투 문서 로드 실패');
       return [];
     }
   }
@@ -63,7 +65,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.WRITING_STYLES, JSON.stringify(documents));
     } catch (error) {
-      console.error('말투 문서 저장 실패:', error);
+      handleError(error, '말투 문서 저장 실패');
     }
   }
 
@@ -107,7 +109,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.SEO_GUIDES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('SEO 가이드 로드 실패:', error);
+      handleError(error, 'SEO 가이드 로드 실패');
       return [];
     }
   }
@@ -119,7 +121,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.SEO_GUIDES, JSON.stringify(documents));
     } catch (error) {
-      console.error('SEO 가이드 저장 실패:', error);
+      handleError(error, 'SEO 가이드 저장 실패');
     }
   }
 
@@ -160,7 +162,7 @@ class StorageServiceClass {
     try {
       return localStorage.getItem(this.KEYS.SELECTED_SEO_GUIDE);
     } catch (error) {
-      console.error('선택된 SEO 가이드 ID 로드 실패:', error);
+      handleError(error, '선택된 SEO 가이드 ID 로드 실패');
       return null;
     }
   }
@@ -176,7 +178,7 @@ class StorageServiceClass {
         localStorage.setItem(this.KEYS.SELECTED_SEO_GUIDE, id);
       }
     } catch (error) {
-      console.error('선택된 SEO 가이드 ID 저장 실패:', error);
+      handleError(error, '선택된 SEO 가이드 ID 저장 실패');
     }
   }
 
@@ -190,7 +192,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.SELECTED_WRITING_STYLES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('선택된 말투 로드 실패:', error);
+      handleError(error, '선택된 말투 로드 실패');
       return [];
     }
   }
@@ -202,7 +204,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.SELECTED_WRITING_STYLES, JSON.stringify(ids));
     } catch (error) {
-      console.error('선택된 말투 저장 실패:', error);
+      handleError(error, '선택된 말투 저장 실패');
     }
   }
 
@@ -216,7 +218,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.TREND_CACHE);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('트렌드 캐시 로드 실패:', error);
+      handleError(error, '트렌드 캐시 로드 실패');
       return null;
     }
   }
@@ -228,7 +230,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.TREND_CACHE, JSON.stringify(cache));
     } catch (error) {
-      console.error('트렌드 캐시 저장 실패:', error);
+      handleError(error, '트렌드 캐시 저장 실패');
     }
   }
 
@@ -239,7 +241,7 @@ class StorageServiceClass {
     try {
       localStorage.removeItem(this.KEYS.TREND_CACHE);
     } catch (error) {
-      console.error('트렌드 캐시 삭제 실패:', error);
+      handleError(error, '트렌드 캐시 삭제 실패');
     }
   }
 
@@ -253,7 +255,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.NAVER_ACCOUNTS);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('네이버 계정 로드 실패:', error);
+      handleError(error, '네이버 계정 로드 실패');
       return [];
     }
   }
@@ -265,7 +267,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.NAVER_ACCOUNTS, JSON.stringify(accounts));
     } catch (error) {
-      console.error('네이버 계정 저장 실패:', error);
+      handleError(error, '네이버 계정 저장 실패');
     }
   }
 
@@ -313,7 +315,7 @@ class StorageServiceClass {
     try {
       return localStorage.getItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`);
     } catch (error) {
-      console.error('비밀번호 로드 실패:', error);
+      handleError(error, '비밀번호 로드 실패');
       return null;
     }
   }
@@ -325,7 +327,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`, password);
     } catch (error) {
-      console.error('비밀번호 저장 실패:', error);
+      handleError(error, '비밀번호 저장 실패');
     }
   }
 
@@ -336,7 +338,7 @@ class StorageServiceClass {
     try {
       localStorage.removeItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`);
     } catch (error) {
-      console.error('비밀번호 삭제 실패:', error);
+      handleError(error, '비밀번호 삭제 실패');
     }
   }
 
@@ -350,7 +352,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.ACCOUNT_BOARDS);
       return data ? JSON.parse(data) : {};
     } catch (error) {
-      console.error('계정 보드 정보 로드 실패:', error);
+      handleError(error, '계정 보드 정보 로드 실패');
       return {};
     }
   }
@@ -362,7 +364,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.ACCOUNT_BOARDS, JSON.stringify(boards));
     } catch (error) {
-      console.error('계정 보드 정보 저장 실패:', error);
+      handleError(error, '계정 보드 정보 저장 실패');
     }
   }
 
@@ -374,7 +376,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('보드 목록 로드 실패:', error);
+      handleError(error, '보드 목록 로드 실패');
       return [];
     }
   }
@@ -391,7 +393,7 @@ class StorageServiceClass {
       allBoards[accountId] = boards;
       this.saveAllAccountBoards(allBoards);
     } catch (error) {
-      console.error('보드 목록 저장 실패:', error);
+      handleError(error, '보드 목록 저장 실패');
     }
   }
 
@@ -407,7 +409,7 @@ class StorageServiceClass {
       delete allBoards[accountId];
       this.saveAllAccountBoards(allBoards);
     } catch (error) {
-      console.error('보드 정보 삭제 실패:', error);
+      handleError(error, '보드 정보 삭제 실패');
     }
   }
 
@@ -421,7 +423,7 @@ class StorageServiceClass {
       const data = localStorage.getItem(this.KEYS.SELECTED_TREND_CATEGORIES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('선택된 카테고리 로드 실패:', error);
+      handleError(error, '선택된 카테고리 로드 실패');
       return [];
     }
   }
@@ -433,7 +435,7 @@ class StorageServiceClass {
     try {
       localStorage.setItem(this.KEYS.SELECTED_TREND_CATEGORIES, JSON.stringify(categories));
     } catch (error) {
-      console.error('선택된 카테고리 저장 실패:', error);
+      handleError(error, '선택된 카테고리 저장 실패');
     }
   }
 
@@ -449,7 +451,7 @@ class StorageServiceClass {
       });
       console.log('✅ 모든 localStorage 데이터 삭제 완료');
     } catch (error) {
-      console.error('데이터 초기화 실패:', error);
+      handleError(error, '데이터 초기화 실패');
     }
   }
 }

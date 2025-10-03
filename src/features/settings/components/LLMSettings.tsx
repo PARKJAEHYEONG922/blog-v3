@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '@/shared/components/ui/Button';
 import { IMAGE_GENERATION_OPTIONS } from '@/shared/utils/constants';
 import { LLMConfig } from '@/shared/services/llm/types/llm.types';
+import { handleError } from '@/shared/utils/error-handler';
 
 interface LLMSettingsProps {
   onClose: () => void;
@@ -244,7 +245,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
             testingStatus
           });
         } catch (error) {
-          console.error('자동 저장 실패:', error);
+          handleError(error, '자동 저장 실패:');
         }
         
         // 설정 변경 시 부모 컴포넌트에 알림
@@ -265,7 +266,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       }
     } catch (error: any) {
       // 에러
-      console.error('API 테스트 에러:', error);
+      handleError(error, 'API 테스트 에러:');
       setTestingStatus(prev => ({
         ...prev,
         [category]: { 
@@ -338,7 +339,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       return result as { success: boolean, message: string };
       
     } catch (error: any) {
-      console.error(`❌ ${provider} API 테스트 실패:`, error);
+      handleError(error, `❌ ${provider} API 테스트 실패:`);
       
       if (error instanceof Error) {
         return { success: false, message: `연결 오류: ${error.message}` };
@@ -360,7 +361,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       onSettingsChange?.();
       onClose();
     } catch (error) {
-      console.error('설정 저장 실패:', error);
+      handleError(error, '설정 저장 실패:');
     }
   };
 

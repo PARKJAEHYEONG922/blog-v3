@@ -1,5 +1,6 @@
 import type { DownloadProgress } from '@/shared/types/electron.types';
 import React, { useState, useEffect } from 'react';
+import { handleError } from '@/shared/utils/error-handler';
 
 interface UpdateInfo {
   hasUpdate: boolean;
@@ -72,7 +73,7 @@ const UpdateModal: React.FC<UpdateModalProps> = ({ isVisible, updateInfo, onClos
           setDownloadProgress(null);
         }
       } catch (error) {
-        console.error('다운로드 예외 발생:', error);
+        handleError(error, '다운로드 예외 발생:');
         setIsDownloading(false);
         setDownloadProgress(null);
       }

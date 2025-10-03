@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { app } from 'electron';
 import { getDefaultSEOGuideContent } from '../../shared/services/content/default-seo-guide';
+import { handleError } from '../../shared/utils/error-handler';
 
 /**
  * 문서 타입
@@ -138,7 +139,7 @@ export class FileService {
       console.log(`${type} 문서 로드 완료: ${docs.length}개`);
       return docs;
     } catch (error) {
-      console.error(`${type} 문서 로드 실패:`, error);
+      handleError(error, `${type} 문서 로드 실패`);
       return [];
     }
   }
@@ -159,7 +160,7 @@ export class FileService {
         return false;
       }
     } catch (error) {
-      console.error(`파일 삭제 실패: ${filePath}`, error);
+      handleError(error, `파일 삭제 실패: ${filePath}`);
       throw error;
     }
   }
@@ -189,7 +190,7 @@ export class FileService {
 
       console.log('기본 SEO 가이드 문서 업데이트됨 (날짜: ' + currentDate + '):', defaultSEOFilePath);
     } catch (error) {
-      console.error('기본 SEO 가이드 생성 실패:', error);
+      handleError(error, '기본 SEO 가이드 생성 실패');
     }
   }
 
@@ -213,7 +214,7 @@ export class FileService {
       console.log(`✅ 임시 파일 저장 완료: ${tempFilePath}`);
       return { success: true, filePath: tempFilePath };
     } catch (error) {
-      console.error('임시 파일 저장 실패:', error);
+      handleError(error, '임시 파일 저장 실패');
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error)
@@ -233,7 +234,7 @@ export class FileService {
       console.log(`✅ 임시 파일 삭제 완료: ${filePath}`);
       return { success: true };
     } catch (error) {
-      console.error('임시 파일 삭제 실패:', error);
+      handleError(error, '임시 파일 삭제 실패');
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error)

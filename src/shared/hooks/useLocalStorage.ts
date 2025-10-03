@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { handleError } from '../utils/error-handler';
 
 export interface UseLocalStorageReturn<T> {
   value: T;
@@ -63,7 +64,7 @@ function useLocalStorage<T>(
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }
       } catch (error) {
-        console.error(`Error setting localStorage key "${key}":`, error);
+        handleError(error, `Error setting localStorage key "${key}":`);
         setError(error instanceof Error ? error.message : 'Unknown error');
       }
     },
@@ -80,7 +81,7 @@ function useLocalStorage<T>(
         window.localStorage.removeItem(key);
       }
     } catch (error) {
-      console.error(`Error removing localStorage key "${key}":`, error);
+      handleError(error, `Error removing localStorage key "${key}":`);
       setError(error instanceof Error ? error.message : 'Unknown error');
     }
   }, [initialValue, key]);

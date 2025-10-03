@@ -1,5 +1,6 @@
 import { BaseLLMClient } from './base-client';
 import { LLMMessage, LLMResponse, LLMTool, ImageGenerationOptions } from '../types/llm.types';
+import { handleError } from '../../../utils/error-handler';
 
 export class OpenAIClient extends BaseLLMClient {
   async generateText(messages: LLMMessage[], options?: { tools?: LLMTool[] }): Promise<LLMResponse> {
@@ -52,7 +53,7 @@ export class OpenAIClient extends BaseLLMClient {
         };
         
       } catch (error) {
-        console.error(`OpenAI API 호출 실패 (${attempt}/${maxRetries}):`, error);
+        handleError(error, `OpenAI API 호출 실패 (${attempt}/${maxRetries}):`);
         
         if (attempt === maxRetries) {
           throw error;
@@ -167,7 +168,7 @@ export class OpenAIClient extends BaseLLMClient {
         continue;
         
       } catch (error) {
-        console.error(`OpenAI Image API 호출 실패 (${attempt}/${maxRetries}):`, error);
+        handleError(error, `OpenAI Image API 호출 실패 (${attempt}/${maxRetries}):`);
         
         if (attempt === maxRetries) {
           throw error;

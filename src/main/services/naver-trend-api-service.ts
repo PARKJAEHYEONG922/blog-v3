@@ -1,5 +1,6 @@
 import * as https from 'https';
 import { CookieService } from './cookie-service';
+import { handleError } from '../../shared/utils/error-handler';
 
 /**
  * 트렌드 키워드
@@ -155,12 +156,12 @@ export class NaverTrendAPIService {
             }
           )
           .on('error', (error) => {
-            console.error('API 호출 오류:', error);
+            handleError(error, 'API 호출 오류');
             resolve({ error: error.message });
           });
       });
     } catch (error) {
-      console.error('네이버 트렌드 가져오기 실패:', error);
+      handleError(error, '네이버 트렌드 가져오기 실패');
       return { error: (error as Error).message };
     }
   }
@@ -251,12 +252,12 @@ export class NaverTrendAPIService {
             }
           )
           .on('error', (error) => {
-            console.error('API 호출 오류:', error);
+            handleError(error, 'API 호출 오류');
             resolve({ error: error.message });
           });
       });
     } catch (error) {
-      console.error('네이버 트렌드 콘텐츠 가져오기 실패:', error);
+      handleError(error, '네이버 트렌드 콘텐츠 가져오기 실패');
       return { error: (error as Error).message };
     }
   }

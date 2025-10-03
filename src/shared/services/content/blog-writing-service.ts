@@ -251,7 +251,7 @@ ${blogContent}
       throw new Error('최대 재시도 횟수를 초과했습니다.');
 
     } catch (error) {
-      console.error('❌ 이미지 프롬프트 생성 실패:', error);
+      handleError(error, '❌ 이미지 프롬프트 생성 실패:');
       return {
         success: false,
         error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'

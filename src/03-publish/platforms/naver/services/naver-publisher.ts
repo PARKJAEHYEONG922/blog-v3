@@ -4,6 +4,7 @@ import { PublishResult, WorkflowData, NaverCredentials, PublishOption } from '..
 import { NaverBlogAutomation } from './naver-automation';
 import type { LoginResult, PublishResult as AutomationPublishResult } from '@/shared/types/automation.types';
 import { StorageService } from '@/shared/services/storage/storage-service';
+import { handleError } from '@/shared/utils/error-handler';
 
 export interface NaverPublishConfig {
   option: PublishOption;
@@ -108,7 +109,7 @@ export class NaverPublisher {
       }
 
     } catch (error) {
-      console.error('❌ 네이버 블로그 발행 실패:', error);
+      handleError(error, '❌ 네이버 블로그 발행 실패:');
       return {
         success: false,
         message: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'
@@ -171,7 +172,7 @@ export class NaverPublisher {
 
       console.log('✅ 네이버 계정 정보 저장 완료');
     } catch (error) {
-      console.error('❌ 계정 정보 저장 실패:', error);
+      handleError(error, '❌ 계정 정보 저장 실패:');
     }
   }
 
@@ -447,7 +448,7 @@ export class NaverPublisher {
       }
       
     } catch (error) {
-      console.error('로그인 또는 발행 실패:', error);
+      handleError(error, '로그인 또는 발행 실패:');
       const errorMessage = error instanceof Error ? error.message : '로그인 또는 발행에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
       
       onStatusUpdate?.({

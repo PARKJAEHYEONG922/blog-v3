@@ -4,6 +4,7 @@
  */
 import { ipcMain } from 'electron';
 import { chromium, Browser, Page, BrowserContext } from 'playwright';
+import { handleError } from '../../shared/utils/error-handler';
 
 class PlaywrightService {
   private browser: Browser | null = null;
@@ -115,7 +116,7 @@ class PlaywrightService {
       return true;
 
     } catch (error) {
-      console.error('❌ Playwright 초기화 실패:', error);
+      handleError(error, '❌ Playwright 초기화 실패');
       
       // 오류 유형별 상세 메시지
       const errorMessage = (error as Error).message;
@@ -165,7 +166,7 @@ class PlaywrightService {
       return true;
       
     } catch (error) {
-      console.error('❌ 폴백 초기화도 실패:', error);
+      handleError(error, '❌ 폴백 초기화도 실패');
       await this.cleanup();
       return false;
     }
@@ -187,7 +188,7 @@ class PlaywrightService {
       }
       console.log('Playwright 리소스 정리 완료');
     } catch (error) {
-      console.error('Playwright 정리 중 오류:', error);
+      handleError(error, 'Playwright 정리 중 오류');
     }
   }
 
@@ -199,7 +200,7 @@ class PlaywrightService {
       console.log(`페이지 이동 완료: ${url}`);
       return true;
     } catch (error) {
-      console.error('페이지 이동 실패:', error);
+      handleError(error, '페이지 이동 실패');
       return false;
     }
   }
@@ -224,7 +225,7 @@ class PlaywrightService {
       console.log(`실제 키보드로 타이핑 완료: "${text.substring(0, 20)}..."`);
       return true;
     } catch (error) {
-      console.error('키보드 타이핑 실패:', error);
+      handleError(error, '키보드 타이핑 실패');
       return false;
     }
   }
@@ -237,7 +238,7 @@ class PlaywrightService {
       console.log(`키 입력: ${key}`);
       return true;
     } catch (error) {
-      console.error(`키 입력 실패 (${key}):`, error);
+      handleError(error, `키 입력 실패 (${key})`);
       return false;
     }
   }
@@ -250,7 +251,7 @@ class PlaywrightService {
       console.log(`마우스 클릭: (${x}, ${y})`);
       return true;
     } catch (error) {
-      console.error(`마우스 클릭 실패 (${x}, ${y}):`, error);
+      handleError(error, `마우스 클릭 실패 (${x}, ${y})`);
       return false;
     }
   }
@@ -265,7 +266,7 @@ class PlaywrightService {
       console.log(`클립보드에 텍스트 설정 완료: ${text.substring(0, 50)}...`);
       return true;
     } catch (error) {
-      console.error('클립보드 설정 실패:', error);
+      handleError(error, '클립보드 설정 실패');
       return false;
     }
   }
@@ -284,7 +285,7 @@ class PlaywrightService {
       console.log(`클립보드에 HTML 설정 완료: ${html.substring(0, 50)}...`);
       return true;
     } catch (error) {
-      console.error('클립보드 HTML 설정 실패:', error);
+      handleError(error, '클립보드 HTML 설정 실패');
       return false;
     }
   }
@@ -294,7 +295,7 @@ class PlaywrightService {
     try {
       return await this.page.evaluate(script);
     } catch (error) {
-      console.error('스크립트 실행 실패:', error);
+      handleError(error, '스크립트 실행 실패');
       return null;
     }
   }
@@ -330,7 +331,7 @@ class PlaywrightService {
       console.warn(`모든 프레임에서 스크립트 실행 실패`);
       return null;
     } catch (error) {
-      console.error(`iframe 스크립트 실행 실패:`, error);
+      handleError(error, `iframe 스크립트 실행 실패`);
       return null;
     }
   }
@@ -367,7 +368,7 @@ class PlaywrightService {
       
       return false;
     } catch (error) {
-      console.error(`요소 클릭 실패 (${selector}):`, error);
+      handleError(error, `요소 클릭 실패 (${selector})`);
       return false;
     }
   }
@@ -382,7 +383,7 @@ class PlaywrightService {
       }
       return false;
     } catch (error) {
-      console.error(`입력 실패 (${selector}):`, error);
+      handleError(error, `입력 실패 (${selector})`);
       return false;
     }
   }
@@ -393,7 +394,7 @@ class PlaywrightService {
       await this.page.waitForSelector(selector, { state: 'visible', timeout });
       return true;
     } catch (error) {
-      console.error(`요소 대기 실패 (${selector}):`, error);
+      handleError(error, `요소 대기 실패 (${selector})`);
       return false;
     }
   }
@@ -430,7 +431,7 @@ class PlaywrightService {
       console.warn(`모든 프레임에서 요소를 찾지 못함: ${selector}`);
       return false;
     } catch (error) {
-      console.error(`iframe 요소 클릭 실패 (${selector}):`, error);
+      handleError(error, `iframe 요소 클릭 실패 (${selector})`);
       return false;
     }
   }
@@ -443,7 +444,7 @@ class PlaywrightService {
       const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
       return cookieString;
     } catch (error) {
-      console.error('쿠키 가져오기 실패:', error);
+      handleError(error, '쿠키 가져오기 실패');
       return null;
     }
   }
@@ -455,7 +456,7 @@ class PlaywrightService {
       await this.page.waitForURL(url, { timeout });
       return true;
     } catch (error) {
-      console.error('페이지 네비게이션 대기 실패:', error);
+      handleError(error, '페이지 네비게이션 대기 실패');
       return false;
     }
   }
@@ -503,7 +504,7 @@ class PlaywrightService {
       return { success: true, cookies: cookieString };
 
     } catch (error) {
-      console.error('네이버 로그인 실패:', error);
+      handleError(error, '네이버 로그인 실패');
       return { success: false, error: (error as Error).message };
     }
   }
@@ -643,7 +644,7 @@ class PlaywrightService {
       return true;
 
     } catch (error) {
-      console.error(`❌ 파일 드래그 앤 드롭 실패:`, error);
+      handleError(error, `❌ 파일 드래그 앤 드롭 실패`);
       return false;
     }
   }

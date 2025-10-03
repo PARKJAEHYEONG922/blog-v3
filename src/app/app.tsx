@@ -4,6 +4,7 @@ import ErrorBoundary from '@/shared/components/error/ErrorBoundary';
 import LoadingFallback from '@/shared/components/ui/LoadingFallback';
 import { DialogProvider } from './DialogContext';
 import { WorkflowProvider, useWorkflow } from './WorkflowContext';
+import { handleError } from '@/shared/utils/error-handler';
 
 // Code Splitting: 필요한 시점에만 로드
 const SetupContainer = lazy(() => import('@/01-setup').then(module => ({ default: module.SetupContainer })));
@@ -40,7 +41,7 @@ const AppContent: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('모델 상태 확인 실패:', error);
+      handleError(error, '모델 상태 확인 실패:');
     }
   }, []);
 
@@ -71,7 +72,7 @@ const AppContent: React.FC = () => {
         return { success: false, error: result?.error || '다운로드 실패' };
       }
     } catch (error) {
-      console.error('업데이트 다운로드 오류:', error);
+      handleError(error, '업데이트 다운로드 오류:');
       return { success: false, error: error instanceof Error ? error.message : '알 수 없는 오류' };
     }
   };
