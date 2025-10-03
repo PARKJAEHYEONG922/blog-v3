@@ -21,8 +21,18 @@ class SetupServiceClass {
     seoGuidePath?: string;
   }): Promise<DocumentLoadResult> {
 
-    // 1. 말투 문서 로드
-    const writingStyles = StorageService.getWritingStyles();
+    // 1. 말투 문서 로드 (Electron에서 실제 파일 로드)
+    let writingStyles: SavedDocument[] = [];
+    try {
+      const loadedWritingStyles = await window.electronAPI.loadDocuments('writingStyle');
+      if (loadedWritingStyles && loadedWritingStyles.length > 0) {
+        writingStyles = loadedWritingStyles;
+        StorageService.saveWritingStyles(writingStyles);
+      }
+    } catch (error) {
+      console.error('말투 문서 로드 실패, localStorage에서 복원:', error);
+      writingStyles = StorageService.getWritingStyles();
+    }
 
     // 2. SEO 가이드 로드
     let seoGuides: SavedDocument[] = [];
@@ -107,15 +117,18 @@ class SetupServiceClass {
           const content = e.target?.result as string;
           const name = file.name.replace(/\.[^/.]+$/, '');
 
+          // Electron API로 실제 파일 저장
+          const filePath = await window.electronAPI.saveDocument('writingStyle', name, content);
+
           const savedDoc: SavedDocument = {
             id: `${Date.now()}-${Math.random()}`,
             name,
             content,
-            filePath: `/말투/${file.name}`,
+            filePath,
             createdAt: new Date().toISOString()
           };
 
-          const updated = StorageService.addWritingStyle(savedDoc);
+          StorageService.addWritingStyle(savedDoc);
           console.log('✅ 말투 문서 저장 완료:', name);
 
           resolve(savedDoc);
@@ -171,15 +184,18 @@ class SetupServiceClass {
           const content = e.target?.result as string;
           const name = file.name.replace(/\.[^/.]+$/, '');
 
+          // Electron API로 실제 파일 저장
+          const filePath = await window.electronAPI.saveDocument('seoGuide', name, content);
+
           const savedDoc: SavedDocument = {
             id: `${Date.now()}-${Math.random()}`,
             name,
             content,
-            filePath: `/seoGuide/${file.name}`,
+            filePath,
             createdAt: new Date().toISOString()
           };
 
-          const updated = StorageService.addSeoGuide(savedDoc);
+          StorageService.addSeoGuide(savedDoc);
           console.log('✅ SEO 가이드 저장 완료:', name);
 
           resolve(savedDoc);
