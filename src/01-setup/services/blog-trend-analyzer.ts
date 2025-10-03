@@ -1,6 +1,7 @@
 import { BlogCrawler } from './blog-crawler';
 import { BlogContent, TrendAnalysisResult, TrendAnalysisProgress } from '../types/setup.types';
 import { LLMClientFactory } from '@/shared/services/llm/llm-factory';
+import { handleError } from '@/shared/utils/error-handler';
 
 export class BlogTrendAnalyzer {
 
@@ -106,7 +107,7 @@ export class BlogTrendAnalyzer {
       };
 
     } catch (error) {
-      console.error('트렌드 분석 실패:', error);
+      handleError(error, '트렌드 분석 실패');
       throw error;
     }
   }
@@ -249,7 +250,7 @@ ${blogsInfo}
       };
 
     } catch (error) {
-      console.error('LLM 분석 실패:', error);
+      handleError(error, 'LLM 분석 실패');
       throw new Error('AI 분석에 실패했습니다: ' + (error as Error).message);
     }
   }
@@ -367,7 +368,7 @@ ${blogsInfo}
       return parsed.titles || [];
 
     } catch (error) {
-      console.error('제목 재생성 실패:', error);
+      handleError(error, '제목 재생성 실패');
       throw new Error('제목 재생성에 실패했습니다: ' + (error as Error).message);
     }
   }
