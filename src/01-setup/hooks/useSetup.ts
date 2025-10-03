@@ -95,6 +95,13 @@ export const useSetup = (): UseSetupReturn => {
     }
   }, [selectedWritingStyles, isInitialLoadComplete]);
 
+  // 선택된 SEO 가이드 변경 시 로컬 스토리지 저장 (초기 로드 이후에만)
+  useEffect(() => {
+    if (isInitialLoadComplete) {
+      StorageService.saveSelectedSeoGuideId(selectedSeoGuide?.id || null);
+    }
+  }, [selectedSeoGuide, isInitialLoadComplete]);
+
   // URL 크롤링
   const handleUrlCrawl = useCallback(async (url: string): Promise<{ title: string; contentLength: number } | null> => {
     try {
