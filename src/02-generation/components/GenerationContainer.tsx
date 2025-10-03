@@ -10,6 +10,7 @@ import '@/shared/types/electron.types';
 import { useDialog } from '@/app/DialogContext';
 import { useWorkflow } from '@/app/WorkflowContext';
 import { useGeneration } from '@/02-generation/hooks/useGeneration';
+import { handleError } from '@/shared/utils/error-handler';
 
 const Step2Generation: React.FC = () => {
   const { showAlert } = useDialog();
@@ -101,7 +102,7 @@ const Step2Generation: React.FC = () => {
           setImageAIInfo('❌ 미설정');
         }
       } catch (error) {
-        console.error('이미지 AI 설정 확인 실패:', error);
+        handleError(error, '이미지 AI 설정 확인 실패');
         setImageAIInfo('❌ 확인 실패');
       }
     };
@@ -636,7 +637,7 @@ const Step2Generation: React.FC = () => {
                 throw new Error('에디터 참조를 찾을 수 없습니다');
               }
             } catch (err) {
-              console.error('복사 실패:', err);
+              handleError(err, '복사 실패');
               // 대체 방법: editedContent로 텍스트 복사
               const tempDiv = document.createElement('div');
               tempDiv.innerHTML = editedContent;
