@@ -228,7 +228,23 @@ export const useContentEditor = ({
 
     input?.focus();
 
+    const handleOverlayClick = (e: MouseEvent) => {
+      if (e.target === overlay) cleanup();
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') handleInsert();
+      if (e.key === 'Escape') cleanup();
+    };
+
     const cleanup = () => {
+      // 이벤트 리스너 제거 (메모리 누수 방지)
+      okBtn?.removeEventListener('click', handleInsert);
+      cancelBtn?.removeEventListener('click', cleanup);
+      overlay.removeEventListener('click', handleOverlayClick);
+      input?.removeEventListener('keydown', handleKeyDown);
+
+      // DOM 제거
       if (document.body.contains(overlay)) {
         document.body.removeChild(overlay);
       }
@@ -282,13 +298,8 @@ export const useContentEditor = ({
 
     okBtn?.addEventListener('click', handleInsert);
     cancelBtn?.addEventListener('click', cleanup);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) cleanup();
-    });
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleInsert();
-      if (e.key === 'Escape') cleanup();
-    });
+    overlay.addEventListener('click', handleOverlayClick);
+    input?.addEventListener('keydown', handleKeyDown);
   }, [updateCharCount, showAlert]);
 
   // 구분선 삽입
