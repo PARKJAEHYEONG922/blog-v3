@@ -722,36 +722,39 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   // 빈 이미지 모두 AI 생성 (정지 기능 포함)
   const handleGenerateAllEmpty = async () => {
     if (!hasImageClient || isGeneratingAll) return;
-    
+
     setIsGeneratingAll(true);
     setShouldStopGeneration(false);
     shouldStopRef.current = false;
     const emptySlots = Array.from({ length: imageCount }, (_, idx) => idx + 1)
       .filter(index => getImageStatus(index) === 'empty' && getCurrentPrompt(index).trim());
-    
+
     console.log(`배치 생성 시작: ${emptySlots.length}개 이미지, 스타일: ${imageStyle}`);
-    
+
+    let successCount = 0; // 실제 생성 성공한 개수 추적
+
     for (let i = 0; i < emptySlots.length; i++) {
       // 정지 신호 확인 (루프 시작 시)
       if (shouldStopRef.current) {
-        console.log('배치 생성 정지됨 (루프 시작)');
+        console.log(`배치 생성 정지됨 (루프 시작) - ${successCount}/${emptySlots.length} 완료`);
         break;
       }
-      
+
       const imageIndex = emptySlots[i];
       console.log(`배치 생성 ${i + 1}/${emptySlots.length} - 이미지 ${imageIndex} 시작`);
-      
+
       // v2와 동일하게 handleAIImageGeneration에 배치 모드 플래그 전달
       await handleAIImageGeneration(imageIndex, true);
-      
+
       // 이미지 생성 완료 후 정지 신호 재확인
       if (shouldStopRef.current) {
-        console.log('배치 생성 정지됨 (이미지 생성 완료 후)');
+        console.log(`배치 생성 정지됨 (이미지 생성 완료 후) - ${successCount}/${emptySlots.length} 완료`);
         break;
       }
-      
-      console.log(`배치 생성 완료 ${i + 1}/${emptySlots.length} - 이미지 ${imageIndex}`);
-      
+
+      successCount++; // 생성 성공
+      console.log(`배치 생성 완료 ${successCount}/${emptySlots.length} - 이미지 ${imageIndex}`);
+
       // 다음 이미지 생성 전 잠시 대기 (API 과부하 방지)
       if (i < emptySlots.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -759,17 +762,28 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     }
 
     setIsGeneratingAll(false);
+    const wasStopped = shouldStopRef.current;
     setShouldStopGeneration(false);
     shouldStopRef.current = false;
-    console.log('배치 생성 완료 또는 정지됨');
+    console.log(`배치 생성 완료 또는 정지됨 - ${successCount}/${emptySlots.length} 생성됨`);
 
-    // 배치 생성 완료 다이얼로그 (정지되지 않았을 때만)
-    if (!shouldStopRef.current && emptySlots.length > 0) {
-      showAlert({
-        type: 'success',
-        title: '🎨 이미지 생성 완료',
-        message: `모든 AI 이미지 생성이 완료되었습니다!\n\n총 ${emptySlots.length}개의 이미지가 생성되었습니다.`
-      });
+    // 배치 생성 완료/정지 다이얼로그
+    if (emptySlots.length > 0) {
+      if (wasStopped) {
+        // 중간에 정지된 경우
+        showAlert({
+          type: 'info',
+          title: '⏸️ 이미지 생성 중지',
+          message: `배치 생성이 중지되었습니다.\n\n생성 완료: ${successCount}개\n남은 이미지: ${emptySlots.length - successCount}개`
+        });
+      } else {
+        // 모두 완료된 경우
+        showAlert({
+          type: 'success',
+          title: '🎨 이미지 생성 완료',
+          message: `모든 AI 이미지 생성이 완료되었습니다!\n\n총 ${successCount}개의 이미지가 생성되었습니다.`
+        });
+      }
     }
   };
   
