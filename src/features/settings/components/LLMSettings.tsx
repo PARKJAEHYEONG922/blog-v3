@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@/shared/components/ui/Button';
-import { IMAGE_GENERATION_OPTIONS } from '@/shared/utils/constants';
 import { LLMConfig } from '@/shared/services/llm/types/llm.types';
 import { handleError } from '@/shared/utils/error-handler';
+import { PROVIDERS, TEXT_PROVIDERS, IMAGE_PROVIDERS } from '../constants/llm-providers';
+import { MODELS_BY_PROVIDER, getModels, ModelInfo } from '../constants/llm-models';
+import { IMAGE_GENERATION_OPTIONS, getImageOptions } from '../constants/image-options';
+import { getDefaultImageOptions } from '../utils/provider-defaults';
 
 interface LLMSettingsProps {
   onClose: () => void;
@@ -21,19 +24,7 @@ interface ProviderApiKeys {
   runware: string;
 }
 
-interface Provider {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-}
-
-interface ModelInfo {
-  id: string;
-  name: string;
-  description: string;
-  tier: string;
-}
+// Provider와 ModelInfo 인터페이스는 이제 constants에서 import
 
 const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) => {
   const [activeTab, setActiveTab] = useState<'writing' | 'image'>('writing');
@@ -120,48 +111,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     loadSettings();
   }, []);
 
-  const providers = [
-    { id: 'claude', name: 'Claude', icon: '🟠', color: 'orange' },
-    { id: 'openai', name: 'OpenAI', icon: '🔵', color: 'blue' },
-    { id: 'gemini', name: 'Gemini', icon: '🟢', color: 'green' },
-    { id: 'runware', name: 'Runware', icon: '⚡', color: 'purple' }
-  ];
-
-  const modelsByProvider = {
-    claude: {
-      text: [
-        { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', description: '최신 고품질 모델', tier: 'premium' },
-        { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', description: '최고품질 모델', tier: 'premium' },
-        { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', description: '빠르고 경제적', tier: 'basic' }
-      ]
-    },
-    openai: {
-      text: [
-        { id: 'gpt-5', name: 'GPT-5', description: '최고 성능 모델', tier: 'enterprise' },
-        { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: '균형잡힌 성능', tier: 'premium' },
-        { id: 'gpt-5-nano', name: 'GPT-5 Nano', description: '빠르고 경제적', tier: 'basic' }
-      ],
-      image: [
-        { id: 'dall-e-3', name: 'DALL-E 3', description: '고품질 이미지 생성 (권장)', tier: 'basic' },
-        { id: 'gpt-image-1', name: 'GPT Image 1', description: '최신 모델 (Limited Access 필요)', tier: 'premium' }
-      ]
-    },
-    gemini: {
-      text: [
-        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: '최고성능 모델', tier: 'premium' },
-        { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: '경제적 모델', tier: 'basic' }
-      ],
-      image: [
-        { id: 'gemini-2.5-flash-image-preview', name: 'Gemini 2.5 Flash Image', description: '이미지 생성 및 편집', tier: 'enterprise' }
-      ]
-    },
-    runware: {
-      image: [
-        { id: 'sdxl-base', name: 'Stable Diffusion XL', description: '다양한 스타일 지원 모델', tier: 'basic' },
-        { id: 'flux-base', name: 'FLUX.1', description: '고품질 세밀한 생성 모델', tier: 'premium' }
-      ]
-    }
-  };
+  // Providers와 models는 이제 constants에서 import하여 사용
 
   const handleProviderChange = (tab: keyof LLMSettings, provider: string) => {
     const newSettings = { ...settings };
@@ -174,19 +124,10 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
 
     // 이미지 탭에서 provider 변경 시 해당 provider의 기본값으로 초기화
     if (tab === 'image') {
-      if (provider === 'gemini') {
-        newSettings[tab].size = '1024x1024';
-        newSettings[tab].style = 'photographic';
-        newSettings[tab].quality = 'high';
-      } else if (provider === 'openai') {
-        newSettings[tab].size = '1024x1024';
-        newSettings[tab].style = undefined; // OpenAI는 스타일 없음
-        newSettings[tab].quality = 'high';
-      } else if (provider === 'runware') {
-        newSettings[tab].size = '1024x1024';
-        newSettings[tab].style = 'realistic';
-        newSettings[tab].quality = 'high';
-      }
+      const defaults = getDefaultImageOptions(provider);
+      newSettings[tab].size = defaults.size;
+      newSettings[tab].style = defaults.style;
+      newSettings[tab].quality = defaults.quality;
     }
 
     setSettings(newSettings);
@@ -457,21 +398,16 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
   };
 
   const getAvailableModels = (tab: keyof LLMSettings, provider: string) => {
-    const providerModels = modelsByProvider[provider as keyof typeof modelsByProvider];
-    if (!providerModels) return [];
-    
-    if (tab === 'image') {
-      return ('image' in providerModels) ? providerModels.image || [] : [];
-    }
-    return ('text' in providerModels) ? providerModels.text || [] : [];
+    const category = tab === 'image' ? 'image' : 'text';
+    return getModels(provider, category);
   };
 
   const getWritingProviders = () => {
-    return providers.filter(p => p.id !== 'runware'); // Runware는 이미지 전용이므로 글쓰기에서 제외
+    return TEXT_PROVIDERS;
   };
 
   const getImageProviders = () => {
-    return providers.filter(p => ['gemini', 'openai', 'runware'].includes(p.id)); // 이미지 모델 지원하는 provider들
+    return IMAGE_PROVIDERS;
   };
 
   return (
