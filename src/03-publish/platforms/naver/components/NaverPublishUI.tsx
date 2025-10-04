@@ -806,7 +806,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
                     저장된 계정 ({savedAccounts.length}개)
                   </div>
                   {savedAccounts
-                    .sort((a, b) => b.lastUsed - a.lastUsed)
+                    .sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0))
                     .map((account) => (
                       <div key={account.id} className="flex items-center p-2 hover:bg-gray-50 border-b last:border-b-0 group">
                         <button
@@ -821,7 +821,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
                         >
                           <div className="font-medium">{account.username}</div>
                           <div className="text-xs text-gray-500">
-                            {new Date(account.lastUsed).toLocaleDateString()} 사용
+                            {account.lastUsed ? new Date(account.lastUsed).toLocaleDateString() : '사용 기록 없음'} 사용
                           </div>
                         </button>
                         <button
