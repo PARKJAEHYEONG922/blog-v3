@@ -91,7 +91,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
             setSettings(prev => ({
               ...prev,
               writing: {
-                provider: lastUsed.writing.provider,
+                provider: lastUsed.writing.provider as LLMConfig['provider'],
                 model: lastUsed.writing.model,
                 apiKey: writingApiKey
               }
@@ -103,7 +103,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
             setSettings(prev => ({
               ...prev,
               image: {
-                provider: lastUsed.image.provider,
+                provider: lastUsed.image.provider as LLMConfig['provider'],
                 model: lastUsed.image.model,
                 apiKey: imageApiKey,
                 style: lastUsed.image.style || 'photographic',

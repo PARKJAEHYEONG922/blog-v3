@@ -43,7 +43,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   logErrorToService(error: Error, errorInfo: ErrorInfo) {
-    // TODO: 원격 로깅 서비스로 전송
+    // 콘솔 에러 로깅 (원격 로깅 서비스는 향후 추가 가능)
     console.group('🔴 Error Log');
     console.error('Error:', error.toString());
     console.error('Error Info:', errorInfo.componentStack);

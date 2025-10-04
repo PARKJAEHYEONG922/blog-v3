@@ -59,7 +59,7 @@ export interface AppConfig {
  * electron-store를 사용하여 모든 설정을 하나의 파일에서 관리
  */
 export class ConfigService {
-  private store: any; // TODO: electron-store 타입 이슈
+  private store: any; // electron-store 타입이 ElectronStore<T>를 반환하지만 실제 메서드는 다름
 
   constructor() {
     const { app } = require('electron');

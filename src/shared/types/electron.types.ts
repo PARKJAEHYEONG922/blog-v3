@@ -1,5 +1,7 @@
 // Electron 관련 타입 정의
 
+import type { AppConfig } from '../../main/services/config-service';
+
 export interface UpdateInfo {
   hasUpdate: boolean;
   currentVersion?: string;
@@ -39,8 +41,10 @@ export interface TrendResponse {
 
 export interface TrendContentData {
   title: string;
-  url: string;
-  contentPreview: string;
+  url?: string;
+  metaUrl?: string;
+  myContent?: boolean;
+  contentPreview?: string;
 }
 
 export interface TrendContentResponse {
@@ -76,10 +80,10 @@ export interface ElectronAPI {
   generateImage: (prompt: string) => Promise<string>;
 
   // LLM 설정
-  getLLMSettings: () => Promise<any>; // TODO: AppConfig['llm'] 타입 적용 필요
-  saveLLMSettings: (settings: any) => Promise<void>;
+  getLLMSettings: () => Promise<AppConfig['llm']>;
+  saveLLMSettings: (settings: AppConfig['llm']) => Promise<void>;
   testLLMConfig: (config: { provider: string; apiKey: string; model?: string }) => Promise<{ success: boolean; error?: string }>;
-  generateTitles: (data: { systemPrompt: string; userPrompt: string }) => Promise<{ success: boolean; content?: string; titles?: string[]; error?: string }>;
+  generateTitles: (data: { systemPrompt: string; userPrompt: string }) => Promise<{ success: boolean; content?: string; titles?: string[]; error?: string; usage?: { promptTokens: number; completionTokens: number; totalTokens: number } }>;
 
   // 로그 관련
   sendLog: (level: string, message: string) => void;
@@ -117,9 +121,9 @@ export interface ElectronAPI {
   playwrightFill: (selector: string, value: string) => Promise<{ success: boolean; error?: string }>;
   playwrightWaitSelector: (selector: string, timeout?: number) => Promise<{ success: boolean; error?: string }>;
   playwrightWaitTimeout: (milliseconds: number) => Promise<{ success: boolean; error?: string }>;
-  playwrightEvaluate: (script: string) => Promise<{ success: boolean; result?: unknown; error?: string }>;
+  playwrightEvaluate: (script: string) => Promise<{ success: boolean; result?: any; error?: string }>;
   playwrightClickInFrames: (selector: string, frameUrlPattern?: string) => Promise<{ success: boolean; error?: string }>;
-  playwrightEvaluateInFrames: (script: string, frameUrlPattern?: string) => Promise<{ success: boolean; result?: unknown; error?: string }>;
+  playwrightEvaluateInFrames: (script: string, frameUrlPattern?: string) => Promise<{ success: boolean; result?: any; error?: string }>;
   playwrightType: (text: string, delay?: number) => Promise<{ success: boolean; error?: string }>;
   playwrightPress: (key: string) => Promise<{ success: boolean; error?: string }>;
   playwrightClickAt: (x: number, y: number) => Promise<{ success: boolean; error?: string }>;

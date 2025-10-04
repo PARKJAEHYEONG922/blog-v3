@@ -107,6 +107,22 @@ class PlaywrightService {
       // 새 페이지 생성
       this.page = await this.context.newPage();
 
+      // dialog 핸들러 등록 - 사용자가 직접 클릭할 수 있도록 30초 대기 후 자동 수락
+      this.page.on('dialog', async (dialog) => {
+        console.log(`📢 Dialog 감지: ${dialog.type()} - ${dialog.message()}`);
+        console.log('⏳ 사용자 응답 대기 중... (30초 후 자동 수락)');
+
+        // 30초 대기 - 사용자가 직접 버튼 클릭 가능
+        await new Promise(resolve => setTimeout(resolve, 30000));
+
+        try {
+          await dialog.accept(); // 30초 후 자동으로 "확인" 클릭
+          console.log('✅ Dialog 자동 수락됨');
+        } catch (error) {
+          console.log('ℹ️ Dialog가 이미 처리되었습니다 (사용자가 직접 클릭함)');
+        }
+      });
+
       // 자동화 탐지 방지
       await this.page.addInitScript(() => {
         Object.defineProperty(navigator, 'webdriver', { get: () => undefined });

@@ -126,6 +126,13 @@ ${blogContent}
           continue;
         }
 
+        // usage 정보 누적
+        if (response.usage) {
+          totalUsage.promptTokens += response.usage.promptTokens || 0;
+          totalUsage.completionTokens += response.usage.completionTokens || 0;
+          totalUsage.totalTokens += response.usage.totalTokens || 0;
+        }
+
         // generateTitles API는 content를 반환함
         const responseContent = response.content || '';
         

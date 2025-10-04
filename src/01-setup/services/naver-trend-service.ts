@@ -146,11 +146,11 @@ export class NaverTrendService {
         throw new Error(result.error);
       }
 
-      // TrendContentData를 TrendContent로 변환
+      // TrendContent 매핑 (metaUrl 또는 url 지원)
       return (result.contents || []).map(content => ({
-        metaUrl: content.url,
+        metaUrl: content.metaUrl || content.url || '',
         title: content.title,
-        myContent: false // TrendContentData에는 myContent가 없으므로 기본값 false
+        myContent: content.myContent || false
       }));
 
     } catch (error) {

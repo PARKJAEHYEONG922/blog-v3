@@ -331,9 +331,38 @@ ipcMain.handle('llm:save-settings', async (_event, settings: any) => {
   return true;
 });
 
-ipcMain.handle('llm:test-config', async (_event, config: any) => {
-  // TODO: API 테스트 로직은 별도 서비스로 분리 필요
-  return { success: true, message: 'API 테스트 성공' };
+ipcMain.handle('llm:test-config', async (_event, config: { provider: string; apiKey: string; model?: string }) => {
+  try {
+    const { LLMClientFactory } = await import('../shared/services/llm/llm-factory');
+
+    // provider별 기본 모델
+    const defaultModels: Record<string, string> = {
+      'gemini': 'gemini-2.0-flash-exp',
+      'openai': 'gpt-4o-mini',
+      'claude': 'claude-3-5-sonnet-20241022',
+      'runware': 'runware-sd3.5-turbo'
+    };
+
+    const llmConfig = {
+      provider: config.provider as 'gemini' | 'openai' | 'claude' | 'runware',
+      apiKey: config.apiKey,
+      model: config.model || defaultModels[config.provider] || ''
+    };
+
+    const client = LLMClientFactory.createClient(llmConfig);
+
+    // 간단한 테스트 메시지로 연결 확인
+    await client.generateText([
+      { role: 'user', content: 'test' }
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'API 연결 실패'
+    };
+  }
 });
 
 // 로그 IPC 핸들러
@@ -386,8 +415,12 @@ ipcMain.handle('llm:generate-titles', async (_event, data: { systemPrompt: strin
       { role: 'system', content: data.systemPrompt },
       { role: 'user', content: data.userPrompt }
     ]);
-    
-    return { success: true, content: response.content };
+
+    return {
+      success: true,
+      content: response.content,
+      usage: response.usage
+    };
 
   } catch (error) {
     handleError(error, '제목 생성 실패');

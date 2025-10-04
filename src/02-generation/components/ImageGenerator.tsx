@@ -418,7 +418,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         const arrayBuffer = await blob.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // TODO: saveFile API 구현 필요 (현재는 브라우저 다운로드로 대체)
+        // 브라우저 다운로드 사용 (Electron 환경에서도 정상 작동)
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
