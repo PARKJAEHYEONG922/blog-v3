@@ -1,30 +1,30 @@
 import { useState, useCallback } from 'react';
 
-export interface UseApiOptions {
-  onSuccess?: (data: any) => void;
+export interface UseApiOptions<T> {
+  onSuccess?: (data: T) => void;
   onError?: (error: Error) => void;
 }
 
-export interface UseApiReturn<T> {
+export interface UseApiReturn<T, TArgs extends unknown[] = unknown[]> {
   data: T | null;
   loading: boolean;
   error: Error | null;
-  execute: (...args: any[]) => Promise<T>;
+  execute: (...args: TArgs) => Promise<T>;
   reset: () => void;
 }
 
 /**
  * API 호출을 위한 훅
  */
-function useApi<T = any>(
-  apiFunction: (...args: any[]) => Promise<T>,
-  options: UseApiOptions = {}
-): UseApiReturn<T> {
+function useApi<T, TArgs extends unknown[] = unknown[]>(
+  apiFunction: (...args: TArgs) => Promise<T>,
+  options: UseApiOptions<T> = {}
+): UseApiReturn<T, TArgs> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const execute = useCallback(async (...args: any[]): Promise<T> => {
+  const execute = useCallback(async (...args: TArgs): Promise<T> => {
     try {
       setLoading(true);
       setError(null);

@@ -35,7 +35,13 @@ export interface AppConfig {
         size?: string;
       };
     };
-    testingStatus?: any;
+    testingStatus?: {
+      [provider: string]: {
+        success: boolean;
+        message: string;
+        timestamp: number;
+      };
+    };
   };
   naver: {
     cookies: string | null;
@@ -53,7 +59,7 @@ export interface AppConfig {
  * electron-store를 사용하여 모든 설정을 하나의 파일에서 관리
  */
 export class ConfigService {
-  private store: any; // electron-store 타입 이슈 회피
+  private store: any; // TODO: electron-store 타입 이슈
 
   constructor() {
     const { app } = require('electron');
@@ -104,14 +110,14 @@ export class ConfigService {
   /**
    * 전체 LLM 설정 가져오기
    */
-  getLLMSettings(): any {
+  getLLMSettings(): AppConfig['llm'] {
     return this.store.get('llm');
   }
 
   /**
    * 전체 LLM 설정 저장
    */
-  saveLLMSettings(settings: any): void {
+  saveLLMSettings(settings: AppConfig['llm']): void {
     this.store.set('llm', settings);
   }
 
