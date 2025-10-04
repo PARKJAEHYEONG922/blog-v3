@@ -127,85 +127,47 @@ export interface DocumentLoadResult {
 // Hook 반환 타입
 // ============================================
 
+/**
+ * useSetup 훅 반환 타입
+ * SetupContainer 컴포넌트에서 사용
+ */
 export interface UseSetupReturn {
-  // 문서 관련 상태
-  savedWritingStyles: SavedDocument[];
-  savedSeoGuides: SavedDocument[];
-  selectedWritingStyles: SavedDocument[];
-  selectedSeoGuide: SavedDocument | null;
-
-  // 키워드 & 트렌드 상태
+  // 상태
   mainKeyword: string;
   subKeywords: string;
-  selectedCategory: string;
-  trendKeywords: TrendKeyword[];
-  isLoadingTrends: boolean;
-
-  // 트렌드 분석 상태
-  trendAnalysisResult: TrendAnalysisResult | null;
-  isTrendModalOpen: boolean;
-  isTrendContentModalOpen: boolean;
-  isGenerating: boolean;
-  generationProgress: string;
-
-  // 제목 추천 상태
-  recommendedTitles: string[];
-  finalTitle: string;
-  isCategoryModalOpen: boolean;
-  isAnalyzing: boolean;
-  analysisProgress: TrendAnalysisProgress | null;
-
-  // 추가 상태 (SetupContainer에서 사용)
   blogContent: string;
   isGeneratingTitles: boolean;
   generatedTitles: string[];
   selectedTitle: string;
+  isGenerating: boolean;
   generationStep: string;
+  savedWritingStyles: SavedDocument[];
+  savedSeoGuides: SavedDocument[];
+  selectedWritingStyles: SavedDocument[];
+  selectedSeoGuide: SavedDocument | null;
   progressSectionRef: React.RefObject<HTMLDivElement>;
-  deleteDialog: { isOpen: boolean; docId: string; docType: string };
+  deleteDialog: { isOpen: boolean; docId: string; docName: string; type: 'writingStyle' | 'seoGuide' };
 
   // 상태 업데이트 함수
   setMainKeyword: (keyword: string) => void;
   setSubKeywords: (keywords: string) => void;
-  setSelectedCategory: (category: string) => void;
-  setFinalTitle: (title: string) => void;
-  setSelectedWritingStyles: (styles: SavedDocument[]) => void;
-  setSelectedSeoGuide: (guide: SavedDocument | null) => void;
-  setSavedWritingStyles: (styles: SavedDocument[]) => void;
-  setSavedSeoGuides: (guides: SavedDocument[]) => void;
-
-  // 추가 setter (SetupContainer에서 사용)
   setBlogContent: (content: string) => void;
   setSelectedTitle: (title: string) => void;
   setGeneratedTitles: (titles: string[]) => void;
-  setTrendAnalysisCache: (cache: any) => void;
+  setTrendAnalysisCache: (cache: TrendAnalysisCache | null) => void;
 
   // 비즈니스 로직 함수
-  handleFileUpload: (type: 'writingStyle' | 'seoGuide') => Promise<void>;
-  handleDeleteDocument: (id: string, type: 'writingStyle' | 'seoGuide') => Promise<void>;
-  handleManualUpload: (type: 'writingStyle' | 'seoGuide', name: string, content: string) => Promise<void>;
-  handleCategorySelect: (category: string) => void;
-  openTrendModal: () => void;
-  closeTrendModal: () => void;
-  handleTrendKeywordClick: (keyword: string) => void;
-  openTrendContentModal: () => void;
-  closeTrendContentModal: () => void;
-  handleTrendContentAnalysis: (selectedContents: TrendContent[]) => Promise<void>;
-  handleTitleRegenerate: () => Promise<void>;
-  handleGenerateContent: () => Promise<void>;
-  openCategoryModal: () => void;
-  closeCategoryModal: () => void;
-
-  // 추가 비즈니스 로직 (SetupContainer에서 사용)
-  handleUrlCrawl: (url: string) => Promise<void>;
-  toggleWritingStyle: (id: string) => void;
-  toggleSeoGuide: (id: string) => void;
-  openDeleteDialog: (id: string, type: string) => void;
+  handleUrlCrawl: (url: string) => Promise<{ title: string; contentLength: number } | null>;
+  handleFileUpload: (type: 'writingStyle' | 'seoGuide', file: File) => Promise<void>;
+  toggleWritingStyle: (doc: SavedDocument) => void;
+  toggleSeoGuide: (doc: SavedDocument) => void;
+  openDeleteDialog: (type: 'writingStyle' | 'seoGuide', docId: string, docName: string) => void;
   handleDeleteConfirm: () => Promise<void>;
   closeDeleteDialog: () => void;
   generateTitleRecommendations: () => Promise<void>;
   handleStartGeneration: () => Promise<void>;
-  handleFileUploaded: (type: 'writingStyle' | 'seoGuide', file: File) => Promise<void>;
+  handleFileUploaded: (content: string) => Promise<void>;
+  scrollToProgress: () => void;
 }
 
 // ============================================

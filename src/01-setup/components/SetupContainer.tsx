@@ -105,7 +105,9 @@ const Step1Setup: React.FC = () => {
             setTrendAnalysisCache({
               contents: result.crawledContents,
               mainKeyword: result.mainKeyword,
-              allTitles: result.allTitles
+              allTitles: result.allTitles,
+              subKeywords: result.subKeywords,
+              direction: result.contentDirection
             });
           }
 
