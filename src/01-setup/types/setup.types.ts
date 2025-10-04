@@ -106,7 +106,7 @@ export interface ContentGenerationParams {
 }
 
 export interface ImagePromptGenerationResult {
-  imagePrompts: string[];
+  imagePrompts: any[];  // ImagePrompt 객체 배열 (index, position, context, prompt)
   expectedImageCount: number;
   generatedImageCount: number;
   failed: boolean;

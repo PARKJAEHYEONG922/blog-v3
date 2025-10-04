@@ -93,6 +93,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteNaverCookies: () => ipcRenderer.invoke('naver:delete-cookies'),
   openNaverLogin: () => ipcRenderer.invoke('naver:open-login'),
   getNaverTrends: (category?: string, limit?: number, date?: string) => ipcRenderer.invoke('naver:get-trends', category, limit, date),
+
+  // Naver Account management
+  getNaverAccounts: () => ipcRenderer.invoke('naver:get-accounts'),
+  addNaverAccount: (account: any) => ipcRenderer.invoke('naver:add-account', account),
+  deleteNaverAccount: (accountId: string) => ipcRenderer.invoke('naver:delete-account', accountId),
+  getNaverPassword: (accountId: string) => ipcRenderer.invoke('naver:get-password', accountId),
+  saveNaverPassword: (accountId: string, password: string) => ipcRenderer.invoke('naver:save-password', accountId, password),
+  getNaverBoards: (accountId: string) => ipcRenderer.invoke('naver:get-boards', accountId),
+  saveNaverBoards: (accountId: string, boards: string[]) => ipcRenderer.invoke('naver:save-boards', accountId, boards),
+  getAllNaverBoards: () => ipcRenderer.invoke('naver:get-all-boards'),
   getTrendContents: (keyword: string, date: string, limit?: number) => ipcRenderer.invoke('naver:get-trend-contents', keyword, date, limit),
 
   // Settings

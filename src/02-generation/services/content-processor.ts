@@ -268,14 +268,22 @@ export class ContentProcessor {
   private static addImageNumbers(content: string): string {
     // 먼저 [이미지]를 (이미지)로 통일
     content = content.replace(/\[이미지\]/g, '(이미지)');
-    
+
+    // 붙어있는 (이미지)(이미지) 패턴만 줄바꿈으로 분리
+    // (이미지)(이미지)(이미지) 같은 경우를 위해 여러 번 적용
+    let prevContent = '';
+    while (prevContent !== content) {
+      prevContent = content;
+      content = content.replace(/\(이미지\)\(이미지\)/g, '(이미지)\n(이미지)');
+    }
+
     let imageIndex = 1;
-    
+
     // 모든 (이미지)를 순서대로 번호가 매겨진 형태로 변경
     content = content.replace(/\(이미지\)/g, () => {
       return `(이미지${imageIndex++})`;
     });
-    
+
     return content;
   }
 

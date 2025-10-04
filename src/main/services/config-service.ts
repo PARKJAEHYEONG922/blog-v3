@@ -1,6 +1,17 @@
 import Store from 'electron-store';
 
 /**
+ * 네이버 계정 정보
+ */
+export interface NaverAccount {
+  id: string;
+  username: string;
+  blogUrl?: string;
+  createdAt: string;
+  lastUsed?: number;
+}
+
+/**
  * 통합 설정 인터페이스
  */
 export interface AppConfig {
@@ -28,6 +39,9 @@ export interface AppConfig {
   };
   naver: {
     cookies: string | null;
+    accounts: NaverAccount[];
+    passwords: { [accountId: string]: string };
+    boards: { [accountId: string]: string[] };
   };
   app: {
     version: string;
@@ -42,8 +56,11 @@ export class ConfigService {
   private store: any; // electron-store 타입 이슈 회피
 
   constructor() {
+    const { app } = require('electron');
+
     this.store = new Store<AppConfig>({
       name: 'config',
+      cwd: app.getPath('userData'),  // 명시적으로 경로 지정
       defaults: {
         llm: {
           providerApiKeys: {
@@ -67,13 +84,19 @@ export class ConfigService {
           }
         },
         naver: {
-          cookies: null
+          cookies: null,
+          accounts: [],
+          passwords: {},
+          boards: {}
         },
         app: {
           version: '3.0.7'
         }
       }
     });
+
+    console.log('📦 ConfigService 초기화 완료');
+    console.log('📁 Config 파일 위치:', this.store.path);
   }
 
   // ==================== LLM 설정 ====================
@@ -150,6 +173,122 @@ export class ConfigService {
    */
   deleteNaverCookies(): void {
     this.store.set('naver.cookies', null);
+  }
+
+  // ========== 네이버 계정 관리 ==========
+
+  /**
+   * 네이버 계정 목록 가져오기
+   */
+  getNaverAccounts(): NaverAccount[] {
+    return this.store.get('naver.accounts') || [];
+  }
+
+  /**
+   * 네이버 계정 목록 저장
+   */
+  setNaverAccounts(accounts: NaverAccount[]): void {
+    this.store.set('naver.accounts', accounts);
+  }
+
+  /**
+   * 네이버 계정 추가
+   */
+  addNaverAccount(account: NaverAccount): NaverAccount[] {
+    const accounts = this.getNaverAccounts();
+    const existingIndex = accounts.findIndex(acc => acc.id === account.id);
+
+    let updated: NaverAccount[];
+    if (existingIndex !== -1) {
+      // 기존 계정 업데이트
+      updated = accounts.map((acc, idx) => idx === existingIndex ? account : acc);
+    } else {
+      // 새 계정 추가
+      updated = [...accounts, account];
+    }
+
+    this.setNaverAccounts(updated);
+    return updated;
+  }
+
+  /**
+   * 네이버 계정 삭제
+   */
+  deleteNaverAccount(accountId: string): NaverAccount[] {
+    const accounts = this.getNaverAccounts();
+    const updated = accounts.filter(acc => acc.id !== accountId);
+    this.setNaverAccounts(updated);
+
+    // 관련 비밀번호도 삭제
+    this.deleteNaverPassword(accountId);
+
+    // 관련 보드 정보도 삭제
+    this.deleteNaverBoards(accountId);
+
+    return updated;
+  }
+
+  // ========== 네이버 비밀번호 관리 ==========
+
+  /**
+   * 네이버 비밀번호 가져오기
+   */
+  getNaverPassword(accountId: string): string | null {
+    const passwords = this.store.get('naver.passwords') || {};
+    return passwords[accountId] || null;
+  }
+
+  /**
+   * 네이버 비밀번호 저장
+   */
+  setNaverPassword(accountId: string, password: string): void {
+    const passwords = this.store.get('naver.passwords') || {};
+    passwords[accountId] = password;
+    this.store.set('naver.passwords', passwords);
+  }
+
+  /**
+   * 네이버 비밀번호 삭제
+   */
+  deleteNaverPassword(accountId: string): void {
+    const passwords = this.store.get('naver.passwords') || {};
+    delete passwords[accountId];
+    this.store.set('naver.passwords', passwords);
+  }
+
+  // ========== 네이버 게시판 관리 ==========
+
+  /**
+   * 특정 계정의 게시판 목록 가져오기
+   */
+  getNaverBoards(accountId: string): string[] {
+    const boards = this.store.get('naver.boards') || {};
+    return boards[accountId] || [];
+  }
+
+  /**
+   * 특정 계정의 게시판 목록 저장
+   */
+  setNaverBoards(accountId: string, boardList: string[]): void {
+    const boards = this.store.get('naver.boards') || {};
+    boards[accountId] = boardList;
+    this.store.set('naver.boards', boards);
+  }
+
+  /**
+   * 특정 계정의 게시판 정보 삭제
+   */
+  deleteNaverBoards(accountId: string): void {
+    const boards = this.store.get('naver.boards') || {};
+    delete boards[accountId];
+    this.store.set('naver.boards', boards);
+  }
+
+  /**
+   * 전체 게시판 정보 가져오기
+   */
+  getAllNaverBoards(): { [accountId: string]: string[] } {
+    return this.store.get('naver.boards') || {};
   }
 
   // ==================== 앱 설정 ====================

@@ -37,10 +37,6 @@ class StorageServiceClass {
     SELECTED_WRITING_STYLES: 'selectedWritingStyles',
     SELECTED_SEO_GUIDE: 'selectedSeoGuideId',
     TREND_CACHE: 'trendAnalysisCache',
-    NAVER_ACCOUNTS: 'naverAccounts',
-    NAVER_PASSWORD_PREFIX: 'naverPassword_',
-    ACCOUNT_BOARDS: 'accountBoards',
-    NAVER_BOARDS_PREFIX: 'naverBoards_',
     SELECTED_TREND_CATEGORIES: 'naver-trend-selected-categories',
   } as const;
 
@@ -251,10 +247,9 @@ class StorageServiceClass {
   /**
    * 네이버 계정 목록 가져오기
    */
-  getNaverAccounts(): NaverAccount[] {
+  async getNaverAccounts(): Promise<NaverAccount[]> {
     try {
-      const data = localStorage.getItem(this.KEYS.NAVER_ACCOUNTS);
-      return data ? JSON.parse(data) : [];
+      return await window.electronAPI.getNaverAccounts();
     } catch (error) {
       handleError(error, '네이버 계정 로드 실패');
       return [];
@@ -263,58 +258,43 @@ class StorageServiceClass {
 
   /**
    * 네이버 계정 목록 저장
+   * @deprecated ConfigService를 통해 자동으로 관리됩니다
    */
-  saveNaverAccounts(accounts: NaverAccount[]): void {
-    try {
-      localStorage.setItem(this.KEYS.NAVER_ACCOUNTS, JSON.stringify(accounts));
-    } catch (error) {
-      handleError(error, '네이버 계정 저장 실패');
-    }
+  saveNaverAccounts(_accounts: NaverAccount[]): void {
+    // ConfigService에서 자동으로 관리됨
+    console.warn('saveNaverAccounts는 deprecated되었습니다. addNaverAccount를 사용하세요.');
   }
 
   /**
    * 네이버 계정 추가
    */
-  addNaverAccount(account: NaverAccount): NaverAccount[] {
-    const accounts = this.getNaverAccounts();
-    const existingIndex = accounts.findIndex(acc => acc.id === account.id);
-
-    let updated: NaverAccount[];
-    if (existingIndex !== -1) {
-      // 기존 계정 업데이트
-      updated = accounts.map((acc, idx) => idx === existingIndex ? account : acc);
-    } else {
-      // 새 계정 추가
-      updated = [...accounts, account];
+  async addNaverAccount(account: NaverAccount): Promise<NaverAccount[]> {
+    try {
+      return await window.electronAPI.addNaverAccount(account);
+    } catch (error) {
+      handleError(error, '네이버 계정 추가 실패');
+      return [];
     }
-
-    this.saveNaverAccounts(updated);
-    return updated;
   }
 
   /**
    * 네이버 계정 삭제
    */
-  deleteNaverAccount(accountId: string): NaverAccount[] {
-    const accounts = this.getNaverAccounts();
-    const updated = accounts.filter(acc => acc.id !== accountId);
-    this.saveNaverAccounts(updated);
-
-    // 관련 비밀번호도 삭제
-    this.deleteNaverPassword(accountId);
-
-    // 관련 보드 정보도 삭제
-    this.deleteAccountBoards(accountId);
-
-    return updated;
+  async deleteNaverAccount(accountId: string): Promise<NaverAccount[]> {
+    try {
+      return await window.electronAPI.deleteNaverAccount(accountId);
+    } catch (error) {
+      handleError(error, '네이버 계정 삭제 실패');
+      return [];
+    }
   }
 
   /**
    * 네이버 비밀번호 가져오기
    */
-  getNaverPassword(accountId: string): string | null {
+  async getNaverPassword(accountId: string): Promise<string | null> {
     try {
-      return localStorage.getItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`);
+      return await window.electronAPI.getNaverPassword(accountId);
     } catch (error) {
       handleError(error, '비밀번호 로드 실패');
       return null;
@@ -324,9 +304,9 @@ class StorageServiceClass {
   /**
    * 네이버 비밀번호 저장
    */
-  saveNaverPassword(accountId: string, password: string): void {
+  async saveNaverPassword(accountId: string, password: string): Promise<void> {
     try {
-      localStorage.setItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`, password);
+      await window.electronAPI.saveNaverPassword(accountId, password);
     } catch (error) {
       handleError(error, '비밀번호 저장 실패');
     }
@@ -335,9 +315,9 @@ class StorageServiceClass {
   /**
    * 네이버 비밀번호 삭제
    */
-  deleteNaverPassword(accountId: string): void {
+  async deleteNaverPassword(accountId: string): Promise<void> {
     try {
-      localStorage.removeItem(`${this.KEYS.NAVER_PASSWORD_PREFIX}${accountId}`);
+      await window.electronAPI.saveNaverPassword(accountId, '');
     } catch (error) {
       handleError(error, '비밀번호 삭제 실패');
     }
@@ -348,10 +328,9 @@ class StorageServiceClass {
   /**
    * 전체 계정 보드 정보 가져오기
    */
-  getAllAccountBoards(): {[accountId: string]: string[]} {
+  async getAllAccountBoards(): Promise<{[accountId: string]: string[]}> {
     try {
-      const data = localStorage.getItem(this.KEYS.ACCOUNT_BOARDS);
-      return data ? JSON.parse(data) : {};
+      return await window.electronAPI.getAllNaverBoards();
     } catch (error) {
       handleError(error, '계정 보드 정보 로드 실패');
       return {};
@@ -360,22 +339,19 @@ class StorageServiceClass {
 
   /**
    * 전체 계정 보드 정보 저장
+   * @deprecated ConfigService를 통해 자동으로 관리됩니다
    */
-  saveAllAccountBoards(boards: {[accountId: string]: string[]}): void {
-    try {
-      localStorage.setItem(this.KEYS.ACCOUNT_BOARDS, JSON.stringify(boards));
-    } catch (error) {
-      handleError(error, '계정 보드 정보 저장 실패');
-    }
+  saveAllAccountBoards(_boards: {[accountId: string]: string[]}): void {
+    // ConfigService에서 자동으로 관리됨
+    console.warn('saveAllAccountBoards는 deprecated되었습니다. saveAccountBoards를 사용하세요.');
   }
 
   /**
    * 특정 계정의 보드 목록 가져오기
    */
-  getAccountBoards(accountId: string): string[] {
+  async getAccountBoards(accountId: string): Promise<string[]> {
     try {
-      const data = localStorage.getItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`);
-      return data ? JSON.parse(data) : [];
+      return await window.electronAPI.getNaverBoards(accountId);
     } catch (error) {
       handleError(error, '보드 목록 로드 실패');
       return [];
@@ -385,14 +361,9 @@ class StorageServiceClass {
   /**
    * 특정 계정의 보드 목록 저장
    */
-  saveAccountBoards(accountId: string, boards: string[]): void {
+  async saveAccountBoards(accountId: string, boards: string[]): Promise<void> {
     try {
-      localStorage.setItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`, JSON.stringify(boards));
-
-      // accountBoards에도 업데이트
-      const allBoards = this.getAllAccountBoards();
-      allBoards[accountId] = boards;
-      this.saveAllAccountBoards(allBoards);
+      await window.electronAPI.saveNaverBoards(accountId, boards);
     } catch (error) {
       handleError(error, '보드 목록 저장 실패');
     }
@@ -401,14 +372,9 @@ class StorageServiceClass {
   /**
    * 특정 계정의 보드 정보 삭제
    */
-  deleteAccountBoards(accountId: string): void {
+  async deleteAccountBoards(accountId: string): Promise<void> {
     try {
-      localStorage.removeItem(`${this.KEYS.NAVER_BOARDS_PREFIX}${accountId}`);
-
-      // accountBoards에서도 삭제
-      const allBoards = this.getAllAccountBoards();
-      delete allBoards[accountId];
-      this.saveAllAccountBoards(allBoards);
+      await window.electronAPI.saveNaverBoards(accountId, []);
     } catch (error) {
       handleError(error, '보드 정보 삭제 실패');
     }

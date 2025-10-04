@@ -107,13 +107,13 @@ class ContentGenerationServiceClass {
   async generateImagePrompts(content: string, onStepChange: (step: string) => void): Promise<ImagePromptGenerationResult> {
     onStepChange('이미지 프롬프트 생성 중...');
 
-    let imagePrompts: string[] = [];
+    let imagePrompts: any[] = [];
 
     try {
       // 동적 import로 BlogWritingService 불러오기
       const { BlogWritingService } = await import('@/shared/services/content/blog-writing-service');
       const result = await BlogWritingService.generateImagePrompts(content);
-      imagePrompts = result.imagePrompts ? result.imagePrompts.map(p => p.prompt) : [];  // ImagePrompt[]를 string[]로 변환
+      imagePrompts = result.imagePrompts || [];  // 전체 ImagePrompt 객체 배열 유지
     } catch (error) {
       handleError(error, '이미지 프롬프트 생성 실패');
       imagePrompts = [];

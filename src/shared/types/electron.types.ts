@@ -47,6 +47,16 @@ export interface ElectronAPI {
   getNaverTrends: (category?: string, limit?: number, date?: string) => Promise<any>;
   getNaverCookies: () => Promise<any>;
   getTrendContents: (keyword: string, date: string, limit?: number) => Promise<any>;
+
+  // 네이버 계정 관리
+  getNaverAccounts: () => Promise<any[]>;
+  addNaverAccount: (account: any) => Promise<any[]>;
+  deleteNaverAccount: (accountId: string) => Promise<any[]>;
+  getNaverPassword: (accountId: string) => Promise<string | null>;
+  saveNaverPassword: (accountId: string, password: string) => Promise<void>;
+  getNaverBoards: (accountId: string) => Promise<string[]>;
+  saveNaverBoards: (accountId: string, boards: string[]) => Promise<void>;
+  getAllNaverBoards: () => Promise<{[key: string]: string[]}>;
   
   // Playwright 관련
   playwrightInitialize: () => Promise<{ success: boolean; error?: string }>;

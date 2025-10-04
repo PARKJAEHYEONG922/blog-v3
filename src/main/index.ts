@@ -489,6 +489,52 @@ ipcMain.handle('naver:delete-cookies', async () => {
   return true;
 });
 
+// ============= Naver Account Management =============
+
+// 네이버 계정 목록 가져오기
+ipcMain.handle('naver:get-accounts', async () => {
+  return configService.getNaverAccounts();
+});
+
+// 네이버 계정 추가
+ipcMain.handle('naver:add-account', async (_event, account: any) => {
+  return configService.addNaverAccount(account);
+});
+
+// 네이버 계정 삭제
+ipcMain.handle('naver:delete-account', async (_event, accountId: string) => {
+  return configService.deleteNaverAccount(accountId);
+});
+
+// 네이버 비밀번호 가져오기
+ipcMain.handle('naver:get-password', async (_event, accountId: string) => {
+  return configService.getNaverPassword(accountId);
+});
+
+// 네이버 비밀번호 저장
+ipcMain.handle('naver:save-password', async (_event, accountId: string, password: string) => {
+  configService.setNaverPassword(accountId, password);
+  return true;
+});
+
+// 네이버 게시판 목록 가져오기
+ipcMain.handle('naver:get-boards', async (_event, accountId: string) => {
+  return configService.getNaverBoards(accountId);
+});
+
+// 네이버 게시판 목록 저장
+ipcMain.handle('naver:save-boards', async (_event, accountId: string, boards: string[]) => {
+  configService.setNaverBoards(accountId, boards);
+  return true;
+});
+
+// 전체 게시판 정보 가져오기
+ipcMain.handle('naver:get-all-boards', async () => {
+  return configService.getAllNaverBoards();
+});
+
+// ============= Naver Login =============
+
 // 네이버 로그인 페이지 열기 (PlaywrightService 사용)
 ipcMain.handle('naver:open-login', async () => {
   try {

@@ -3,7 +3,6 @@
 import { PublishResult, WorkflowData, NaverCredentials, PublishOption } from '@/03-publish/types/publishing.types';
 import { NaverBlogAutomation } from './naver-automation';
 import type { LoginResult, PublishResult as AutomationPublishResult } from '@/shared/types/automation.types';
-import { StorageService } from '@/shared/services/storage/storage-service';
 import { handleError } from '@/shared/utils/error-handler';
 
 export interface NaverPublishConfig {
@@ -141,34 +140,28 @@ export class NaverPublisher {
   /**
    * 저장된 계정 목록 가져오기
    */
-  getSavedAccounts(): any[] {
-    return StorageService.getNaverAccounts();
+  async getSavedAccounts(): Promise<any[]> {
+    return await window.electronAPI.getNaverAccounts();
   }
 
   /**
    * 계정 정보 저장
    */
-  private saveCredentials(credentials: NaverCredentials): void {
+  private async saveCredentials(credentials: NaverCredentials): Promise<void> {
     try {
       const accountId = `naver_${credentials.username}`;
       const accountInfo = {
         id: accountId,
         username: credentials.username,
+        createdAt: new Date().toISOString(),
         lastUsed: Date.now()
       };
 
-      // 계정 목록 업데이트
-      let accounts = this.getSavedAccounts();
-      accounts = accounts.filter(acc => acc.id !== accountId);
-      accounts.unshift(accountInfo);
+      // 계정 추가 (비밀번호 제외)
+      await window.electronAPI.addNaverAccount(accountInfo);
 
-      // 최대 5개까지만 저장
-      if (accounts.length > 5) {
-        accounts = accounts.slice(0, 5);
-      }
-
-      StorageService.saveNaverAccounts(accounts);
-      StorageService.saveNaverPassword(accountId, credentials.password);
+      // 비밀번호 별도 저장
+      await window.electronAPI.saveNaverPassword(accountId, credentials.password);
 
       console.log('✅ 네이버 계정 정보 저장 완료');
     } catch (error) {
