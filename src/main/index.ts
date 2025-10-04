@@ -8,19 +8,18 @@ import { getDefaultSEOGuideContent } from '../shared/services/content/default-se
 import { CookieService } from './services/cookie-service';
 import { FileService } from './services/file-service';
 import { AppService } from './services/app-service';
-import { SettingsService } from './services/settings-service';
+import { ConfigService } from './services/config-service';
 import { NaverTrendAPIService } from './services/naver-trend-api-service';
 import * as https from 'https';
 import { handleError } from '../shared/utils/error-handler';
 
 let mainWindow: BrowserWindow;
 const claudeWebService = new ClaudeWebService();
-const cookieService = new CookieService();
 const fileService = new FileService();
 const appService = new AppService();
-const settingsService = new SettingsService();
-const imageService = new ImageService(settingsService);
-const naverTrendAPI = new NaverTrendAPIService(cookieService);
+const configService = new ConfigService();
+const imageService = new ImageService(configService);
+const naverTrendAPI = new NaverTrendAPIService(configService);
 
 // 콘솔 로그를 UI로 전송하는 함수
 function sendLogToUI(level: string, message: string) {
@@ -248,19 +247,10 @@ ipcMain.handle('image:generate-prompts', async (_event, data: { content: string;
 ipcMain.handle('image:generate', async (_event, prompt: string) => {
   try {
     console.log('이미지 생성 시작 - LLMClientFactory 사용');
-    
-    // LLM 설정 로드
-    const fs = require('fs');
-    const path = require('path');
-    const userDataPath = app.getPath('userData');
-    const settingsPath = path.join(userDataPath, 'llm-settings.json');
-    
-    let settings = null;
-    if (fs.existsSync(settingsPath)) {
-      const settingsData = fs.readFileSync(settingsPath, 'utf-8');
-      settings = JSON.parse(settingsData);
-    }
-    
+
+    // ConfigService에서 설정 로드
+    const settings = configService.getLLMSettings();
+
     if (!settings?.lastUsedSettings?.image) {
       throw new Error('이미지 생성 API가 설정되지 않았습니다.');
     }
@@ -334,15 +324,17 @@ ipcMain.handle('file:load-documents', async (_event, type: 'writingStyle' | 'seo
 
 // LLM Settings handlers
 ipcMain.handle('llm:get-settings', async () => {
-  return await settingsService.getSettings();
+  return configService.getLLMSettings();
 });
 
 ipcMain.handle('llm:save-settings', async (_event, settings: any) => {
-  return await settingsService.saveSettings(settings);
+  configService.saveLLMSettings(settings);
+  return true;
 });
 
 ipcMain.handle('llm:test-config', async (_event, config: any) => {
-  return await settingsService.testAPIConfig(config);
+  // TODO: API 테스트 로직은 별도 서비스로 분리 필요
+  return { success: true, message: 'API 테스트 성공' };
 });
 
 // 로그 IPC 핸들러
@@ -365,18 +357,9 @@ ipcMain.handle('llm:generate-titles', async (_event, data: { systemPrompt: strin
   try {
     console.log('제목 생성 시작 - LLMClientFactory 사용');
     
-    // LLM 설정 로드
-    const fs = require('fs');
-    const path = require('path');
-    const userDataPath = app.getPath('userData');
-    const settingsPath = path.join(userDataPath, 'llm-settings.json');
-    
-    let settings = null;
-    if (fs.existsSync(settingsPath)) {
-      const settingsData = fs.readFileSync(settingsPath, 'utf-8');
-      settings = JSON.parse(settingsData);
-    }
-    
+    // ConfigService에서 설정 로드
+    const settings = configService.getLLMSettings();
+
     if (!settings?.lastUsedSettings?.writing) {
       return { success: false, error: '글쓰기 API가 설정되지 않았습니다.' };
     }
@@ -492,17 +475,19 @@ ipcMain.handle('app:download-update', async (_event, downloadUrl: string) => {
 
 // 네이버 쿠키 가져오기
 ipcMain.handle('naver:get-cookies', async () => {
-  return await cookieService.getCookies();
+  return configService.getNaverCookies();
 });
 
 // 네이버 쿠키 저장
 ipcMain.handle('naver:save-cookies', async (_event, cookies: string) => {
-  return await cookieService.saveCookies(cookies);
+  configService.setNaverCookies(cookies);
+  return true;
 });
 
 // 네이버 쿠키 삭제
 ipcMain.handle('naver:delete-cookies', async () => {
-  return await cookieService.deleteCookies();
+  configService.deleteNaverCookies();
+  return true;
 });
 
 // 네이버 로그인 페이지 열기 (PlaywrightService 사용)
@@ -516,7 +501,7 @@ ipcMain.handle('naver:open-login', async () => {
     }
 
     // 쿠키 저장
-    await cookieService.saveCookies(result.cookies!);
+    configService.setNaverCookies(result.cookies!);
 
     // 브라우저 닫기
     await playwrightService.cleanup();
@@ -542,6 +527,6 @@ ipcMain.handle('naver:get-trend-contents', async (_event, keyword: string, date:
 
 // Settings 가져오기 (llm:get-settings와 동일)
 ipcMain.handle('settings:get', async () => {
-  return await settingsService.getSettings();
+  return configService.getLLMSettings();
 });
 

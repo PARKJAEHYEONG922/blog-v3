@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",
+    "electron-store": "^11.0.0",
     "google-trends-api": "^4.9.2",
     "marked": "^9.0.0",
     "playwright": "^1.40.0",

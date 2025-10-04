@@ -1,5 +1,5 @@
 import * as https from 'https';
-import { CookieService } from './cookie-service';
+import { ConfigService } from './config-service';
 import { handleError } from '../../shared/utils/error-handler';
 
 /**
@@ -42,10 +42,10 @@ export interface ContentAPIResponse {
  * 네이버 트렌드 API 서비스
  */
 export class NaverTrendAPIService {
-  private cookieService: CookieService;
+  private configService: ConfigService;
 
-  constructor(cookieService: CookieService) {
-    this.cookieService = cookieService;
+  constructor(configService: ConfigService) {
+    this.configService = configService;
   }
 
   /**
@@ -54,7 +54,7 @@ export class NaverTrendAPIService {
   async getTrends(category?: string, limit: number = 20, date?: string): Promise<TrendAPIResponse> {
     try {
       // 쿠키 확인
-      const cookies = await this.cookieService.getCookies();
+      const cookies = this.configService.getNaverCookies();
       if (!cookies) {
         return { needsLogin: true };
       }
@@ -113,7 +113,7 @@ export class NaverTrendAPIService {
 
                 if (res.statusCode === 401 || res.statusCode === 403) {
                   // 쿠키 만료
-                  await this.cookieService.deleteCookies();
+                  this.configService.deleteNaverCookies();
                   console.log('✅ 만료된 쿠키 삭제');
                   resolve({ needsLogin: true });
                   return;
@@ -174,7 +174,7 @@ export class NaverTrendAPIService {
       console.log('🔍 트렌드 콘텐츠 요청:', { keyword, date, limit });
 
       // 쿠키 확인
-      const cookies = await this.cookieService.getCookies();
+      const cookies = this.configService.getNaverCookies();
       if (!cookies) {
         console.log('❌ 쿠키가 없습니다!');
         return { needsLogin: true };
@@ -212,7 +212,7 @@ export class NaverTrendAPIService {
 
                 if (res.statusCode === 401 || res.statusCode === 403) {
                   // 쿠키 만료
-                  await this.cookieService.deleteCookies();
+                  this.configService.deleteNaverCookies();
                   console.log('✅ 만료된 쿠키 삭제');
                   resolve({ needsLogin: true });
                   return;

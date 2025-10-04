@@ -3,14 +3,14 @@
  * 이미지 프롬프트 생성 및 이미지 생성을 담당하는 메인 프로세스 서비스
  * 보안을 위해 API 키 처리는 메인 프로세스에서만 수행
  */
-import { SettingsService } from './settings-service';
+import { ConfigService } from './config-service';
 import { handleError } from '../../shared/utils/error-handler';
 
 export class ImageService {
-  private settingsService: SettingsService;
+  private configService: ConfigService;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(configService: ConfigService) {
+    this.configService = configService;
   }
 
   /**
@@ -21,8 +21,8 @@ export class ImageService {
     try {
       console.log(`🎨 이미지 프롬프트 생성 시작 (${imageCount}개)`);
 
-      // LLM 설정 로드
-      const settings = await this.settingsService.getSettings();
+      // ConfigService에서 설정 로드
+      const settings = this.configService.getLLMSettings();
       if (!settings?.lastUsedSettings?.writing) {
         throw new Error('글쓰기 API가 설정되지 않았습니다.');
       }
