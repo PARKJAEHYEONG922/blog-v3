@@ -77,9 +77,10 @@ ${blogContent}
   /**
    * 이미지 프롬프트 생성
    */
-  static async generateImagePrompts(blogContent: string): Promise<ImagePromptResult> {
+  static async generateImagePrompts(blogContent: string, onProgress?: (step: string) => void): Promise<ImagePromptResult> {
     try {
       console.log('🎨 이미지 프롬프트 생성 시작');
+      onProgress?.('🎨 이미지 프롬프트 생성 시작');
 
       // 글쓰기 AI 설정 확인 (IPC 통신 사용)
       const llmSettings = await window.electronAPI?.getLLMSettings?.();
@@ -107,10 +108,13 @@ ${blogContent}
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         console.log(`🔄 이미지 프롬프트 생성 시도 ${attempt}/${maxRetries}`);
-        
+        onProgress?.(`🔄 이미지 프롬프트 생성 시도 ${attempt}/${maxRetries}`);
+
         const prompt = this.generateImagePromptRequest(blogContent, expectedImageCount);
 
         console.log('📝 이미지 프롬프트 요청 생성 완료');
+        console.log('🎨 이미지 프롬프트 API 호출 중...');
+        onProgress?.('🎨 이미지 프롬프트 API 호출 중...');
 
         // IPC 통신으로 제목 생성 API 활용 (시스템 프롬프트 없이 사용)
         const response = await window.electronAPI.generateTitles({
@@ -149,6 +153,7 @@ ${blogContent}
         try {
           const cleanedResponse = responseContent.trim();
           console.log('🔍 AI 원본 응답 (처음 200자):', cleanedResponse.substring(0, 200));
+          onProgress?.('📝 AI 응답 파싱 중...');
           
           // 마크다운 코드 블록 제거
           let jsonContent = cleanedResponse;
@@ -216,7 +221,8 @@ ${blogContent}
         if (imagePrompts.length === expectedImageCount) {
           console.log('✅ 이미지 프롬프트 생성 성공 - 개수 일치!');
           console.log('📊 총 토큰 사용량:', totalUsage);
-          
+          onProgress?.('✅ 이미지 프롬프트 생성 완료!');
+
           return {
             success: true,
             imagePrompts,

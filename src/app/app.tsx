@@ -79,7 +79,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
         <div className="max-w-7xl mx-auto px-6">
@@ -110,17 +110,16 @@ const AppContent: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-3">
-              <Button
-                variant="ghost"
+              <button
                 onClick={() => setShowLogs(!showLogs)}
                 className={`inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${showLogs
                     ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 hover:bg-emerald-600'
-                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 hover:-translate-y-0.5 shadow-sm'
+                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 hover:-translate-y-0.5 shadow-sm'
                   }`}
               >
                 <span>📝</span>
                 <span>로그</span>
-              </Button>
+              </button>
               <button
                 onClick={() => setShowLLMSettings(true)}
                 className={`inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${showLLMSettings
@@ -138,7 +137,7 @@ const AppContent: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-hidden flex">
-        <div className={`${showLogs ? 'flex-1' : 'w-full'} overflow-y-auto`}>
+        <div className={`${showLogs ? 'mr-80' : ''} w-full overflow-y-auto`}>
           <div className="h-full">
             <ErrorBoundary>
               <Suspense fallback={<LoadingFallback message="컴포넌트 로딩 중..." fullScreen />}>
@@ -148,8 +147,10 @@ const AppContent: React.FC = () => {
             </ErrorBoundary>
           </div>
         </div>
-        <LogPanel isVisible={showLogs} />
       </main>
+
+      {/* Fixed Log Panel */}
+      <LogPanel isVisible={showLogs} />
 
       {/* LLM Settings Modal */}
       {showLLMSettings && (

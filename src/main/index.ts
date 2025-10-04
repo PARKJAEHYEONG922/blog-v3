@@ -383,7 +383,7 @@ ipcMain.on('log:add', (_event, level: string, message: string) => {
 // IPC handler for title generation via API
 ipcMain.handle('llm:generate-titles', async (_event, data: { systemPrompt: string; userPrompt: string }) => {
   try {
-    console.log('제목 생성 시작 - LLMClientFactory 사용');
+    console.log('텍스트 생성 시작 - LLMClientFactory 사용');
     
     // ConfigService에서 설정 로드
     const settings = configService.getLLMSettings();
