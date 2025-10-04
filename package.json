@@ -8,7 +8,8 @@
     "build": "webpack --mode production && electron-builder",
     "build:quick": "webpack --mode development",
     "start:prod": "cross-env NODE_ENV=production electron dist/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
   },
   "keywords": [
     "blog",
@@ -29,6 +30,8 @@
     "electron": "38.1.1",
     "electron-builder": "^23.6.0",
     "html-webpack-plugin": "^5.6.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3",
     "nodemon": "^3.1.10",
     "sharp": "^0.34.4",
     "style-loader": "^3.3.4",
@@ -89,5 +92,10 @@
       "owner": "PARKJAEHYEONG922",
       "repo": "blog-automation-v2"
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "tsc --noEmit"
+    ]
   }
 }
