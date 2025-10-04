@@ -36,10 +36,14 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     image: { provider: 'gemini', model: 'gemini-2.5-flash-image-preview', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' }
   });
 
-  // 실제 적용된 설정 (사용자가 저장한 기본 설정값)
-  const [appliedSettings, setAppliedSettings] = useState<LLMSettings>({
-    writing: { provider: 'gemini', model: '', apiKey: '' },
-    image: { provider: 'gemini', model: '', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' }
+  // 마지막 사용 설정 (provider, model, style/quality/size만 저장)
+  // API 키는 providerApiKeys에서 조회
+  const [lastUsedSettings, setLastUsedSettings] = useState<{
+    writing: { provider: string; model: string };
+    image: { provider: string; model: string; style?: string; quality?: string; size?: string };
+  }>({
+    writing: { provider: 'gemini', model: '' },
+    image: { provider: 'gemini', model: '', style: 'photographic', quality: 'high', size: '1024x1024' }
   });
 
   // API 키 테스트 상태
@@ -56,28 +60,43 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     const loadSettings = async () => {
       try {
         const cachedData = await window.electronAPI?.getLLMSettings?.();
-        if (cachedData && cachedData.settings) {
-          // 저장된 설정이 있으면 그대로 사용
-          setSettings(cachedData.settings);
-          const appliedSettingsData = cachedData.appliedSettings || { writing: { provider: '', model: '', apiKey: '' }, image: { provider: '', model: '', apiKey: '' } };
-          setAppliedSettings(appliedSettingsData);
-          setProviderApiKeys(cachedData.providerApiKeys || { claude: '', openai: '', gemini: '' });
-          
-          // appliedSettings가 있으면 현재 settings에도 반영 (UI 드롭박스 선택을 위해)
-          if (appliedSettingsData.writing.provider || appliedSettingsData.image.provider) {
-            const mergedSettings = { ...cachedData.settings };
-            
-            // writing 적용 설정이 있으면 현재 설정에 반영
-            if (appliedSettingsData.writing.provider) {
-              mergedSettings.writing = { ...appliedSettingsData.writing };
-            }
-            
-            // image 적용 설정이 있으면 현재 설정에 반영
-            if (appliedSettingsData.image.provider) {
-              mergedSettings.image = { ...appliedSettingsData.image };
-            }
-            
-            setSettings(mergedSettings);
+        if (cachedData) {
+          // Provider별 API 키 로드
+          setProviderApiKeys(cachedData.providerApiKeys || { claude: '', openai: '', gemini: '', runware: '' });
+
+          // 마지막 사용 설정 로드
+          const lastUsed = cachedData.lastUsedSettings || {
+            writing: { provider: '', model: '' },
+            image: { provider: '', model: '', style: 'photographic', quality: 'high', size: '1024x1024' }
+          };
+          setLastUsedSettings(lastUsed);
+
+          // UI에 마지막 사용 설정 반영 (provider, model만)
+          if (lastUsed.writing.provider) {
+            const writingApiKey = cachedData.providerApiKeys?.[lastUsed.writing.provider as keyof ProviderApiKeys] || '';
+            setSettings(prev => ({
+              ...prev,
+              writing: {
+                provider: lastUsed.writing.provider,
+                model: lastUsed.writing.model,
+                apiKey: writingApiKey
+              }
+            }));
+          }
+
+          if (lastUsed.image.provider) {
+            const imageApiKey = cachedData.providerApiKeys?.[lastUsed.image.provider as keyof ProviderApiKeys] || '';
+            setSettings(prev => ({
+              ...prev,
+              image: {
+                provider: lastUsed.image.provider,
+                model: lastUsed.image.model,
+                apiKey: imageApiKey,
+                style: lastUsed.image.style || 'photographic',
+                quality: lastUsed.image.quality || 'high',
+                size: lastUsed.image.size || '1024x1024'
+              }
+            }));
           }
         }
       } catch (error) {
@@ -229,19 +248,26 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
           detail: { category, provider, model }
         }));
         
-        // 테스트 성공한 설정을 appliedSettings에 반영
-        const newAppliedSettings = {
-          ...appliedSettings,
-          [category]: settings[category]
+        // 테스트 성공한 설정을 lastUsedSettings에 반영 (API 키 제외)
+        const { apiKey, ...settingsWithoutKey } = settings[category];
+        const newLastUsedSettings = {
+          ...lastUsedSettings,
+          [category]: settingsWithoutKey
         };
-        setAppliedSettings(newAppliedSettings);
-        
+        setLastUsedSettings(newLastUsedSettings);
+
+        // Provider별 API 키 업데이트
+        const newProviderApiKeys = {
+          ...providerApiKeys,
+          [provider]: apiKey
+        };
+        setProviderApiKeys(newProviderApiKeys);
+
         // 파일에도 자동 저장
         try {
           await window.electronAPI?.saveLLMSettings?.({
-            settings,
-            appliedSettings: newAppliedSettings,
-            providerApiKeys,
+            lastUsedSettings: newLastUsedSettings,
+            providerApiKeys: newProviderApiKeys,
             testingStatus
           });
         } catch (error) {
@@ -288,10 +314,14 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     };
     setSettings(newSettings);
 
-    // 적용된 설정에서도 제거
-    const newAppliedSettings = { ...appliedSettings };
-    newAppliedSettings[category] = { provider: 'gemini', model: '', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' };
-    setAppliedSettings(newAppliedSettings);
+    // 마지막 사용 설정 초기화
+    const newLastUsedSettings = { ...lastUsedSettings };
+    if (category === 'image') {
+      newLastUsedSettings[category] = { provider: 'gemini', model: '', style: 'photographic', quality: 'high', size: '1024x1024' };
+    } else {
+      newLastUsedSettings[category] = { provider: 'gemini', model: '' };
+    }
+    setLastUsedSettings(newLastUsedSettings);
 
     // 테스트 상태 초기화
     setTestingStatus(prev => ({
@@ -352,8 +382,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
   const saveSettings = async () => {
     try {
       await window.electronAPI?.saveLLMSettings?.({
-        settings,
-        appliedSettings,
+        lastUsedSettings,
         providerApiKeys,
         testingStatus
       });
@@ -541,7 +570,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                 )}
 
                 {/* 현재 적용된 설정 */}
-                {appliedSettings.writing.provider && (
+                {lastUsedSettings.writing.provider && (
                   <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl mt-6 shadow-sm">
                     <h4 className="font-semibold text-sm text-blue-800 mb-3 m-0 flex items-center space-x-2">
                       <span>⚙️</span>
@@ -550,47 +579,47 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                       <div>
                         <span className="text-slate-600 block mb-1">제공자</span>
-                        <span className="font-semibold text-blue-700">{appliedSettings.writing.provider.toUpperCase()}</span>
+                        <span className="font-semibold text-blue-700">{lastUsedSettings.writing.provider.toUpperCase()}</span>
                       </div>
                       <div>
                         <span className="text-slate-600 block mb-1">모델</span>
-                        <span className="font-semibold text-blue-700">{appliedSettings.writing.model || '미선택'}</span>
+                        <span className="font-semibold text-blue-700">{lastUsedSettings.writing.model || '미선택'}</span>
                       </div>
                       <div>
                         <span className="text-slate-600 block mb-1">API 키</span>
                         <div className={`flex items-center space-x-1 font-semibold ${
-                          appliedSettings.writing.apiKey ? 'text-emerald-600' : 'text-red-500'
+                          providerApiKeys[lastUsedSettings.writing.provider as keyof ProviderApiKeys] ? 'text-emerald-600' : 'text-red-500'
                         }`}>
-                          <span>{appliedSettings.writing.apiKey ? '🔑' : '🔒'}</span>
-                          <span>{appliedSettings.writing.apiKey ? '설정됨' : '미설정'}</span>
+                          <span>{providerApiKeys[lastUsedSettings.writing.provider as keyof ProviderApiKeys] ? '🔑' : '🔒'}</span>
+                          <span>{providerApiKeys[lastUsedSettings.writing.provider as keyof ProviderApiKeys] ? '설정됨' : '미설정'}</span>
                         </div>
                       </div>
                       <div>
                         <span className="text-slate-600 block mb-1">연결 상태</span>
                         <div className={`flex items-center space-x-1 font-semibold ${
-                          testingStatus.writing?.success || (appliedSettings.writing.provider && appliedSettings.writing.apiKey) 
-                            ? 'text-emerald-600' 
-                            : testingStatus.writing?.message && !testingStatus.writing?.success 
-                            ? 'text-red-500' 
+                          testingStatus.writing?.success || (lastUsedSettings.writing.provider && providerApiKeys[lastUsedSettings.writing.provider as keyof ProviderApiKeys])
+                            ? 'text-emerald-600'
+                            : testingStatus.writing?.message && !testingStatus.writing?.success
+                            ? 'text-red-500'
                             : 'text-slate-500'
                         }`}>
                           <span>
-                            {testingStatus.writing?.testing 
-                              ? '🔄' 
-                              : testingStatus.writing?.success 
-                              ? '✅' 
-                              : (appliedSettings.writing.provider && appliedSettings.writing.apiKey)
-                              ? '✅' 
+                            {testingStatus.writing?.testing
+                              ? '🔄'
+                              : testingStatus.writing?.success
+                              ? '✅'
+                              : (lastUsedSettings.writing.provider && providerApiKeys[lastUsedSettings.writing.provider as keyof ProviderApiKeys])
+                              ? '✅'
                               : testingStatus.writing?.message && !testingStatus.writing?.success
-                              ? '❌' 
+                              ? '❌'
                               : '⚪'}
                           </span>
                           <span>
-                            {testingStatus.writing?.testing 
+                            {testingStatus.writing?.testing
                               ? '테스트 중...'
-                              : testingStatus.writing?.success 
+                              : testingStatus.writing?.success
                               ? '연결됨'
-                              : (appliedSettings.writing.provider && appliedSettings.writing.apiKey)
+                              : (lastUsedSettings.writing.provider && providerApiKeys[lastUsedSettings.writing.provider as keyof ProviderApiKeys])
                               ? '연결됨'
                               : testingStatus.writing?.message && !testingStatus.writing?.success
                               ? '연결 실패'
@@ -974,7 +1003,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                 )}
 
                 {/* 현재 적용된 설정 */}
-                {appliedSettings.image.provider && (
+                {lastUsedSettings.image.provider && (
                   <div className="p-5 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl mt-6 shadow-sm">
                     <h4 className="font-semibold text-sm text-purple-800 mb-3 m-0 flex items-center space-x-2">
                       <span>⚙️</span>
@@ -983,47 +1012,47 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                       <div>
                         <span className="text-slate-600 block mb-1">제공자</span>
-                        <span className="font-semibold text-purple-700">{appliedSettings.image.provider.toUpperCase()}</span>
+                        <span className="font-semibold text-purple-700">{lastUsedSettings.image.provider.toUpperCase()}</span>
                       </div>
                       <div>
                         <span className="text-slate-600 block mb-1">모델</span>
-                        <span className="font-semibold text-purple-700">{appliedSettings.image.model || '미선택'}</span>
+                        <span className="font-semibold text-purple-700">{lastUsedSettings.image.model || '미선택'}</span>
                       </div>
                       <div>
                         <span className="text-slate-600 block mb-1">API 키</span>
                         <div className={`flex items-center space-x-1 font-semibold ${
-                          appliedSettings.image.apiKey ? 'text-emerald-600' : 'text-red-500'
+                          providerApiKeys[lastUsedSettings.image.provider as keyof ProviderApiKeys] ? 'text-emerald-600' : 'text-red-500'
                         }`}>
-                          <span>{appliedSettings.image.apiKey ? '🔑' : '🔒'}</span>
-                          <span>{appliedSettings.image.apiKey ? '설정됨' : '미설정'}</span>
+                          <span>{providerApiKeys[lastUsedSettings.image.provider as keyof ProviderApiKeys] ? '🔑' : '🔒'}</span>
+                          <span>{providerApiKeys[lastUsedSettings.image.provider as keyof ProviderApiKeys] ? '설정됨' : '미설정'}</span>
                         </div>
                       </div>
                       <div>
                         <span className="text-slate-600 block mb-1">연결 상태</span>
                         <div className={`flex items-center space-x-1 font-semibold ${
-                          testingStatus.image?.success || (appliedSettings.image.provider && appliedSettings.image.apiKey) 
-                            ? 'text-emerald-600' 
-                            : testingStatus.image?.message && !testingStatus.image?.success 
-                            ? 'text-red-500' 
+                          testingStatus.image?.success || (lastUsedSettings.image.provider && providerApiKeys[lastUsedSettings.image.provider as keyof ProviderApiKeys])
+                            ? 'text-emerald-600'
+                            : testingStatus.image?.message && !testingStatus.image?.success
+                            ? 'text-red-500'
                             : 'text-slate-500'
                         }`}>
                           <span>
-                            {testingStatus.image?.testing 
-                              ? '🔄' 
-                              : testingStatus.image?.success 
-                              ? '✅' 
-                              : (appliedSettings.image.provider && appliedSettings.image.apiKey)
-                              ? '✅' 
+                            {testingStatus.image?.testing
+                              ? '🔄'
+                              : testingStatus.image?.success
+                              ? '✅'
+                              : (lastUsedSettings.image.provider && providerApiKeys[lastUsedSettings.image.provider as keyof ProviderApiKeys])
+                              ? '✅'
                               : testingStatus.image?.message && !testingStatus.image?.success
-                              ? '❌' 
+                              ? '❌'
                               : '⚪'}
                           </span>
                           <span>
-                            {testingStatus.image?.testing 
+                            {testingStatus.image?.testing
                               ? '테스트 중...'
-                              : testingStatus.image?.success 
+                              : testingStatus.image?.success
                               ? '연결됨'
-                              : (appliedSettings.image.provider && appliedSettings.image.apiKey)
+                              : (lastUsedSettings.image.provider && providerApiKeys[lastUsedSettings.image.provider as keyof ProviderApiKeys])
                               ? '연결됨'
                               : testingStatus.image?.message && !testingStatus.image?.success
                               ? '연결 실패'

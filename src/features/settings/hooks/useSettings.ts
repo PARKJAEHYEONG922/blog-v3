@@ -11,13 +11,28 @@ export interface LLMConfig {
   size?: string;
 }
 
+// 마지막 사용 설정 (API 키 제외)
+export interface LastUsedConfig {
+  writing: {
+    provider: string;
+    model: string;
+  };
+  image: {
+    provider: string;
+    model: string;
+    style?: string;
+    quality?: string;
+    size?: string;
+  };
+}
+
 export interface LLMSettings {
   writing: LLMConfig;
   image: LLMConfig;
 }
 
 export interface LLMSettingsData {
-  appliedSettings: LLMSettings;
+  lastUsedSettings: LastUsedConfig;
   providerApiKeys: {
     openai: string;
     claude: string;
@@ -97,12 +112,12 @@ export const useSettings = () => {
   }, []);
 
   const getModelStatus = useCallback(() => {
-    if (!settingsData) {
+    if (!settingsData?.lastUsedSettings) {
       return { writing: '미설정', image: '미설정' };
     }
 
-    const writing = settingsData.appliedSettings.writing.model || '미설정';
-    const image = settingsData.appliedSettings.image.model || '미설정';
+    const writing = settingsData.lastUsedSettings.writing?.model || '미설정';
+    const image = settingsData.lastUsedSettings.image?.model || '미설정';
 
     return { writing, image };
   }, [settingsData]);
@@ -113,8 +128,8 @@ export const useSettings = () => {
   }, [loadSettings]);
 
   return {
-    settings: settingsData?.appliedSettings, // 레거시 호환성
-    settingsData, // 새로운 전체 데이터
+    settings: settingsData?.lastUsedSettings,
+    settingsData,
     isLoading,
     isTesting,
     loadSettings,

@@ -567,5 +567,101 @@ chore: 빌드/설정 변경
 
 ---
 
-**Last Updated**: 2025-10-03
+---
+
+## 🔧 다음 작업: API 키 중복 저장 제거 (2025-10-04)
+
+### 문제점 발견
+
+현재 `llm-settings.json` 구조에서 **API 키가 중복 저장**되고 있음:
+
+```json
+{
+  "providerApiKeys": {
+    "gemini": "AIza...",
+    "openai": "sk-...",
+    "claude": "sk-ant-...",
+    "runware": "..."
+  },
+  "appliedSettings": {
+    "writing": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash-exp",
+      "apiKey": "AIza..."  // ← 중복!
+    },
+    "image": {
+      "provider": "openai",
+      "model": "dall-e-3",
+      "apiKey": "sk-...",  // ← 중복!
+      "style": "photographic",
+      "quality": "high",
+      "size": "1024x1024"
+    }
+  }
+}
+```
+
+### 개선 방안
+
+**목표 구조:**
+```json
+{
+  "providerApiKeys": {
+    "gemini": "AIza...",
+    "openai": "sk-...",
+    "claude": "sk-ant-...",
+    "runware": "..."
+  },
+  "lastUsedSettings": {
+    "writing": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash-exp"
+    },
+    "image": {
+      "provider": "openai",
+      "model": "dall-e-3",
+      "style": "photographic",
+      "quality": "high",
+      "size": "1024x1024"
+    }
+  }
+}
+```
+
+**핵심 변경:**
+1. ✅ `appliedSettings.writing.apiKey` 제거 (중복)
+2. ✅ `appliedSettings.image.apiKey` 제거 (중복)
+3. ✅ `appliedSettings` → `lastUsedSettings`로 이름 변경 (의미 명확화)
+4. ✅ 런타임에 API 키 조합: `providerApiKeys[lastUsedSettings.writing.provider]`
+
+**장점:**
+- API 키 단일 저장소 (`providerApiKeys`만)
+- 마지막 사용 설정 기억 (UX 유지)
+- 코드 명확성 향상
+
+### 작업 범위
+
+**수정 필요 파일:**
+1. `src/features/settings/components/LLMSettings.tsx`
+   - `appliedSettings` → `lastUsedSettings` 변경
+   - apiKey 필드 제거
+   - 런타임에 `providerApiKeys[provider]` 조합
+
+2. `src/features/settings/hooks/useSettings.ts`
+   - 타입 수정
+
+3. `src/main/services/settings-service.ts`
+   - 타입 수정
+   - 마이그레이션 로직 추가 (기존 JSON 자동 변환)
+
+4. `src/02-generation/components/ImageGenerator.tsx`
+   - `appliedSettings` → `lastUsedSettings` 참조 변경
+
+**예상 소요 시간:** 1-2시간
+
+**우선순위:** 🟡 중간 (기술 부채 제거)
+
+---
+
+**Last Updated**: 2025-10-04
 **Maintainer**: Claude Code Assistant

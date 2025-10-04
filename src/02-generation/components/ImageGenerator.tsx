@@ -120,7 +120,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     const loadImageSettingsFromAPI = async () => {
       try {
         const llmSettings = await window.electronAPI.getLLMSettings();
-        const imageSettings = llmSettings?.appliedSettings?.image;
+        const imageSettings = llmSettings?.lastUsedSettings?.image;
 
         if (imageSettings) {
           const { style, quality, size } = imageSettings;
@@ -142,7 +142,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     const handleSettingsChange = async () => {
       try {
         const llmSettings = await window.electronAPI.getLLMSettings();
-        const imageSettings = llmSettings?.appliedSettings?.image;
+        const imageSettings = llmSettings?.lastUsedSettings?.image;
 
         if (imageSettings) {
           const { style, quality, size } = imageSettings;
@@ -785,13 +785,13 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     try {
       const currentSettings = await window.electronAPI.getLLMSettings();
 
-      if (currentSettings?.appliedSettings?.image) {
+      if (currentSettings?.lastUsedSettings?.image) {
         const updatedSettings = {
           ...currentSettings,
-          appliedSettings: {
-            ...currentSettings.appliedSettings,
+          lastUsedSettings: {
+            ...currentSettings.lastUsedSettings,
             image: {
-              ...currentSettings.appliedSettings.image,
+              ...currentSettings.lastUsedSettings.image,
               [settingType]: value
             }
           }
