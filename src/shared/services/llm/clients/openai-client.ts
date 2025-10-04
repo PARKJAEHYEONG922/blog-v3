@@ -9,7 +9,7 @@ export class OpenAIClient extends BaseLLMClient {
       async (attempt, maxRetries) => {
         console.log(`🔵 OpenAI ${this.config.model} 텍스트 생성 시작 (${attempt}/${maxRetries})`);
 
-        // GPT-5 모델은 max_completion_tokens 사용, 이전 모델은 max_tokens 사용
+        // GPT-5 모델은 max_completion_tokens 사용, temperature 기본값(1)만 지원
         const isGPT5 = this.config.model.startsWith('gpt-5');
 
         const requestBody: any = {
@@ -17,14 +17,15 @@ export class OpenAIClient extends BaseLLMClient {
           messages: messages.map(msg => ({
             role: msg.role,
             content: msg.content
-          })),
-          temperature: 0.7
+          }))
         };
 
         if (isGPT5) {
           requestBody.max_completion_tokens = 2000;
+          // GPT-5는 temperature 기본값(1)만 지원, 명시하지 않음
         } else {
           requestBody.max_tokens = 2000;
+          requestBody.temperature = 0.7;
         }
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
