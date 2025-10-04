@@ -9,21 +9,31 @@ export class OpenAIClient extends BaseLLMClient {
       async (attempt, maxRetries) => {
         console.log(`🔵 OpenAI ${this.config.model} 텍스트 생성 시작 (${attempt}/${maxRetries})`);
 
+        // GPT-5 모델은 max_completion_tokens 사용, 이전 모델은 max_tokens 사용
+        const isGPT5 = this.config.model.startsWith('gpt-5');
+
+        const requestBody: any = {
+          model: this.config.model,
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          temperature: 0.7
+        };
+
+        if (isGPT5) {
+          requestBody.max_completion_tokens = 2000;
+        } else {
+          requestBody.max_tokens = 2000;
+        }
+
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.config.apiKey}`
           },
-          body: JSON.stringify({
-            model: this.config.model,
-            messages: messages.map(msg => ({
-              role: msg.role,
-              content: msg.content
-            })),
-            temperature: 0.7,
-            max_tokens: 2000
-          })
+          body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
