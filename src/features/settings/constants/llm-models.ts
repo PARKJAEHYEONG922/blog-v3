@@ -18,9 +18,9 @@ export const MODELS_BY_PROVIDER: Record<string, { text?: ModelInfo[]; image?: Mo
   },
   openai: {
     text: [
-      { id: 'gpt-5-2025-08-07', name: 'GPT-5', description: '최고 성능 모델', tier: 'premium' },
-      { id: 'gpt-5-mini-2025-08-07', name: 'GPT-5 Mini', description: '균형잡힌 성능', tier: 'premium' },
-      { id: 'gpt-5-nano-2025-08-07', name: 'GPT-5 Nano', description: '빠르고 경제적', tier: 'basic' }
+      { id: 'gpt-5', name: 'GPT-5', description: '최고 성능 모델', tier: 'premium' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: '균형잡힌 성능', tier: 'premium' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', description: '빠르고 경제적', tier: 'basic' }
     ],
     image: [
       { id: 'dall-e-3', name: 'DALL-E 3', description: '고품질 이미지 생성', tier: 'basic' },
