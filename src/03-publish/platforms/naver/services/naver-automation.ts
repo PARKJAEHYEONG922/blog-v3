@@ -4,6 +4,56 @@ import { BaseBrowserAutomation } from '@/03-publish/services/base-automation';
 import type { LoginResult, PublishResult, INaverBlogAutomation } from '@/shared/types/automation.types';
 import { handleError } from '@/shared/utils/error-handler';
 
+// Playwright evaluate 결과 타입
+interface ElementFocusResult {
+  success?: boolean;
+  message?: string;
+  error?: string;
+}
+
+interface ElementPositionResult {
+  success?: boolean;
+  elementText?: string;
+  centerX?: number;
+  centerY?: number;
+  offsetX?: number;
+  offsetY?: number;
+}
+
+interface ElementTextResult {
+  selectedText?: string;
+}
+
+interface ImageUrlsResult {
+  success?: boolean;
+  urls?: string[];
+}
+
+interface MonthCheckResult {
+  success?: boolean;
+  currentMonth?: number;
+  year?: number;
+  error?: string;
+}
+
+interface CategoryResult {
+  success?: boolean;
+  selectedCategory?: string;
+  wasChanged?: boolean;
+  userInput?: string;
+  notFound?: boolean;
+  error?: string;
+}
+
+interface ToastCheckResult {
+  success?: boolean;
+  found?: boolean;
+  isVisible?: boolean;
+  message?: string;
+  isDraftSaveComplete?: boolean;
+  error?: string;
+}
+
 // URL 변경 감지 결과 타입
 interface URLChangeResult {
   success: boolean;
@@ -621,16 +671,17 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
           
-          if (titleFocusResult?.result?.success) {
+          const focusResult = titleFocusResult?.result as ElementFocusResult | undefined;
+          if (focusResult?.success) {
             console.log('✅ 제목 요소 포커스 완료');
             await window.electronAPI.playwrightWaitTimeout(500);
-            
+
             // 제목을 실제 Playwright 키보드 API로 타이핑
             console.log('🎹 실제 키보드로 제목 타이핑 시작...');
             console.log('🔤 타이핑할 내용:', `"${title}"`);
             const titleTypingResult = await window.electronAPI.playwrightType(title, 30);
             console.log('🔤 타이핑 결과:', titleTypingResult);
-            
+
             if (titleTypingResult.success) {
               console.log('✅ 제목 입력 완료');
               return true;
@@ -638,7 +689,7 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
               console.warn('⚠️ 제목 입력 실패:', titleTypingResult.error);
             }
           } else {
-            console.warn('⚠️ 제목 요소 포커스 실패:', titleFocusResult?.result?.message);
+            console.warn('⚠️ 제목 요소 포커스 실패:', focusResult?.message);
           }
           
           await this.waitForTimeout(1000);
@@ -905,16 +956,17 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
               })()
             `, 'PostWriteForm.naver');
             
-            if (!findResult?.result?.success) {
-              console.warn(`⚠️ (이미지${i}) 텍스트 찾기 실패:`, findResult?.result);
+            const positionResult = findResult?.result as ElementPositionResult | undefined;
+            if (!positionResult?.success) {
+              console.warn(`⚠️ (이미지${i}) 텍스트 찾기 실패:`, positionResult);
               continue;
             }
-            
-            console.log(`✅ (이미지${i}) 텍스트 찾기 완료: "${findResult.result.elementText}"`);
-            
+
+            console.log(`✅ (이미지${i}) 텍스트 찾기 완료: "${positionResult.elementText}"`);
+
             // Step 2: 실제 Playwright 마우스로 클릭
-            if (findResult.result.centerX && findResult.result.centerY) {
-              console.log(`🖱️ 실제 마우스로 클릭: (${findResult.result.centerX}, ${findResult.result.centerY})`);
+            if (positionResult.centerX && positionResult.centerY) {
+              console.log(`🖱️ 실제 마우스로 클릭: (${positionResult.centerX}, ${positionResult.centerY})`);
               
               // iframe 오프셋 계산
               const offsetResult = await window.electronAPI.playwrightEvaluate(`
@@ -933,9 +985,10 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
                 })()
               `);
               
-              if (offsetResult?.result?.success) {
-                const realX = findResult.result.centerX + offsetResult.result.offsetX;
-                const realY = findResult.result.centerY + offsetResult.result.offsetY;
+              const offsetPos = offsetResult?.result as ElementPositionResult | undefined;
+              if (offsetPos?.success && offsetPos.offsetX && offsetPos.offsetY) {
+                const realX = positionResult.centerX + offsetPos.offsetX;
+                const realY = positionResult.centerY + offsetPos.offsetY;
                 
                 console.log(`🖱️ 최종 더블클릭 좌표: (${realX}, ${realY})`);
                 
@@ -961,7 +1014,8 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
                       })()
                     `, 'PostWriteForm.naver');
                     
-                    console.log(`더블클릭 후 선택 상태:`, selectionCheck?.result?.selectedText);
+                    const textResult = selectionCheck?.result as ElementTextResult | undefined;
+                    console.log(`더블클릭 후 선택 상태:`, textResult?.selectedText);
                   } else {
                     console.warn(`⚠️ (이미지${i}) 두 번째 클릭 실패`);
                   }
@@ -972,15 +1026,15 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
                 console.warn(`⚠️ iframe 오프셋 계산 실패`);
               }
             }
-            
-            const findAndClickResult = { result: findResult.result };
-            
-            if (!findAndClickResult?.result?.success) {
-              console.warn(`⚠️ (이미지${i}) 텍스트 찾기/클릭 실패:`, findAndClickResult?.result);
+
+            const clickResult = findResult?.result as ElementPositionResult | undefined;
+
+            if (!clickResult?.success) {
+              console.warn(`⚠️ (이미지${i}) 텍스트 찾기/클릭 실패:`, clickResult);
               continue;
             }
-            
-            console.log(`✅ (이미지${i}) 텍스트 클릭 완료: "${findAndClickResult.result.elementText}"`);
+
+            console.log(`✅ (이미지${i}) 텍스트 클릭 완료: "${clickResult.elementText}"`);
             await window.electronAPI.playwrightWaitTimeout(500);
             
             // 3. 이미지 파일을 클립보드에 복사 (Electron 메인 프로세스에서)
@@ -1068,12 +1122,14 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         })()
       `, 'PostWriteForm.naver');
 
-      if (!findUrlsResult?.result?.success || !findUrlsResult?.result?.urls || findUrlsResult.result.urls.length === 0) {
+      const urlsResult = findUrlsResult?.result as ImageUrlsResult | undefined;
+
+      if (!urlsResult?.success || !urlsResult?.urls || urlsResult.urls.length === 0) {
         console.log('ℹ️ 변환할 링크가 없습니다.');
         return;
       }
 
-      const links = findUrlsResult.result.urls;
+      const links = urlsResult.urls;
       console.log(`📋 발견된 링크 개수: ${links.length}개`);
 
       // 각 링크에 대해 더블클릭 + URL 붙여넣기
@@ -1149,12 +1205,14 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
 
-          if (!findResult?.result?.success) {
-            console.warn(`⚠️ 링크 "${url}" 찾기 실패:`, findResult?.result);
+          const linkPosResult = findResult?.result as ElementPositionResult | undefined;
+
+          if (!linkPosResult?.success) {
+            console.warn(`⚠️ 링크 "${url}" 찾기 실패:`, linkPosResult);
             continue;
           }
 
-          console.log(`✅ 링크 텍스트 위치 찾음: (${findResult.result.centerX}, ${findResult.result.centerY})`);
+          console.log(`✅ 링크 텍스트 위치 찾음: (${linkPosResult.centerX}, ${linkPosResult.centerY})`);
 
           // 2. iframe 오프셋 계산 후 더블클릭
           const offsetResult = await window.electronAPI.playwrightEvaluate(`
@@ -1173,13 +1231,15 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `);
 
-          if (!offsetResult?.result?.success) {
+          const linkOffsetResult = offsetResult?.result as ElementPositionResult | undefined;
+
+          if (!linkOffsetResult?.success) {
             console.warn(`⚠️ iframe 오프셋 계산 실패`);
             continue;
           }
 
-          const realX = findResult.result.centerX + offsetResult.result.offsetX;
-          const realY = findResult.result.centerY + offsetResult.result.offsetY;
+          const realX = linkPosResult.centerX! + linkOffsetResult.offsetX!;
+          const realY = linkPosResult.centerY! + linkOffsetResult.offsetY!;
 
           console.log(`🖱️ 링크 더블클릭 좌표: (${realX}, ${realY})`);
 
@@ -1263,7 +1323,8 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
 
-          console.log(`✅ 링크 카드 변환 로딩 완료:`, waitForLoadingResult?.result?.message);
+          const loadingResult = waitForLoadingResult?.result as ElementFocusResult | undefined;
+          console.log(`✅ 링크 카드 변환 로딩 완료:`, loadingResult?.message);
           await window.electronAPI.playwrightWaitTimeout(500); // 추가 안정화 대기
 
           // 5. 생성된 링크 카드 찾아서 클릭 (정렬 툴바 표시)
@@ -1351,10 +1412,12 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
 
-          if (deleteResult?.result?.success) {
+          const deleteTextResult = deleteResult?.result as ElementPositionResult | undefined;
+
+          if (deleteTextResult?.success) {
             // iframe 오프셋 적용
-            const deleteRealX = deleteResult.result.centerX + offsetResult.result.offsetX;
-            const deleteRealY = deleteResult.result.centerY + offsetResult.result.offsetY;
+            const deleteRealX = deleteTextResult.centerX! + linkOffsetResult.offsetX!;
+            const deleteRealY = deleteTextResult.centerY! + linkOffsetResult.offsetY!;
 
             // 더블클릭으로 선택 (빠르게 클릭해야 진짜 더블클릭으로 인식)
             console.log(`🖱️ URL 텍스트 더블클릭: (${deleteRealX}, ${deleteRealY})`);
@@ -1465,7 +1528,9 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         })()
       `, 'PostWriteForm.naver');
 
-      if (alignDropdownResult?.result?.success) {
+      const alignResult = alignDropdownResult?.result as ElementPositionResult | undefined;
+
+      if (alignResult?.success) {
         // iframe offset 가져오기
         const offsetResult = await window.electronAPI.playwrightEvaluate(`
           (function() {
@@ -1478,9 +1543,11 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           })()
         `);
 
-        if (offsetResult?.result?.success) {
-          const dropdownX = alignDropdownResult.result.centerX + offsetResult.result.offsetX;
-          const dropdownY = alignDropdownResult.result.centerY + offsetResult.result.offsetY;
+        const alignOffsetResult = offsetResult?.result as ElementPositionResult | undefined;
+
+        if (alignOffsetResult?.success) {
+          const dropdownX = alignResult.centerX! + alignOffsetResult.offsetX!;
+          const dropdownY = alignResult.centerY! + alignOffsetResult.offsetY!;
 
           console.log(`🖱️ 정렬 드롭다운 클릭: (${dropdownX}, ${dropdownY})`);
           await window.electronAPI.playwrightClickAt(dropdownX, dropdownY);
@@ -1506,9 +1573,11 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
 
-          if (centerAlignResult?.result?.success) {
-            const centerX = centerAlignResult.result.centerX + offsetResult.result.offsetX;
-            const centerY = centerAlignResult.result.centerY + offsetResult.result.offsetY;
+          const centerResult = centerAlignResult?.result as ElementPositionResult | undefined;
+
+          if (centerResult?.success) {
+            const centerX = centerResult.centerX! + alignOffsetResult.offsetX!;
+            const centerY = centerResult.centerY! + alignOffsetResult.offsetY!;
 
             console.log(`🖱️ 가운데 정렬 버튼 클릭: (${centerX}, ${centerY})`);
             await window.electronAPI.playwrightClickAt(centerX, centerY);
@@ -1706,7 +1775,9 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
           
-          if (!calendarCheckResult.success || !calendarCheckResult.result?.success) {
+          const calendarResult = calendarCheckResult?.result as ElementFocusResult | undefined;
+
+          if (!calendarCheckResult.success || !calendarResult?.success) {
             console.warn('⚠️ 달력 확인 실패:', calendarCheckResult);
             return false;
           }
@@ -1744,9 +1815,11 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
               })()
             `, 'PostWriteForm.naver');
             
-            if (monthCheckResult.success && monthCheckResult.result?.success) {
-              currentMonth = monthCheckResult.result.currentMonth;
-              console.log(`📅 현재 달력: ${monthCheckResult.result.year}년 ${currentMonth}월, 목표: ${year}년 ${month}월`);
+            const monthResult = monthCheckResult?.result as MonthCheckResult | undefined;
+
+            if (monthCheckResult.success && monthResult?.success) {
+              currentMonth = monthResult.currentMonth!;
+              console.log(`📅 현재 달력: ${monthResult.year}년 ${currentMonth}월, 목표: ${year}년 ${month}월`);
               
               if (currentMonth === month) {
                 console.log('✅ 목표 월에 도달함');
@@ -1803,15 +1876,17 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           `, 'PostWriteForm.naver');
           
           console.log('📅 날짜 선택 결과:', dateSelectResult);
-          
+
+          const dateResult = dateSelectResult?.result as ElementFocusResult | undefined;
+
           if (!dateSelectResult.success) {
             console.warn('⚠️ playwrightEvaluateInFrames 호출 실패:', dateSelectResult);
             return false;
           }
-          
-          if (!dateSelectResult.result?.success) {
-            console.warn('⚠️ 날짜 선택 실패:', dateSelectResult.result?.error || '알 수 없는 오류');
-            console.warn('⚠️ 전체 결과:', JSON.stringify(dateSelectResult.result, null, 2));
+
+          if (!dateResult?.success) {
+            console.warn('⚠️ 날짜 선택 실패:', dateResult?.error || '알 수 없는 오류');
+            console.warn('⚠️ 전체 결과:', JSON.stringify(dateResult, null, 2));
             return false;
           }
           
@@ -1838,8 +1913,10 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           })()
         `, 'PostWriteForm.naver');
         
-        if (!hourSelectResult.success || !hourSelectResult.result?.success) {
-          console.warn('⚠️ 시간 선택 실패:', hourSelectResult?.result?.error);
+        const hourResult = hourSelectResult?.result as ElementFocusResult | undefined;
+
+        if (!hourSelectResult.success || !hourResult?.success) {
+          console.warn('⚠️ 시간 선택 실패:', hourResult?.error);
           return false;
         }
         
@@ -1865,8 +1942,10 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           })()
         `, 'PostWriteForm.naver');
         
-        if (!minuteSelectResult.success || !minuteSelectResult.result?.success) {
-          console.warn('⚠️ 분 선택 실패:', minuteSelectResult?.result?.error);
+        const minuteResult = minuteSelectResult?.result as ElementFocusResult | undefined;
+
+        if (!minuteSelectResult.success || !minuteResult?.success) {
+          console.warn('⚠️ 분 선택 실패:', minuteResult?.error);
           return false;
         }
         
@@ -2674,11 +2753,13 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           })()
         `, 'PostWriteForm.naver');
         
-        if (currentCategoryResult?.result?.success) {
-          console.log(`📂 현재 기본 카테고리: "${currentCategoryResult.result.selectedCategory}"`);
-          return { 
-            success: true, 
-            selectedCategory: currentCategoryResult.result.selectedCategory || '기본 카테고리' 
+        const currentCategory = currentCategoryResult?.result as CategoryResult | undefined;
+
+        if (currentCategory?.success) {
+          console.log(`📂 현재 기본 카테고리: "${currentCategory.selectedCategory}"`);
+          return {
+            success: true,
+            selectedCategory: currentCategory.selectedCategory || '기본 카테고리'
           };
         } else {
           console.log('⚠️ 현재 카테고리 확인 실패');
@@ -2777,28 +2858,27 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         })()
       `, 'PostWriteForm.naver');
       
-      if (categoryResult?.result?.success) {
-        const result = categoryResult.result;
-        
-        if (result.wasChanged) {
-          console.log(`✅ 카테고리 변경 완료: "${result.selectedCategory}" (입력: "${result.userInput}")`);
-        } else if (result.notFound) {
-          console.log(`⚠️ "${result.userInput}" 카테고리를 찾을 수 없어서 "${result.selectedCategory}"에 발행됩니다.`);
+      const categorySelectionResult = categoryResult?.result as CategoryResult | undefined;
+
+      if (categorySelectionResult?.success) {
+        if (categorySelectionResult.wasChanged) {
+          console.log(`✅ 카테고리 변경 완료: "${categorySelectionResult.selectedCategory}" (입력: "${categorySelectionResult.userInput}")`);
+        } else if (categorySelectionResult.notFound) {
+          console.log(`⚠️ "${categorySelectionResult.userInput}" 카테고리를 찾을 수 없어서 "${categorySelectionResult.selectedCategory}"에 발행됩니다.`);
         } else {
-          console.log(`📂 기본 카테고리 "${result.selectedCategory}"에 발행됩니다.`);
+          console.log(`📂 기본 카테고리 "${categorySelectionResult.selectedCategory}"에 발행됩니다.`);
         }
         
         await window.electronAPI.playwrightWaitTimeout(500);
-        return { 
-          success: true, 
-          selectedCategory: result.selectedCategory,
-          userInput: result.userInput,
-          notFound: result.notFound
+        return {
+          success: true,
+          selectedCategory: categorySelectionResult.selectedCategory,
+          userInput: categorySelectionResult.userInput,
+          notFound: categorySelectionResult.notFound
         };
-      } else if (categoryResult?.result?.notFound) {
+      } else if (categorySelectionResult?.notFound) {
         // 카테고리를 찾지 못한 경우 - 드롭다운 버튼 다시 클릭해서 닫기
-        const result = categoryResult.result;
-        console.log(`⚠️ "${result.userInput}" 카테고리를 찾을 수 없음. 드롭다운 닫는 중...`);
+        console.log(`⚠️ "${categorySelectionResult.userInput}" 카테고리를 찾을 수 없음. 드롭다운 닫는 중...`);
         
         const closeDropdownResult = await window.electronAPI.playwrightClickInFrames(
           'button.selectbox_button__jb1Dt', 
@@ -2829,29 +2909,31 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
           
-          const finalCategoryName = finalCategoryResult?.result?.success 
-            ? finalCategoryResult.result.selectedCategory 
+          const finalCategory = finalCategoryResult?.result as CategoryResult | undefined;
+
+          const finalCategoryName = finalCategory?.success
+            ? finalCategory.selectedCategory
             : '기본 카테고리';
-            
+
           console.log(`📂 최종 선택된 카테고리: "${finalCategoryName}"`);
-          
-          return { 
-            success: true, 
+
+          return {
+            success: true,
             selectedCategory: finalCategoryName,
-            userInput: result.userInput,
-            notFound: result.notFound
+            userInput: categorySelectionResult.userInput,
+            notFound: categorySelectionResult.notFound
           };
         } else {
           console.log('⚠️ 드롭다운 닫기 실패');
-          return { 
-            success: true, 
-            selectedCategory: result.selectedCategory,
-            userInput: result.userInput,
-            notFound: result.notFound
+          return {
+            success: true,
+            selectedCategory: categorySelectionResult.selectedCategory,
+            userInput: categorySelectionResult.userInput,
+            notFound: categorySelectionResult.notFound
           };
         }
       } else {
-        handleError(new Error(categoryResult?.result?.error), '카테고리 확인 실패');
+        handleError(new Error(categorySelectionResult?.error), '카테고리 확인 실패');
 
         // 오류 발생 시에도 드롭다운 닫기 시도
         console.log('오류 발생으로 드롭다운 닫는 중...');
@@ -2882,10 +2964,12 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
             })()
           `, 'PostWriteForm.naver');
           
-          const finalCategoryName = currentCategoryResult?.result?.success 
-            ? currentCategoryResult.result.selectedCategory 
+          const errorCategory = currentCategoryResult?.result as CategoryResult | undefined;
+
+          const finalCategoryName = errorCategory?.success
+            ? errorCategory.selectedCategory
             : '기본 카테고리';
-            
+
           return { success: true, selectedCategory: finalCategoryName };
         }
         
@@ -3143,14 +3227,14 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
           })()
         `, 'PostWriteForm.naver');
         
-        if (toastCheckResult.success && toastCheckResult.result?.success) {
-          const result = toastCheckResult.result;
-          
-          if (result.found && result.isVisible) {
-            console.log(`📄 토스트 메시지: "${result.message}"`);
-            console.log(`👁️ 토스트 표시: ${result.isVisible}`);
-            
-            if (result.isDraftSaveComplete) {
+        const toastResult = toastCheckResult?.result as ToastCheckResult | undefined;
+
+        if (toastCheckResult.success && toastResult?.success) {
+          if (toastResult.found && toastResult.isVisible) {
+            console.log(`📄 토스트 메시지: "${toastResult.message}"`);
+            console.log(`👁️ 토스트 표시: ${toastResult.isVisible}`);
+
+            if (toastResult.isDraftSaveComplete) {
               console.log('✅ 임시저장 완료 토스트 확인됨!');
               return true;
             }

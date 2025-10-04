@@ -96,7 +96,12 @@ export class NaverTrendService {
         throw new Error(result.error);
       }
 
-      return result.trends || [];
+      // TrendData를 TrendKeyword로 변환
+      return (result.trends || []).map((trend, index) => ({
+        keyword: trend.keyword,
+        rank: trend.rank,
+        rankChange: null // TrendData에는 rankChange가 없으므로 null로 설정
+      }));
 
     } catch (error) {
       if ((error as Error).message === 'NEED_LOGIN') {
@@ -141,7 +146,12 @@ export class NaverTrendService {
         throw new Error(result.error);
       }
 
-      return result.contents || [];
+      // TrendContentData를 TrendContent로 변환
+      return (result.contents || []).map(content => ({
+        metaUrl: content.url,
+        title: content.title,
+        myContent: false // TrendContentData에는 myContent가 없으므로 기본값 false
+      }));
 
     } catch (error) {
       if ((error as Error).message === 'NEED_LOGIN') {
