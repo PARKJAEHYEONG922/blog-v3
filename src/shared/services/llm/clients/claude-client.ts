@@ -18,7 +18,7 @@ export class ClaudeClient extends BaseLLMClient {
           },
           body: JSON.stringify({
             model: this.config.model,
-            max_tokens: 2000,
+            max_tokens: 16000,
             messages: messages.map(msg => ({
               role: msg.role === 'system' ? 'user' : msg.role,
               content: msg.role === 'system' ? `System: ${msg.content}` : msg.content

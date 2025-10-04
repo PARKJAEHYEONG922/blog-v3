@@ -33,7 +33,7 @@ export class GeminiClient extends BaseLLMClient {
                 }]
               }],
               generationConfig: {
-                maxOutputTokens: 2000,
+                maxOutputTokens: 16000,
                 temperature: 0.7
               }
             })

@@ -237,15 +237,21 @@ ${blogsInfo}
 
       const response = llmResponse.content;
 
+      // 응답 확인용 로그
+      console.log('[제목 생성 - LLM 응답 원본]:', response);
+
       // JSON 파싱
       const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) ||
                         response.match(/\{[\s\S]*\}/);
 
       if (!jsonMatch) {
+        console.log('[JSON 파싱 실패] 응답에서 JSON을 찾을 수 없습니다.');
         throw new Error('LLM 응답 형식이 올바르지 않습니다.');
       }
 
       const jsonText = jsonMatch[1] || jsonMatch[0];
+      console.log('[추출된 JSON 텍스트]:', jsonText);
+
       const parsed = JSON.parse(jsonText);
 
       return {
