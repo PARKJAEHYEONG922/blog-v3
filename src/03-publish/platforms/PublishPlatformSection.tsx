@@ -115,12 +115,12 @@ const PublishPlatformSection: React.FC<PublishPlatformSectionProps> = ({
       )}
 
       {selectedPlatform && selectedPlatform !== 'naver' && (
-        <div className="section-card" style={{ padding: '20px', marginBottom: '16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '16px', color: '#dc2626', fontWeight: '600', marginBottom: '8px' }}>
+        <div className="section-card p-5 mb-4 bg-red-50 border border-red-200">
+          <div className="text-center">
+            <div className="text-base text-red-600 font-semibold mb-2">
               🚧 {getPlatformName(selectedPlatform)} 발행 기능 준비 중
             </div>
-            <div style={{ fontSize: '14px', color: '#7f1d1d' }}>
+            <div className="text-sm text-red-900">
               해당 플랫폼의 발행 기능은 곧 구현될 예정입니다.
             </div>
           </div>

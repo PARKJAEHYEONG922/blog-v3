@@ -991,14 +991,13 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
               
               {/* 자격 증명 저장 체크박스 */}
               <div className="flex items-center space-x-2 mt-3">
-                <div 
+                <div
                   onClick={() => !publishStatus.isPublishing && setSaveCredentials(!saveCredentials)}
-                  className={`w-4 h-4 border-2 rounded cursor-pointer flex items-center justify-center ${
-                    saveCredentials 
-                      ? 'bg-blue-600 border-blue-600' 
+                  className={`w-4 h-4 min-w-[16px] min-h-[16px] border-2 rounded cursor-pointer flex items-center justify-center ${
+                    saveCredentials
+                      ? 'bg-blue-600 border-blue-600'
                       : 'bg-white border-gray-400 hover:border-blue-500'
                   } ${publishStatus.isPublishing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  style={{ minWidth: '16px', minHeight: '16px' }}
                 >
                   {saveCredentials && (
                     <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">

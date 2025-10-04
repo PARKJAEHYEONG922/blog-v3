@@ -683,7 +683,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                     }`}>
                       {settings.writing.provider === 'claude' && (
                         <>
-                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://console.anthropic.com'); }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Claude Console</a> 접속</li>
+                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://console.anthropic.com'); }} className="underline cursor-pointer">Claude Console</a> 접속</li>
                           <li>계정 생성 또는 로그인</li>
                           <li>"Get API Keys" 또는 "API Keys" 메뉴 선택</li>
                           <li>"Create Key" 버튼 클릭하여 새 API 키 생성</li>
@@ -693,7 +693,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                       )}
                       {settings.writing.provider === 'openai' && (
                         <>
-                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://platform.openai.com'); }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>OpenAI Platform</a> 접속</li>
+                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://platform.openai.com'); }} className="underline cursor-pointer">OpenAI Platform</a> 접속</li>
                           <li>계정 생성 또는 로그인</li>
                           <li>우상단 프로필 → "View API keys" 선택</li>
                           <li>"Create new secret key" 버튼 클릭</li>
@@ -703,7 +703,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                       )}
                       {settings.writing.provider === 'gemini' && (
                         <>
-                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://aistudio.google.com/app/apikey'); }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Google AI Studio</a> 접속</li>
+                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://aistudio.google.com/app/apikey'); }} className="underline cursor-pointer">Google AI Studio</a> 접속</li>
                           <li>구글 계정으로 로그인</li>
                           <li>"Create API key" 버튼 클릭</li>
                           <li>프로젝트 선택 또는 새 프로젝트 생성</li>
@@ -1100,7 +1100,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                     }`}>
                       {settings.image.provider === 'gemini' && (
                         <>
-                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://aistudio.google.com/app/apikey'); }} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Google AI Studio</a> 접속</li>
+                          <li><a href="#" onClick={(e) => { e.preventDefault(); window.electronAPI?.openExternal?.('https://aistudio.google.com/app/apikey'); }} className="underline cursor-pointer">Google AI Studio</a> 접속</li>
                           <li>구글 계정으로 로그인</li>
                           <li>"Create API key" 버튼 클릭</li>
                           <li>프로젝트 선택 또는 새 프로젝트 생성</li>

@@ -214,68 +214,37 @@ const Step2Generation: React.FC = () => {
         </div>
         
         {/* v2 Step3와 완전 동일한 편집기 UI */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '16px',
-          borderBottom: '2px solid #e5e7eb',
-          paddingBottom: '12px'
-        }}>
+        <div className="flex justify-between items-center mb-4 border-b-2 border-gray-200 pb-3">
           {/* 탭 버튼들 */}
-          <div style={{ display: 'flex', gap: '2px' }}>
+          <div className="flex gap-0.5">
             <button
               onClick={() => setActiveTab('edited')}
-              style={{
-                backgroundColor: activeTab === 'edited' ? '#3b82f6' : 'transparent',
-                color: activeTab === 'edited' ? 'white' : '#6b7280',
-                borderTop: activeTab === 'edited' ? 'none' : '1px solid #d1d5db',
-                borderLeft: activeTab === 'edited' ? 'none' : '1px solid #d1d5db',
-                borderRight: activeTab === 'edited' ? 'none' : '1px solid #d1d5db',
-                borderBottom: 'none',
-                borderRadius: '8px 8px 0 0',
-                padding: '12px 20px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600'
-              }}
+              className={`
+                ${activeTab === 'edited' ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-500 border-t border-l border-r border-gray-300'}
+                rounded-t-lg px-5 py-3 cursor-pointer text-sm font-semibold border-b-0
+              `}
             >
               📝 자동편집 콘텐츠
             </button>
             <button
               onClick={() => setActiveTab('original')}
-              style={{
-                backgroundColor: activeTab === 'original' ? '#3b82f6' : 'transparent',
-                color: activeTab === 'original' ? 'white' : '#6b7280',
-                borderTop: activeTab === 'original' ? 'none' : '1px solid #d1d5db',
-                borderLeft: activeTab === 'original' ? 'none' : '1px solid #d1d5db',
-                borderRight: activeTab === 'original' ? 'none' : '1px solid #d1d5db',
-                borderBottom: 'none',
-                borderRadius: '8px 8px 0 0',
-                padding: '12px 20px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600'
-              }}
+              className={`
+                ${activeTab === 'original' ? 'bg-blue-500 text-white' : 'bg-transparent text-gray-500 border-t border-l border-r border-gray-300'}
+                rounded-t-lg px-5 py-3 cursor-pointer text-sm font-semibold border-b-0
+              `}
             >
               📄 원본 콘텐츠
             </button>
           </div>
 
           {/* 기능 버튼 */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div className="flex gap-2 items-center">
             {activeTab === 'edited' && (
               <>
                 <select
                   value={currentFontSize}
                   onChange={(e) => handleFontSizeChange(e.target.value)}
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #d1d5db',
-                    fontSize: '14px',
-                    cursor: 'pointer'
-                  }}
+                  className="px-2.5 py-1.5 rounded-md border border-gray-300 text-sm cursor-pointer"
                   title="텍스트 드래그 후 글씨 크기 선택"
                 >
                   {fontSizes.map((font) => (
@@ -287,15 +256,7 @@ const Step2Generation: React.FC = () => {
 
                 <button
                   onClick={insertLink}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer'
-                  }}
+                  className="px-3 py-1.5 bg-blue-500 text-white border-none rounded-md text-xs cursor-pointer"
                   title="링크 카드 추가 (커서 위치에 삽입)"
                 >
                   🔗 링크
@@ -303,15 +264,7 @@ const Step2Generation: React.FC = () => {
 
                 <button
                   onClick={insertSeparator}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer'
-                  }}
+                  className="px-3 py-1.5 bg-emerald-500 text-white border-none rounded-md text-xs cursor-pointer"
                   title="구분선 추가 (커서 위치에 삽입)"
                 >
                   ➕ 구분선
@@ -319,30 +272,14 @@ const Step2Generation: React.FC = () => {
 
                 <button
                   onClick={restoreOriginal}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#f59e0b',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer'
-                  }}
+                  className="px-3 py-1.5 bg-amber-500 text-white border-none rounded-md text-xs cursor-pointer"
                 >
                   🔄 원본 복원
                 </button>
                 
                 <button
                   onClick={async () => await copyToClipboard()}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#8b5cf6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    cursor: 'pointer'
-                  }}
+                  className="px-3 py-1.5 bg-violet-500 text-white border-none rounded-md text-xs cursor-pointer"
                 >
                   📋 복사
                 </button>
@@ -350,42 +287,25 @@ const Step2Generation: React.FC = () => {
             )}
           </div>
         </div>
-        
+
         {/* 글자 수 표시 */}
         {activeTab === 'edited' && (
-          <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+          <div className="text-sm text-gray-500 mb-2">
             글자 수: {charCount.toLocaleString()}자 / 공백포함: {charCountWithSpaces.toLocaleString()}자
           </div>
         )}
 
         {/* v2와 완전 동일한 편집기 - 탭 전환 시에도 DOM 유지 */}
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: '0 8px 8px 8px',
-          backgroundColor: '#ffffff',
-          minHeight: '400px'
-        }}>
+        <div className="border border-gray-200 rounded-tr-lg rounded-b-lg bg-white min-h-[400px]">
           {/* 자동편집 에디터 - 항상 렌더링하되 display로 숨김 */}
           <div
             ref={editorRef}
             id="step3-editor"
             contentEditable
+            className="w-full min-h-[400px] max-h-[600px] p-4 border-none rounded-tr-lg rounded-b-lg text-[15px] leading-relaxed bg-white relative z-[1] overflow-y-auto outline-none"
             style={{
               display: activeTab === 'edited' ? 'block' : 'none',
-              width: '100%',
-              minHeight: '400px',
-              maxHeight: '600px',
-              padding: '16px',
-              border: 'none',
-              borderRadius: '0 8px 8px 8px',
-              fontSize: '15px',
-              lineHeight: '1.8',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              backgroundColor: 'white',
-              position: 'relative',
-              zIndex: 1,
-              overflowY: 'auto',
-              outline: 'none'
+              fontFamily: 'system-ui, -apple-system, sans-serif'
             }}
             onInput={handleContentChange}
             onKeyDown={handleKeyDown}
@@ -395,20 +315,9 @@ const Step2Generation: React.FC = () => {
 
           {/* 원본 콘텐츠 뷰어 - 항상 렌더링하되 display로 숨김 */}
           <div
+            className="p-5 text-[15px] leading-[1.7] h-[500px] max-h-[500px] overflow-y-auto text-gray-700 bg-gray-50 font-mono whitespace-pre-wrap break-words border border-gray-200"
             style={{
-              display: activeTab === 'original' ? 'block' : 'none',
-              padding: '20px',
-              fontSize: '15px',
-              lineHeight: '1.7',
-              height: '500px',
-              maxHeight: '500px',
-              overflowY: 'auto',
-              color: '#374151',
-              backgroundColor: '#f9fafb',
-              fontFamily: 'monospace',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              border: '1px solid #e5e7eb'
+              display: activeTab === 'original' ? 'block' : 'none'
             }}
           >
             {originalContent || workflowData.generatedContent || '원본 콘텐츠가 없습니다.'}
@@ -472,56 +381,38 @@ const Step2Generation: React.FC = () => {
           }
         `}</style>
 
-        <div style={{ marginTop: '12px', fontSize: '12px', color: '#6b7280' }}>
+        <div className="mt-3 text-xs text-gray-500">
           💡 <strong>편집 팁:</strong> 텍스트 선택 후 폰트 크기 변경 | 네이버 블로그 완전 호환 방식 | Ctrl+1~4로 폰트 크기 단축키
         </div>
       </div>
 
       {/* 이미지 프롬프트 재생성 섹션 (오류 시에만 표시) */}
       {(imagePromptError || (imagePositions.length > 0 && imagePrompts.length === 0)) && (
-        <div className="section-card" style={{padding: '20px', marginBottom: '16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca'}}>
-          <div className="section-header" style={{marginBottom: '16px'}}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div className="section-icon" style={{
-                width: '32px', 
-                height: '32px', 
-                backgroundColor: '#fee2e2',
-                color: '#dc2626',
-                fontSize: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%'
-              }}>⚠️</div>
-              <h2 className="section-title" style={{fontSize: '16px', margin: '0', lineHeight: '1', color: '#dc2626'}}>
+        <div className="section-card p-5 mb-4 bg-red-50 border border-red-200">
+          <div className="section-header mb-4">
+            <div className="flex items-center gap-3">
+              <div className="section-icon w-8 h-8 bg-red-100 text-red-600 text-base flex items-center justify-center rounded-full">⚠️</div>
+              <h2 className="section-title text-base m-0 leading-none text-red-600">
                 이미지 프롬프트 생성 오류
               </h2>
             </div>
           </div>
-          
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ 
-              fontSize: '14px', 
-              color: '#7f1d1d', 
-              marginBottom: '8px',
-              backgroundColor: '#fef7f7',
-              padding: '12px',
-              borderRadius: '6px',
-              border: '1px solid #fecaca'
-            }}>
+
+          <div className="mb-4">
+            <div className="text-sm text-red-900 mb-2 bg-red-50/50 p-3 rounded-md border border-red-200">
               {imagePromptError || '이미지 프롬프트가 생성되지 않았습니다. 글에는 이미지 태그가 있지만 프롬프트가 생성되지 않았습니다.'}
             </div>
-            
-            <div style={{ fontSize: '13px', color: '#991b1b', marginBottom: '16px' }}>
+
+            <div className="text-[13px] text-red-800 mb-4">
               💡 <strong>해결 방법:</strong>
-              <ul style={{ margin: '8px 0 0 16px', padding: 0 }}>
+              <ul className="my-2 ml-4 p-0">
                 <li>API 설정에서 다른 AI 제공자로 변경 후 재생성 시도</li>
                 <li>현재 설정 그대로 재생성 시도 (일시적 오류일 경우)</li>
                 <li>수동으로 이미지 업로드하여 사용</li>
               </ul>
             </div>
-            
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+
+            <div className="flex gap-3 items-center">
               <Button
                 onClick={regenerateImagePrompts}
                 disabled={isRegeneratingPrompts}
@@ -531,8 +422,8 @@ const Step2Generation: React.FC = () => {
               >
                 🔄 이미지 프롬프트 재생성
               </Button>
-              
-              <span style={{ fontSize: '12px', color: '#7f1d1d' }}>
+
+              <span className="text-xs text-red-900">
                 {isRegeneratingPrompts ? '프롬프트 재생성 중...' : 'API 설정을 변경한 후 재생성하면 더 성공 가능성이 높습니다'}
               </span>
             </div>
@@ -637,12 +528,12 @@ const Step2Generation: React.FC = () => {
       )}
 
       {selectedPlatform && selectedPlatform !== 'naver' && (
-        <div className="section-card" style={{padding: '20px', marginBottom: '16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca'}}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '16px', color: '#dc2626', fontWeight: '600', marginBottom: '8px' }}>
+        <div className="section-card p-5 mb-4 bg-red-50 border border-red-200">
+          <div className="text-center">
+            <div className="text-base text-red-600 font-semibold mb-2">
               🚧 {getPlatformName(selectedPlatform)} 발행 기능 준비 중
             </div>
-            <div style={{ fontSize: '14px', color: '#7f1d1d' }}>
+            <div className="text-sm text-red-900">
               해당 플랫폼의 발행 기능은 곧 구현될 예정입니다.
             </div>
           </div>

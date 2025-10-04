@@ -822,34 +822,16 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
     await saveImageSettingToAPI('size', newSize);
   };
 
-
-  // 공통 스타일
-  const buttonStyle = (bgColor: string, disabled = false) => ({
-    padding: '6px 12px',
-    backgroundColor: disabled ? '#9ca3af' : bgColor,
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    fontSize: '12px',
-    fontWeight: '600',
-    opacity: disabled ? 0.5 : 1,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px'
-  } as const);
-  
-  
   // 상태 표시 컴포넌트
   const StatusIndicator = ({ status }: { status: ImageStatus }) => {
     const statusConfig = {
-      empty: { color: '#9ca3af', text: '⚪ 대기중' },
-      uploading: { color: '#3b82f6', text: '🔄 업로드 중...' },
-      generating: { color: '#7c3aed', text: '🎨 AI 생성 중...' },
-      completed: { color: '#10b981', text: '✅ 완료' }
+      empty: { className: 'text-gray-400', text: '⚪ 대기중' },
+      uploading: { className: 'text-blue-500', text: '🔄 업로드 중...' },
+      generating: { className: 'text-violet-600', text: '🎨 AI 생성 중...' },
+      completed: { className: 'text-emerald-500', text: '✅ 완료' }
     };
     const config = statusConfig[status];
-    return <span style={{ color: config.color }}>{config.text}</span>;
+    return <span className={config.className}>{config.text}</span>;
   };
 
   if (imageCount === 0) {
@@ -1061,83 +1043,39 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                   </div>
                   
                   {/* 이미지 정보 및 컨트롤 */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      marginBottom: '8px'
-                    }}>
-                      <span style={{
-                        fontWeight: '600',
-                        color: '#1f2937',
-                        fontSize: '14px'
-                      }}>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-semibold text-gray-800 text-sm">
                         📸 이미지 {imageIndex}
                       </span>
                       {imagePrompt && (
-                        <span style={{
-                          fontSize: '12px',
-                          backgroundColor: '#dbeafe',
-                          color: '#1e40af',
-                          padding: '2px 8px',
-                          borderRadius: '4px'
-                        }}>
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                           📍 {imagePrompt.position}
                         </span>
                       )}
                     </div>
                     
                     {/* AI 프롬프트 정보 */}
-                    <div style={{ marginBottom: '12px' }}>
+                    <div className="mb-3">
                       {imagePrompt ? (
-                        <div style={{
-                          fontSize: '12px',
-                          color: '#6b7280',
-                          marginBottom: '4px'
-                        }}>
+                        <div className="text-xs text-gray-500 mb-1">
                           <strong>컨텍스트:</strong> {imagePrompt.context}
                         </div>
                       ) : (
-                        <div style={{
-                          fontSize: '12px',
-                          color: '#ea580c',
-                          marginBottom: '4px'
-                        }}>
+                        <div className="text-xs text-orange-600 mb-1">
                           <strong>⚠️ 프롬프트 없음:</strong> AI가 생성하지 못한 이미지 위치입니다. 직접 프롬프트를 입력해주세요.
                         </div>
                       )}
-                      
-                      <div style={{
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        padding: '8px'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '4px'
-                        }}>
-                          <div style={{
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            color: '#4b5563'
-                          }}>
+
+                      <div className="bg-slate-50 border border-slate-200 rounded-md p-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="text-xs font-medium text-gray-600">
                             💡 이미지 프롬프트:
                           </div>
                           {editingPrompts.hasOwnProperty(imageIndex) && imagePrompt && (
                             <button
                               onClick={() => resetPromptToOriginal(imageIndex)}
-                              style={{
-                                fontSize: '12px',
-                                color: '#ea580c',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '2px 4px'
-                              }}
+                              className="text-xs text-orange-600 bg-transparent border-none cursor-pointer px-1 py-0.5"
                               title="원본으로 되돌리기"
                             >
                               🔄 원본
@@ -1148,38 +1086,23 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                           value={currentPrompt}
                           onChange={(e) => handlePromptChange(imageIndex, e.target.value)}
                           placeholder="이미지 생성을 위한 프롬프트를 입력하세요..."
-                          style={{
-                            width: '100%',
-                            minHeight: '60px',
-                            padding: '8px',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontFamily: 'system-ui, -apple-system, sans-serif',
-                            resize: 'vertical',
-                            backgroundColor: 'white'
-                          }}
+                          className="w-full min-h-[60px] p-2 border border-gray-300 rounded text-xs font-sans resize-y bg-white"
                         />
                       </div>
                       
                       {/* 개별 버튼 영역 */}
-                      <div style={{
-                        display: 'flex',
-                        gap: '8px',
-                        marginTop: '12px',
-                        flexWrap: 'wrap'
-                      }}>
+                      <div className="flex gap-2 mt-3 flex-wrap">
                         {/* 이미지 업로드 버튼 */}
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleImageUpload(imageIndex, e.target.files?.[0] || null)}
-                          style={{ display: 'none' }}
+                          className="hidden"
                           id={`image-upload-${imageIndex}`}
                         />
                         <label
                           htmlFor={`image-upload-${imageIndex}`}
-                          style={buttonStyle('#3b82f6')}
+                          className="px-3 py-1.5 bg-blue-500 text-white border-none rounded cursor-pointer text-xs font-semibold flex items-center gap-1"
                         >
                           📁 이미지 업로드
                         </label>
@@ -1187,7 +1110,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                         {/* 이미지 붙여넣기 버튼 */}
                         <button
                           onClick={() => openUrlInputModal(imageIndex)}
-                          style={buttonStyle('#10b981')}
+                          className="px-3 py-1.5 bg-emerald-500 text-white border-none rounded cursor-pointer text-xs font-semibold flex items-center gap-1"
                           title="이미지 URL을 입력하여 가져옵니다"
                         >
                           📋 이미지 붙여넣기
@@ -1197,7 +1120,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                         <button
                           onClick={() => handleAIImageGeneration(imageIndex)}
                           disabled={!canGenerate || isGenerating}
-                          style={buttonStyle('#7c3aed', !canGenerate || isGenerating)}
+                          className={`px-3 py-1.5 border-none rounded text-xs font-semibold flex items-center gap-1 ${
+                            !canGenerate || isGenerating
+                              ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                              : 'bg-violet-600 text-white cursor-pointer'
+                          }`}
                           title={
                             !hasImageClient ? 'AI가 설정되지 않았습니다' :
                             !currentPrompt.trim() ? '프롬프트를 입력해주세요' : ''
@@ -1205,14 +1132,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                         >
                           🎨 AI 이미지생성
                           {isGenerating && (
-                            <div style={{
-                              width: '10px',
-                              height: '10px',
-                              border: '2px solid transparent',
-                              borderTop: '2px solid white',
-                              borderRadius: '50%',
-                              animation: 'spin 1s linear infinite'
-                            }} />
+                            <div className="w-2.5 h-2.5 border-2 border-transparent border-t-white rounded-full animate-spin" />
                           )}
                         </button>
 
@@ -1220,15 +1140,15 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                         {status === 'completed' && (
                           <button
                             onClick={() => removeImage(imageIndex)}
-                            style={buttonStyle('#ef4444')}
+                            className="px-3 py-1.5 bg-red-500 text-white border-none rounded cursor-pointer text-xs font-semibold flex items-center gap-1"
                           >
                             🗑️ 제거
                           </button>
                         )}
                       </div>
-                      
+
                       {/* 상태 표시 */}
-                      <div style={{ marginTop: '8px', fontSize: '12px' }}>
+                      <div className="mt-2 text-xs">
                         <StatusIndicator status={status} />
                       </div>
                     </div>
@@ -1243,51 +1163,19 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
       {/* 이미지 미리보기 모달 (v2 스타일 - 갤러리 포함) */}
       {previewModal.isOpen && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px'
-          }}
+          className="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-[1000] p-5"
           onClick={cropMode ? undefined : closePreviewModal}
         >
           <div
-            style={{
-              maxWidth: '90vw',
-              maxHeight: '90vh',
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}
+            className="max-w-[90vw] max-h-[90vh] relative flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 메인 이미지 */}
-            <div style={{
-              position: 'relative',
-              marginBottom: '20px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: '60vh'
-            }}>
+            <div className="relative mb-5 flex justify-center items-center min-h-[60vh]">
               {cropMode ? (
                 // 크롭 모드 - 드래그로 영역 선택
                 <div
-                  style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    cursor: 'crosshair',
-                    userSelect: 'none'
-                  }}
+                  className="relative inline-block cursor-crosshair select-none"
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
@@ -1297,43 +1185,24 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                     ref={cropImageRef}
                     src={previewModal.imageUrl}
                     alt={`이미지 ${previewModal.imageIndex}`}
-                    style={{
-                      maxWidth: '80vw',
-                      maxHeight: '70vh',
-                      objectFit: 'contain',
-                      display: 'block',
-                      pointerEvents: 'none'
-                    }}
+                    className="max-w-[80vw] max-h-[70vh] object-contain block pointer-events-none"
                   />
 
                   {/* 크롭 영역 표시 */}
                   {cropArea && (
                     <>
                       {/* 반투명 오버레이 */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                          pointerEvents: 'none'
-                        }}
-                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
 
                       {/* 선택 영역 (투명) */}
                       <div
+                        className="absolute border-2 border-emerald-500 bg-transparent pointer-events-none"
                         style={{
-                          position: 'absolute',
                           left: `${Math.min(cropArea.startX, cropArea.endX)}px`,
                           top: `${Math.min(cropArea.startY, cropArea.endY)}px`,
                           width: `${Math.abs(cropArea.endX - cropArea.startX)}px`,
                           height: `${Math.abs(cropArea.endY - cropArea.startY)}px`,
-                          border: '2px solid #10b981',
-                          backgroundColor: 'transparent',
-                          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
-                          pointerEvents: 'none'
+                          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)'
                         }}
                       />
                     </>
@@ -1344,13 +1213,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                 <img
                   src={previewModal.imageUrl}
                   alt={`이미지 ${previewModal.imageIndex}`}
-                  style={{
-                    maxWidth: '80vw',
-                    maxHeight: '70vh',
-                    objectFit: 'contain',
-                    borderRadius: '8px',
-                    display: 'block'
-                  }}
+                  className="max-w-[80vw] max-h-[70vh] object-contain rounded-lg block"
                 />
               )}
             </div>
@@ -1358,68 +1221,25 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
             {/* 닫기 버튼 */}
             <button
               onClick={closePreviewModal}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                fontSize: '20px',
-                cursor: 'pointer',
-                zIndex: 10
-              }}
+              className="absolute top-2.5 right-2.5 bg-black bg-opacity-70 text-white border-none rounded-full w-10 h-10 text-xl cursor-pointer z-10"
             >
               ✕
             </button>
 
             {/* 하단 버튼들 - 이미지 아래 중앙 */}
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'center',
-              marginTop: '16px',
-              zIndex: 10
-            }}>
+            <div className="flex gap-3 justify-center mt-4 z-10">
               {cropMode ? (
                 // 크롭 모드 버튼들
                 <>
                   <button
                     onClick={cancelCrop}
-                    style={{
-                      backgroundColor: '#6b7280',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+                    className="bg-gray-500 text-white border-none rounded-lg px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-gray-600"
                   >
                     ❌ 취소
                   </button>
                   <button
                     onClick={completeCrop}
-                    style={{
-                      backgroundColor: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                    className="bg-emerald-500 text-white border-none rounded-lg px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-emerald-600"
                   >
                     ✂️ 자르기 완료
                   </button>
@@ -1429,37 +1249,13 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                 <>
                   <button
                     onClick={startCrop}
-                    style={{
-                      backgroundColor: '#f59e0b',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d97706'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f59e0b'}
+                    className="bg-amber-500 text-white border-none rounded-lg px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-amber-600"
                   >
                     ✂️ 자르기
                   </button>
                   <button
                     onClick={() => downloadImage(previewModal.imageUrl, previewModal.imageIndex)}
-                    style={{
-                      backgroundColor: '#2563eb',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                    className="bg-blue-600 text-white border-none rounded-lg px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 hover:bg-blue-700"
                   >
                     💾 저장
                   </button>
@@ -1472,80 +1268,31 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
               const currentImageUrl = imageUrls[previewModal.imageIndex];
               const historyImages = imageHistory[previewModal.imageIndex] || [];
               const allImages = [currentImageUrl, ...historyImages].filter(Boolean);
-              
+
               return allImages.length > 1 && (
-                <div style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.75)',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  maxWidth: '1152px'
-                }}>
-                  <div style={{
-                    color: 'white',
-                    fontSize: '14px',
-                    marginBottom: '12px',
-                    textAlign: 'center'
-                  }}>
+                <div className="bg-black bg-opacity-75 rounded-lg p-4 max-w-screen-xl">
+                  <div className="text-white text-sm mb-3 text-center">
                     📸 이미지 갤러리 ({allImages.length}개) - 클릭해서 선택하세요
                   </div>
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    overflowX: 'auto',
-                    justifyContent: 'center',
-                    paddingBottom: '4px'
-                  }}>
+                  <div className="flex gap-2 overflow-x-auto justify-center pb-1">
                     {allImages.map((imageUrl, index) => (
                       <div
                         key={index}
-                        style={{
-                          position: 'relative',
-                          flexShrink: 0,
-                          cursor: 'pointer',
-                          borderRadius: '8px',
-                          overflow: 'hidden',
-                          border: imageUrl === previewModal.imageUrl ? '2px solid #3b82f6' : '2px solid #6b7280',
-                          transform: imageUrl === previewModal.imageUrl ? 'scale(1.05)' : 'scale(1)',
-                          transition: 'all 0.2s',
-                          boxShadow: imageUrl === previewModal.imageUrl ? '0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.06)' : 'none'
-                        }}
+                        className={`relative flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                          imageUrl === previewModal.imageUrl
+                            ? 'border-blue-500 scale-105 shadow-md'
+                            : 'border-gray-500 scale-100 hover:border-gray-400'
+                        }`}
                         onClick={() => selectImageFromGallery(previewModal.imageIndex, imageUrl)}
-                        onMouseEnter={(e) => {
-                          if (imageUrl !== previewModal.imageUrl) {
-                            e.currentTarget.style.borderColor = '#9ca3af';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (imageUrl !== previewModal.imageUrl) {
-                            e.currentTarget.style.borderColor = '#6b7280';
-                          }
-                        }}
                       >
                         <img
                           src={imageUrl}
                           alt={`버전 ${index + 1}`}
-                          style={{
-                            width: '96px',
-                            height: '96px',
-                            objectFit: 'cover'
-                          }}
+                          className="w-24 h-24 object-cover"
                         />
                         {imageUrl === previewModal.imageUrl && (
-                          <div style={{
-                            position: 'absolute',
-                            inset: 0,
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}>
-                            <div style={{
-                              backgroundColor: '#3b82f6',
-                              color: 'white',
-                              fontSize: '12px',
-                              padding: '4px 8px',
-                              borderRadius: '4px'
-                            }}>
+                          <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                            <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded">
                               현재
                             </div>
                           </div>
@@ -1562,132 +1309,51 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
       
       {/* 이미지 선택 모달 (현재 vs 새로운) */}
       {selectionModal.isOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1001
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '24px',
-            maxWidth: '1024px',
-            maxHeight: '90vh',
-            overflow: 'auto'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '700',
-              textAlign: 'center',
-              marginBottom: '16px'
-            }}>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[1001]">
+          <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-auto">
+            <h3 className="text-lg font-bold text-center mb-4">
               🎨 이미지 {selectionModal.imageIndex} - 새로운 버전이 생성되었습니다!
             </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              textAlign: 'center',
-              marginBottom: '24px'
-            }}>
+            <p className="text-sm text-gray-500 text-center mb-6">
               어떤 이미지를 사용하시겠습니까?
             </p>
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '24px',
-              marginBottom: '24px'
-            }}>
+
+            <div className="grid grid-cols-2 gap-6 mb-6">
               {/* 현재 이미지 */}
-              <div style={{ textAlign: 'center' }}>
-                <h4 style={{
-                  fontWeight: '600',
-                  marginBottom: '8px',
-                  color: '#2563eb'
-                }}>
+              <div className="text-center">
+                <h4 className="font-semibold mb-2 text-blue-600">
                   🔷 현재 이미지 (기존)
                 </h4>
-                <div style={{
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  backgroundColor: '#f9fafb'
-                }}>
-                  <img 
-                    src={selectionModal.currentUrl} 
-                    alt="현재 이미지" 
-                    style={{
-                      width: '100%',
-                      height: '256px',
-                      objectFit: 'contain'
-                    }}
+                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <img
+                    src={selectionModal.currentUrl}
+                    alt="현재 이미지"
+                    className="w-full h-64 object-contain"
                   />
                 </div>
                 <button
                   onClick={() => handleImageSelection(false)}
-                  style={{
-                    marginTop: '12px',
-                    padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+                  className="mt-3 px-4 py-2 bg-blue-500 text-white border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-blue-600"
                 >
                   ✅ 현재 이미지 유지
                 </button>
               </div>
-              
+
               {/* 새 이미지 */}
-              <div style={{ textAlign: 'center' }}>
-                <h4 style={{
-                  fontWeight: '600',
-                  marginBottom: '8px',
-                  color: '#16a34a'
-                }}>
+              <div className="text-center">
+                <h4 className="font-semibold mb-2 text-green-600">
                   🔶 새 이미지 (AI 생성)
                 </h4>
-                <div style={{
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  backgroundColor: '#f9fafb'
-                }}>
-                  <img 
-                    src={selectionModal.newUrl} 
-                    alt="새 이미지" 
-                    style={{
-                      width: '100%',
-                      height: '256px',
-                      objectFit: 'contain'
-                    }}
+                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <img
+                    src={selectionModal.newUrl}
+                    alt="새 이미지"
+                    className="w-full h-64 object-contain"
                   />
                 </div>
                 <button
                   onClick={() => handleImageSelection(true)}
-                  style={{
-                    marginTop: '12px',
-                    padding: '8px 16px',
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                  className="mt-3 px-4 py-2 bg-emerald-500 text-white border-none rounded-md cursor-pointer transition-colors duration-200 hover:bg-emerald-600"
                 >
                   🆕 새 이미지 사용
                 </button>
@@ -1699,38 +1365,12 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
 
       {/* URL 입력 모달 */}
       {urlInputModal.isOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1002
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '32px',
-            maxWidth: '600px',
-            width: '90%'
-          }}>
-            <h3 style={{
-              fontSize: '20px',
-              fontWeight: '700',
-              marginBottom: '16px',
-              color: '#1f2937'
-            }}>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[1002]">
+          <div className="bg-white rounded-xl p-8 max-w-[600px] w-[90%]">
+            <h3 className="text-xl font-bold mb-4 text-gray-800">
               📋 이미지 URL 붙여넣기
             </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '24px'
-            }}>
+            <p className="text-sm text-gray-500 mb-6">
               💡 이미지 우클릭 → "이미지 주소 복사" 후 아래에 붙여넣으세요 (Ctrl+V)
             </p>
 
@@ -1745,58 +1385,19 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
                   handleImageFromURL();
                 }
               }}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '14px',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                marginBottom: '24px',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#10b981'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              className="w-full px-4 py-3 text-sm border-2 border-gray-200 rounded-lg mb-6 outline-none transition-colors duration-200 focus:border-emerald-500"
             />
 
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end'
-            }}>
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={closeUrlInputModal}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+                className="px-5 py-2.5 bg-gray-500 text-white border-none rounded-lg text-sm font-semibold cursor-pointer transition-colors duration-200 hover:bg-gray-600"
               >
                 취소
               </button>
               <button
                 onClick={handleImageFromURL}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                className="px-5 py-2.5 bg-emerald-500 text-white border-none rounded-lg text-sm font-semibold cursor-pointer transition-colors duration-200 hover:bg-emerald-600"
               >
                 ✅ 확인
               </button>
@@ -1804,16 +1405,6 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
           </div>
         </div>
       )}
-
-      {/* CSS 애니메이션 */}
-      <style>
-        {`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </>
   );
 };
