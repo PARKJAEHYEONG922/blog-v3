@@ -171,12 +171,18 @@ export const useLLMSettings = (onSettingsChange?: () => void) => {
 
   // API Key 삭제
   const deleteApiKey = async (category: keyof LLMSettings) => {
+    const provider = settings[category].provider;
+
     const newSettings = { ...settings };
     newSettings[category] = {
       ...newSettings[category],
       apiKey: '',
       model: ''
     };
+
+    // Provider API 키도 삭제
+    const newProviderApiKeys = { ...providerApiKeys };
+    newProviderApiKeys[provider as keyof ProviderApiKeys] = '';
 
     const newLastUsedSettings = { ...lastUsedSettings };
     if (category === 'image') {
@@ -186,11 +192,12 @@ export const useLLMSettings = (onSettingsChange?: () => void) => {
     }
 
     await window.electronAPI?.saveLLMSettings?.({
-      providerApiKeys,
+      providerApiKeys: newProviderApiKeys,
       lastUsedSettings: newLastUsedSettings
     });
 
     setSettings(newSettings);
+    setProviderApiKeys(newProviderApiKeys);
     setLastUsedSettings(newLastUsedSettings);
 
     onSettingsChange?.();
