@@ -18,7 +18,7 @@ export function useAsync<T>(
 
   const execute = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    
+
     try {
       const result = await asyncFunction();
       setState({ data: result, loading: false, error: null });
@@ -29,11 +29,12 @@ export function useAsync<T>(
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
-  }, dependencies);
+  }, [asyncFunction]);
 
   useEffect(() => {
     execute();
-  }, [execute]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, dependencies);
 
   return { ...state, execute };
 }

@@ -183,10 +183,29 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         acc[key] = value;
         return acc;
       }, {} as { [key: string]: string });
-      
+
       onImagesChange(stringKeyImageUrls);
     }
   }, [imageUrls, onImagesChange]);
+
+  // Blob URL 메모리 누수 방지: 컴포넌트 언마운트 시 모든 Blob URL 정리
+  useEffect(() => {
+    return () => {
+      Object.values(imageUrls).forEach(url => {
+        if (url && url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+
+      Object.values(imageHistory).forEach(historyArray => {
+        historyArray.forEach(url => {
+          if (url && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        });
+      });
+    };
+  }, []);
   
   // 이미지 상태 가져오기 헬퍼
   const getImageStatus = (imageIndex: number): ImageStatus => imageStatus[imageIndex] || 'empty';
