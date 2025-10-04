@@ -1,403 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '@/shared/components/ui/Button';
-import { LLMConfig } from '@/shared/services/llm/types/llm.types';
-import { handleError } from '@/shared/utils/error-handler';
-import { PROVIDERS, TEXT_PROVIDERS, IMAGE_PROVIDERS } from '../constants/llm-providers';
-import { MODELS_BY_PROVIDER, getModels, ModelInfo } from '../constants/llm-models';
-import { IMAGE_GENERATION_OPTIONS, getImageOptions } from '../constants/image-options';
-import { getDefaultImageOptions } from '../utils/provider-defaults';
+import { TEXT_PROVIDERS, IMAGE_PROVIDERS, Provider } from '../constants/llm-providers';
+import { getModels, ModelInfo } from '../constants/llm-models';
+import { IMAGE_GENERATION_OPTIONS } from '../constants/image-options';
+import { useLLMSettings, LLMSettings as LLMSettingsType, ProviderApiKeys } from '../hooks/useLLMSettings';
+import { useApiKeyTest } from '../hooks/useApiKeyTest';
 
 interface LLMSettingsProps {
   onClose: () => void;
   onSettingsChange?: () => void;
 }
 
-interface LLMSettings {
-  writing: LLMConfig;
-  image: LLMConfig;
-}
-
-interface ProviderApiKeys {
-  claude: string;
-  openai: string;
-  gemini: string;
-  runware: string;
-}
-
-// Provider와 ModelInfo 인터페이스는 이제 constants에서 import
-
 const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) => {
   const [activeTab, setActiveTab] = useState<'writing' | 'image'>('writing');
-  const [providerApiKeys, setProviderApiKeys] = useState<ProviderApiKeys>({
-    claude: '',
-    openai: '',
-    gemini: '',
-    runware: ''
-  });
 
-  // LLM 설정 (UI에서 임시로 입력하는 값)
-  const [settings, setSettings] = useState<LLMSettings>({
-    writing: { provider: 'gemini', model: 'gemini-2.0-flash-exp', apiKey: '' },
-    image: { provider: 'gemini', model: 'gemini-2.5-flash-image-preview', apiKey: '', style: 'photographic', quality: 'high', size: '1024x1024' }
-  });
+  // Custom hooks 사용
+  const {
+    settings,
+    providerApiKeys,
+    lastUsedSettings,
+    handleProviderChange: handleProviderChangeHook,
+    handleModelChange: handleModelChangeHook,
+    handleStyleChange: handleStyleChangeHook,
+    handleSizeChange: handleSizeChangeHook,
+    handleQualityChange: handleQualityChangeHook,
+    handleApiKeyChange,
+    deleteApiKey: deleteApiKeyHook,
+    saveSettings: saveSettingsHook,
+    saveAfterTest
+  } = useLLMSettings(onSettingsChange);
 
-  // 마지막 사용 설정 (provider, model, style/quality/size만 저장)
-  // API 키는 providerApiKeys에서 조회
-  const [lastUsedSettings, setLastUsedSettings] = useState<{
-    writing: { provider: string; model: string };
-    image: { provider: string; model: string; style?: string; quality?: string; size?: string };
-  }>({
-    writing: { provider: 'gemini', model: '' },
-    image: { provider: 'gemini', model: '', style: 'photographic', quality: 'high', size: '1024x1024' }
-  });
+  const { testingStatus, testApiKey: testApiKeyHook, resetTestStatus } = useApiKeyTest();
 
-  // API 키 테스트 상태
-  const [testingStatus, setTestingStatus] = useState<{
-    [key: string]: {
-      testing: boolean;
-      success: boolean;
-      message: string;
-    }
-  }>({});
-
-  // 설정 로드
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const cachedData = await window.electronAPI?.getLLMSettings?.();
-        if (cachedData) {
-          // Provider별 API 키 로드
-          setProviderApiKeys(cachedData.providerApiKeys || { claude: '', openai: '', gemini: '', runware: '' });
-
-          // 마지막 사용 설정 로드
-          const lastUsed = cachedData.lastUsedSettings || {
-            writing: { provider: '', model: '' },
-            image: { provider: '', model: '', style: 'photographic', quality: 'high', size: '1024x1024' }
-          };
-          setLastUsedSettings(lastUsed);
-
-          // UI에 마지막 사용 설정 반영 (provider, model만)
-          if (lastUsed.writing.provider) {
-            const writingApiKey = cachedData.providerApiKeys?.[lastUsed.writing.provider as keyof ProviderApiKeys] || '';
-            setSettings(prev => ({
-              ...prev,
-              writing: {
-                provider: lastUsed.writing.provider as LLMConfig['provider'],
-                model: lastUsed.writing.model,
-                apiKey: writingApiKey
-              }
-            }));
-          }
-
-          if (lastUsed.image.provider) {
-            const imageApiKey = cachedData.providerApiKeys?.[lastUsed.image.provider as keyof ProviderApiKeys] || '';
-            setSettings(prev => ({
-              ...prev,
-              image: {
-                provider: lastUsed.image.provider as LLMConfig['provider'],
-                model: lastUsed.image.model,
-                apiKey: imageApiKey,
-                style: lastUsed.image.style || 'photographic',
-                quality: lastUsed.image.quality || 'high',
-                size: lastUsed.image.size || '1024x1024'
-              }
-            }));
-          }
-        }
-      } catch (error) {
-        // 기본값 사용
-      }
-    };
-    loadSettings();
-  }, []);
-
-  // Providers와 models는 이제 constants에서 import하여 사용
-
-  const handleProviderChange = (tab: keyof LLMSettings, provider: string) => {
-    const newSettings = { ...settings };
-    newSettings[tab] = {
-      ...newSettings[tab],
-      provider: provider as 'openai' | 'claude' | 'gemini' | 'runware',
-      model: '', // 모델 초기화 (사용자가 직접 선택)
-      apiKey: providerApiKeys[provider as keyof ProviderApiKeys] || ''
-    };
-
-    // 이미지 탭에서 provider 변경 시 해당 provider의 기본값으로 초기화
-    if (tab === 'image') {
-      const defaults = getDefaultImageOptions(provider);
-      newSettings[tab].size = defaults.size;
-      newSettings[tab].style = defaults.style;
-      newSettings[tab].quality = defaults.quality;
-    }
-
-    setSettings(newSettings);
-
-    // provider 변경 시 테스트 상태 초기화
-    setTestingStatus(prev => ({
-      ...prev,
-      [tab]: { testing: false, success: false, message: '' }
-    }));
+  // 테스트 상태 초기화를 포함한 핸들러들
+  const handleProviderChange = (tab: keyof LLMSettingsType, provider: string) => {
+    handleProviderChangeHook(tab, provider);
+    resetTestStatus(tab);
   };
 
-  const handleModelChange = (tab: keyof LLMSettings, model: string) => {
-    const newSettings = { ...settings };
-    newSettings[tab] = {
-      ...newSettings[tab],
-      model
-    };
-    setSettings(newSettings);
-
-    // 모델 변경 시 테스트 상태 초기화
-    setTestingStatus(prev => ({
-      ...prev,
-      [tab]: { testing: false, success: false, message: '' }
-    }));
+  const handleModelChange = (tab: keyof LLMSettingsType, model: string) => {
+    handleModelChangeHook(tab, model);
+    resetTestStatus(tab);
   };
 
-  const handleStyleChange = (tab: keyof LLMSettings, style: string) => {
-    const newSettings = { ...settings };
-    newSettings[tab] = {
-      ...newSettings[tab],
-      style
-    };
-    setSettings(newSettings);
-
-    // 스타일 변경 시 테스트 상태 초기화
-    setTestingStatus(prev => ({
-      ...prev,
-      [tab]: { testing: false, success: false, message: '' }
-    }));
+  const handleStyleChange = (tab: keyof LLMSettingsType, style: string) => {
+    handleStyleChangeHook(tab, style);
+    resetTestStatus(tab);
   };
 
-  const handleSizeChange = (tab: keyof LLMSettings, size: string) => {
-    const newSettings = { ...settings };
-    newSettings[tab] = {
-      ...newSettings[tab],
-      size
-    };
-    setSettings(newSettings);
-
-    // 사이즈 변경 시 테스트 상태 초기화
-    setTestingStatus(prev => ({
-      ...prev,
-      [tab]: { testing: false, success: false, message: '' }
-    }));
+  const handleSizeChange = (tab: keyof LLMSettingsType, size: string) => {
+    handleSizeChangeHook(tab, size);
+    resetTestStatus(tab);
   };
 
-  const handleQualityChange = (tab: keyof LLMSettings, quality: string) => {
-    const newSettings = { ...settings };
-    newSettings[tab] = {
-      ...newSettings[tab],
-      quality
-    };
-    setSettings(newSettings);
-
-    // 품질 변경 시 테스트 상태 초기화
-    setTestingStatus(prev => ({
-      ...prev,
-      [tab]: { testing: false, success: false, message: '' }
-    }));
+  const handleQualityChange = (tab: keyof LLMSettingsType, quality: string) => {
+    handleQualityChangeHook(tab, quality);
+    resetTestStatus(tab);
   };
 
-  const handleApiKeyChange = (provider: string, apiKey: string) => {
-    const newKeys = { ...providerApiKeys };
-    newKeys[provider as keyof ProviderApiKeys] = apiKey;
-    setProviderApiKeys(newKeys);
-
-    // 같은 provider를 사용하는 모든 탭에 API 키 적용
-    const newSettings = { ...settings };
-    Object.keys(newSettings).forEach(tab => {
-      if (newSettings[tab as keyof LLMSettings].provider === provider) {
-        newSettings[tab as keyof LLMSettings].apiKey = apiKey;
-      }
+  const testApiKey = async (category: keyof LLMSettingsType) => {
+    await testApiKeyHook(category, settings[category], async () => {
+      await saveAfterTest(category, testingStatus);
     });
-    setSettings(newSettings);
   };
 
-  const testApiKey = async (category: keyof LLMSettings) => {
-    const { provider, apiKey, model, size, style, quality } = settings[category];
-
-    if (!apiKey || !provider || !model) {
-      setTestingStatus(prev => ({
-        ...prev,
-        [category]: { testing: false, success: false, message: '❌ 제공자, 모델, API 키를 모두 입력해주세요.' }
-      }));
-      return;
-    }
-
-    // 테스트 시작
-    setTestingStatus(prev => ({
-      ...prev,
-      [category]: { testing: true, success: false, message: '연결 테스트 중...' }
-    }));
-
-    try {
-      // 실제 API 테스트 (category, model, size, style, quality 전달)
-      const result = await testAPIConnection(provider, apiKey, category, model, size, style, quality);
-      
-      if (result.success) {
-        // 성공
-        setTestingStatus(prev => ({
-          ...prev,
-          [category]: {
-            testing: false,
-            success: true,
-            message: `✅ ${provider.toUpperCase()} API 연결 성공! ${model} 모델이 적용되었습니다.`
-          }
-        }));
-
-        // 커스텀 이벤트 발생 (2단계에서 실시간 감지용)
-        window.dispatchEvent(new CustomEvent('llm-settings-changed', {
-          detail: { category, provider, model }
-        }));
-        
-        // 테스트 성공한 설정을 lastUsedSettings에 반영 (API 키 제외)
-        const { apiKey, ...settingsWithoutKey } = settings[category];
-        const newLastUsedSettings = {
-          ...lastUsedSettings,
-          [category]: settingsWithoutKey
-        };
-        setLastUsedSettings(newLastUsedSettings);
-
-        // Provider별 API 키 업데이트
-        const newProviderApiKeys = {
-          ...providerApiKeys,
-          [provider]: apiKey
-        };
-        setProviderApiKeys(newProviderApiKeys);
-
-        // 파일에도 자동 저장
-        try {
-          await window.electronAPI?.saveLLMSettings?.({
-            lastUsedSettings: newLastUsedSettings,
-            providerApiKeys: newProviderApiKeys,
-            testingStatus
-          });
-        } catch (error) {
-          handleError(error, '자동 저장 실패:');
-        }
-        
-        // 설정 변경 시 부모 컴포넌트에 알림
-        if (onSettingsChange) {
-          onSettingsChange();
-        }
-        
-      } else {
-        // 실패
-        setTestingStatus(prev => ({
-          ...prev,
-          [category]: { 
-            testing: false, 
-            success: false, 
-            message: `❌ 연결 실패: ${result.message}` 
-          }
-        }));
-      }
-    } catch (error) {
-      // 에러
-      handleError(error, 'API 테스트 에러:');
-      setTestingStatus(prev => ({
-        ...prev,
-        [category]: { 
-          testing: false, 
-          success: false, 
-          message: `❌ 연결 테스트 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}` 
-        }
-      }));
-    }
-  };
-
-  // API 키 삭제 함수
-  const deleteApiKey = async (category: keyof LLMSettings) => {
-    // 해당 카테고리의 설정만 초기화 (다른 카테고리의 API 키는 유지)
-    const newSettings = { ...settings };
-    newSettings[category] = {
-      ...newSettings[category],
-      apiKey: '',
-      model: ''
-    };
-
-    // 마지막 사용 설정 초기화
-    const newLastUsedSettings = { ...lastUsedSettings };
-    if (category === 'image') {
-      newLastUsedSettings[category] = { provider: 'gemini', model: '', style: 'photographic', quality: 'high', size: '1024x1024' };
-    } else {
-      newLastUsedSettings[category] = { provider: 'gemini', model: '' };
-    }
-
-    // 설정 파일에 직접 저장
-    await window.electronAPI?.saveLLMSettings?.({
-      ...newSettings,
-      lastUsedSettings: newLastUsedSettings
-    });
-
-    // State 업데이트 (providerApiKeys는 건드리지 않음 - 다른 카테고리가 사용 중일 수 있음)
-    setSettings(newSettings);
-    setLastUsedSettings(newLastUsedSettings);
-
-    // 테스트 상태 초기화
-    setTestingStatus(prev => ({
-      ...prev,
-      [category]: { testing: false, success: false, message: '' }
-    }));
-
-    // 설정 변경 시 부모 컴포넌트에 알림
-    if (onSettingsChange) {
-      onSettingsChange();
-    }
-  };
-
-  // 실제 API 연결 테스트 (Electron IPC 사용)
-  const testAPIConnection = async (provider: string, apiKey: string, category?: string, model?: string, size?: string, style?: string, quality?: string): Promise<{success: boolean, message: string}> => {
-    console.log(`🔍 Testing ${provider} API with key: ${apiKey.substring(0, 10)}...`);
-
-    try {
-      // Electron IPC를 통해 Main process에서 API 테스트 실행
-      const result = await window.electronAPI?.testLLMConfig?.({ provider, apiKey, category, model, size, style, quality });
-      
-      console.log(`📡 ${provider} API 테스트 결과:`, result);
-      
-      if (!result) {
-        return { success: false, message: '테스트 응답을 받지 못했습니다.' };
-      }
-      
-      // result에 message가 없고 error가 있으면 error를 message로 변환
-      if ('error' in result && !('message' in result)) {
-        return { 
-          success: result.success, 
-          message: result.error || (result.success ? '연결 성공' : '연결 실패') 
-        };
-      }
-      
-      return result as { success: boolean, message: string };
-      
-    } catch (error) {
-      handleError(error, `❌ ${provider} API 테스트 실패:`);
-      
-      if (error instanceof Error) {
-        return { success: false, message: `연결 오류: ${error.message}` };
-      }
-      
-      return { success: false, message: `연결 테스트 실패: ${String(error)}` };
-    }
+  const deleteApiKey = async (category: keyof LLMSettingsType) => {
+    await deleteApiKeyHook(category);
+    resetTestStatus(category);
   };
 
   const saveSettings = async () => {
-    try {
-      await window.electronAPI?.saveLLMSettings?.({
-        lastUsedSettings,
-        providerApiKeys,
-        testingStatus
-      });
-      
-      onSettingsChange?.();
-      onClose();
-    } catch (error) {
-      handleError(error, '설정 저장 실패:');
-    }
+    await saveSettingsHook(testingStatus);
+    onClose();
   };
 
-  const getAvailableModels = (tab: keyof LLMSettings, provider: string) => {
+  const getAvailableModels = (tab: keyof LLMSettingsType, provider: string) => {
     const category = tab === 'image' ? 'image' : 'text';
     return getModels(provider, category);
   };

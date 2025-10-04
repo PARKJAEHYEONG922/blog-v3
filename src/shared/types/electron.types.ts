@@ -82,7 +82,7 @@ export interface ElectronAPI {
   // LLM 설정
   getLLMSettings: () => Promise<AppConfig['llm']>;
   saveLLMSettings: (settings: AppConfig['llm']) => Promise<void>;
-  testLLMConfig: (config: { provider: string; apiKey: string; model?: string }) => Promise<{ success: boolean; error?: string }>;
+  testLLMConfig: (config: { provider: string; apiKey: string; model?: string; category?: string; size?: string; style?: string; quality?: string }) => Promise<{ success: boolean; error?: string; message?: string }>;
   generateTitles: (data: { systemPrompt: string; userPrompt: string }) => Promise<{ success: boolean; content?: string; titles?: string[]; error?: string; usage?: { promptTokens: number; completionTokens: number; totalTokens: number } }>;
 
   // 로그 관련

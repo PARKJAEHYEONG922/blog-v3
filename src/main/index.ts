@@ -346,9 +346,9 @@ ipcMain.handle('llm:test-config', async (_event, config: { provider: string; api
     // category가 'image'면 이미지 생성으로 테스트, 아니면 텍스트 생성으로 테스트
     if (config.category === 'image') {
       await client.generateImage('test image', {
-        style: config.style,
-        quality: config.quality,
-        size: config.size
+        style: config.style as any,
+        quality: config.quality as any,
+        size: config.size as any
       });
     } else {
       await client.generateText([

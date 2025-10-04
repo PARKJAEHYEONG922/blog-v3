@@ -67,7 +67,7 @@ export const IMAGE_GENERATION_OPTIONS = {
 export const getImageOptions = (
   provider: string,
   optionType: 'styles' | 'qualities' | 'sizes'
-): OptionItem[] => {
+): readonly OptionItem[] => {
   const providerOptions = IMAGE_GENERATION_OPTIONS[provider as keyof typeof IMAGE_GENERATION_OPTIONS];
-  return providerOptions?.[optionType] || [];
+  return (providerOptions?.[optionType] || []) as readonly OptionItem[];
 };
