@@ -30,8 +30,8 @@ const AppContent: React.FC = () => {
   const refreshModelStatus = useCallback(async () => {
     try {
       const llmSettings = await window.electronAPI?.getLLMSettings?.();
-      if (llmSettings?.appliedSettings) {
-        const { writing, image } = llmSettings.appliedSettings;
+      if (llmSettings?.lastUsedSettings) {
+        const { writing, image } = llmSettings.lastUsedSettings;
 
         setAiModelStatus({
           writing: writing?.provider && writing?.model ?

@@ -261,20 +261,25 @@ ipcMain.handle('image:generate', async (_event, prompt: string) => {
       settings = JSON.parse(settingsData);
     }
     
-    if (!settings?.appliedSettings?.image) {
+    if (!settings?.lastUsedSettings?.image) {
       throw new Error('이미지 생성 API가 설정되지 않았습니다.');
     }
-    
-    const imageConfig = settings.appliedSettings.image;
-    
+
+    const imageConfig = settings.lastUsedSettings.image;
+    const apiKey = settings.providerApiKeys?.[imageConfig.provider];
+
+    if (!apiKey) {
+      throw new Error(`${imageConfig.provider} API 키가 설정되지 않았습니다.`);
+    }
+
     // LLMClientFactory 사용
     const { LLMClientFactory } = require('../shared/services/llm');
-    
+
     // Image client 설정
     LLMClientFactory.setImageClient({
       provider: imageConfig.provider,
       model: imageConfig.model,
-      apiKey: imageConfig.apiKey,
+      apiKey: apiKey,
       style: imageConfig.style
     });
     
@@ -372,20 +377,25 @@ ipcMain.handle('llm:generate-titles', async (_event, data: { systemPrompt: strin
       settings = JSON.parse(settingsData);
     }
     
-    if (!settings?.appliedSettings?.writing) {
+    if (!settings?.lastUsedSettings?.writing) {
       return { success: false, error: '글쓰기 API가 설정되지 않았습니다.' };
     }
-    
-    const writingConfig = settings.appliedSettings.writing;
-    
+
+    const writingConfig = settings.lastUsedSettings.writing;
+    const apiKey = settings.providerApiKeys?.[writingConfig.provider];
+
+    if (!apiKey) {
+      return { success: false, error: `${writingConfig.provider} API 키가 설정되지 않았습니다.` };
+    }
+
     // LLMClientFactory 사용
     const { LLMClientFactory } = require('../shared/services/llm');
-    
+
     // Writing client 설정
     LLMClientFactory.setWritingClient({
       provider: writingConfig.provider,
       model: writingConfig.model,
-      apiKey: writingConfig.apiKey
+      apiKey: apiKey
     });
     
     // Writing client로 텍스트 생성

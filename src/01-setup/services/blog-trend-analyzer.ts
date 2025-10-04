@@ -212,16 +212,21 @@ ${blogsInfo}
       // LLM 설정 가져오기 (글쓰기 AI 사용)
       const settingsData = await window.electronAPI.getLLMSettings();
 
-      if (!settingsData?.appliedSettings?.writing?.provider) {
+      if (!settingsData?.lastUsedSettings?.writing?.provider) {
         throw new Error('글쓰기 AI가 설정되지 않았습니다. 설정에서 LLM을 구성해주세요.');
       }
 
-      const writingLLM = settingsData.appliedSettings.writing;
+      const writingLLM = settingsData.lastUsedSettings.writing;
+      const apiKey = settingsData.providerApiKeys?.[writingLLM.provider as keyof typeof settingsData.providerApiKeys];
+
+      if (!apiKey) {
+        throw new Error(`${writingLLM.provider} API 키가 설정되지 않았습니다.`);
+      }
 
       // LLM 클라이언트 생성
       const client = LLMClientFactory.createClient({
         provider: writingLLM.provider,
-        apiKey: writingLLM.apiKey,
+        apiKey: apiKey,
         model: writingLLM.model
       });
 
@@ -334,16 +339,21 @@ ${blogsInfo}
       // LLM 설정 가져오기
       const settingsData = await window.electronAPI.getLLMSettings();
 
-      if (!settingsData?.appliedSettings?.writing?.provider) {
+      if (!settingsData?.lastUsedSettings?.writing?.provider) {
         throw new Error('글쓰기 AI가 설정되지 않았습니다.');
       }
 
-      const writingLLM = settingsData.appliedSettings.writing;
+      const writingLLM = settingsData.lastUsedSettings.writing;
+      const apiKey = settingsData.providerApiKeys?.[writingLLM.provider as keyof typeof settingsData.providerApiKeys];
+
+      if (!apiKey) {
+        throw new Error(`${writingLLM.provider} API 키가 설정되지 않았습니다.`);
+      }
 
       // LLM 클라이언트 생성
       const client = LLMClientFactory.createClient({
         provider: writingLLM.provider,
-        apiKey: writingLLM.apiKey,
+        apiKey: apiKey,
         model: writingLLM.model
       });
 

@@ -83,7 +83,7 @@ ${blogContent}
 
       // 글쓰기 AI 설정 확인 (IPC 통신 사용)
       const llmSettings = await window.electronAPI?.getLLMSettings?.();
-      if (!llmSettings?.appliedSettings?.writing?.provider) {
+      if (!llmSettings?.lastUsedSettings?.writing?.provider) {
         throw new Error('글쓰기 AI가 설정되지 않았습니다.');
       }
 

@@ -20,8 +20,9 @@ class TitleGenerationServiceClass {
   } | null> {
     try {
       const llmSettings = await window.electronAPI?.getLLMSettings?.();
-      if (llmSettings?.appliedSettings?.writing) {
-        const { provider, model, apiKey } = llmSettings.appliedSettings.writing;
+      if (llmSettings?.lastUsedSettings?.writing && llmSettings?.providerApiKeys) {
+        const { provider, model } = llmSettings.lastUsedSettings.writing;
+        const apiKey = llmSettings.providerApiKeys[provider as keyof typeof llmSettings.providerApiKeys];
         if (provider && model && apiKey) {
           return { provider, model, apiKey };
         }

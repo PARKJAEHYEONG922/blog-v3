@@ -23,11 +23,16 @@ export class ImageService {
 
       // LLM 설정 로드
       const settings = await this.settingsService.getSettings();
-      if (!settings?.appliedSettings?.writing) {
+      if (!settings?.lastUsedSettings?.writing) {
         throw new Error('글쓰기 API가 설정되지 않았습니다.');
       }
 
-      const writingConfig = settings.appliedSettings.writing;
+      const writingConfig = settings.lastUsedSettings.writing;
+      const apiKey = settings.providerApiKeys?.[writingConfig.provider];
+
+      if (!apiKey) {
+        throw new Error(`${writingConfig.provider} API 키가 설정되지 않았습니다.`);
+      }
 
       // LLMClientFactory 사용
       const { LLMClientFactory } = require('../../shared/services/llm');
@@ -36,7 +41,7 @@ export class ImageService {
       LLMClientFactory.setWritingClient({
         provider: writingConfig.provider,
         model: writingConfig.model,
-        apiKey: writingConfig.apiKey
+        apiKey: apiKey
       });
 
       // Writing client로 프롬프트 생성

@@ -90,8 +90,8 @@ const Step2Generation: React.FC = () => {
       try {
         // IPC 직접 호출
         const llmSettings = await window.electronAPI.getLLMSettings();
-        if (llmSettings?.appliedSettings?.image) {
-          const { provider, model } = llmSettings.appliedSettings.image;
+        if (llmSettings?.lastUsedSettings?.image) {
+          const { provider, model } = llmSettings.lastUsedSettings.image;
           if (provider && model) {
             setImageAIInfo(`✅ ${provider} ${model}`);
           } else {

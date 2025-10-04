@@ -102,8 +102,8 @@ export const useGeneration = (): UseGenerationReturn => {
     try {
       // IPC 직접 호출
       const llmSettings = await window.electronAPI.getLLMSettings();
-      if (llmSettings?.appliedSettings) {
-        const { writing, image } = llmSettings.appliedSettings;
+      if (llmSettings?.lastUsedSettings) {
+        const { writing, image } = llmSettings.lastUsedSettings;
 
         setAiModelStatus({
           writing: writing?.provider && writing?.model ?
