@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
@@ -34,9 +34,6 @@ const Header: React.FC<HeaderProps> = ({
               <h1 className="text-xl font-bold text-gray-900 leading-tight">
                 {title}
               </h1>
-              {subtitle && (
-                <p className="text-sm text-gray-500">{subtitle}</p>
-              )}
               <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
                 <div className="flex items-center space-x-1.5">
                   <div className={`w-2 h-2 rounded-full ${

@@ -7,7 +7,7 @@
 import { handleError } from '@/shared/utils/error-handler';
 import { useState, useCallback } from 'react';
 import { useDialog } from '@/app/DialogContext';
-import { ContentProcessor } from '@/02-generation/services/content-processor';
+import { ContentProcessor } from '@/modules/blog-automation/02-generation/services/content-processor';
 
 export interface UseContentRefreshParams {
   editorRef: React.RefObject<HTMLDivElement>;

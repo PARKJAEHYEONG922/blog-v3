@@ -283,7 +283,7 @@ class SetupServiceClass {
       console.log('블로그 URL 크롤링 시작:', url);
 
       // BlogCrawler를 동적 import
-      const { BlogCrawler } = await import('@/01-setup/services/blog-crawler');
+      const { BlogCrawler } = await import('@/modules/blog-automation/01-setup/services/blog-crawler');
       const crawler = new BlogCrawler();
 
       // 임시 제목으로 크롤링 (실제 제목은 크롤링에서 추출됨)

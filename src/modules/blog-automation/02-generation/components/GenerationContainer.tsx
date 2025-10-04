@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { marked } from 'marked';
 import WorkSummary from './WorkSummary';
 import ImageGenerator from './ImageGenerator';
-import { NaverPublishUI } from '@/03-publish/platforms/naver';
-import { ContentProcessor } from '@/02-generation/services/content-processor';
+import { NaverPublishUI } from '@/modules/blog-automation/03-publish/platforms/naver';
+import { ContentProcessor } from '@/modules/blog-automation/02-generation/services/content-processor';
 import Button from '@/shared/components/ui/Button';
 import { useDialog } from '@/app/DialogContext';
-import { useWorkflow } from '@/app/WorkflowContext';
-import { useGeneration } from '@/02-generation/hooks/useGeneration';
+import { useWorkflow } from '@/modules/blog-automation/contexts/WorkflowContext';
+import { useGeneration } from '@/modules/blog-automation/02-generation/hooks/useGeneration';
 import { handleError } from '@/shared/utils/error-handler';
 
 const Step2Generation: React.FC = () => {
@@ -185,7 +185,7 @@ const Step2Generation: React.FC = () => {
   `;
 
   return (
-    <div className="max-w-6xl mx-auto min-h-screen bg-gray-50 p-6">
+    <div className="w-full min-h-screen bg-gray-50 p-6">
       <style>{sectionStyles}</style>
       {/* 작업 요약 */}
       <WorkSummary 

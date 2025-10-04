@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TrendModal from './TrendModal';
-import { TrendAnalysisResult } from '@/01-setup/types/setup.types';
+import { TrendAnalysisResult } from '@/modules/blog-automation/01-setup/types/setup.types';
 
 interface KeywordInputSectionProps {
   mainKeyword: string;

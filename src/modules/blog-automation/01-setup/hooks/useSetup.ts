@@ -4,12 +4,12 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useWorkflow } from '@/app/WorkflowContext';
+import { useWorkflow } from '@/modules/blog-automation/contexts/WorkflowContext';
 import { useDialog } from '@/app/DialogContext';
 import { StorageService } from '@/shared/services/storage/storage-service';
-import { SetupService } from '@/01-setup/services/setup-service';
-import { TitleGenerationService } from '@/01-setup/services/title-generation-service';
-import { ContentGenerationService } from '@/01-setup/services/content-generation-service';
+import { SetupService } from '@/modules/blog-automation/01-setup/services/setup-service';
+import { TitleGenerationService } from '@/modules/blog-automation/01-setup/services/title-generation-service';
+import { ContentGenerationService } from '@/modules/blog-automation/01-setup/services/content-generation-service';
 import { handleError } from '@/shared/utils/error-handler';
 import {
   SavedDocument,

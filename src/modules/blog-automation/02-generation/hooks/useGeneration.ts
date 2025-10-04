@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { handleError } from '@/shared/utils/error-handler';
-import { useWorkflow } from '@/app/WorkflowContext';
-import { ContentProcessor } from '@/02-generation/services/content-processor';
+import { useWorkflow } from '@/modules/blog-automation/contexts/WorkflowContext';
+import { ContentProcessor } from '@/modules/blog-automation/02-generation/services/content-processor';
 import type { WorkflowData } from '@/shared/types/common.types';
 import type { ImagePrompt } from '@/shared/services/content/blog-writing-service';
 

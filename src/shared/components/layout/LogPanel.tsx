@@ -88,7 +88,7 @@ const LogPanel: React.FC<LogPanelProps> = ({ isVisible }) => {
   }
 
   return (
-    <div className="fixed right-0 top-16 bottom-0 w-80 bg-white border-l border-gray-200 flex flex-col shadow-lg z-40">
+    <div className="fixed right-0 top-16 bottom-0 w-64 bg-white border-l border-gray-200 flex flex-col shadow-lg z-40">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gray-50/50">
         <div className="flex items-center justify-between mb-2">

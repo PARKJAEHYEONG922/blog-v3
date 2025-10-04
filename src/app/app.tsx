@@ -1,21 +1,22 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
-import { LogPanel, Button } from '@/shared/components';
+import { LogPanel } from '@/shared/components';
 import ErrorBoundary from '@/shared/components/error/ErrorBoundary';
 import LoadingFallback from '@/shared/components/ui/LoadingFallback';
+import Header from '@/shared/components/layout/Header';
+import Sidebar, { ModuleType } from '@/shared/components/layout/Sidebar';
 import { DialogProvider } from './DialogContext';
-import { WorkflowProvider, useWorkflow } from './WorkflowContext';
+import { WorkflowProvider } from '@/modules/blog-automation/contexts/WorkflowContext';
 import { handleError } from '@/shared/utils/error-handler';
 import type { UpdateInfo } from '@/shared/types/electron.types';
 
 // Code Splitting: 필요한 시점에만 로드
-const SetupContainer = lazy(() => import('@/01-setup').then(module => ({ default: module.SetupContainer })));
-const GenerationContainer = lazy(() => import('@/02-generation').then(module => ({ default: module.GenerationContainer })));
+const BlogAutomationPage = lazy(() => import('@/modules/blog-automation/BlogAutomationPage'));
+const NeighborAddPage = lazy(() => import('@/modules/neighbor-add/NeighborAddPage'));
 const LLMSettings = lazy(() => import('@/features/settings').then(module => ({ default: module.LLMSettings })));
 const UpdateModal = lazy(() => import('@/features/settings').then(module => ({ default: module.UpdateModal })));
 
 const AppContent: React.FC = () => {
-  const { currentStep, workflowData, updateWorkflowData, nextStep, prevStep, reset } = useWorkflow();
-
+  const [currentModule, setCurrentModule] = useState<ModuleType>('blog');
   const [showLLMSettings, setShowLLMSettings] = useState<boolean>(false);
   const [showLogs, setShowLogs] = useState<boolean>(false);
   const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
@@ -78,79 +79,51 @@ const AppContent: React.FC = () => {
     }
   };
 
+  const getModuleTitle = (): { title: string; subtitle: string } => {
+    switch (currentModule) {
+      case 'blog':
+        return { title: 'AI 블로그 자동화', subtitle: '' };
+      case 'neighbor':
+        return { title: '서로이웃 추가', subtitle: '' };
+      default:
+        return { title: 'Blog Auto V3', subtitle: '' };
+    }
+  };
+
+  const { title, subtitle } = getModuleTitle();
+
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-lg">🤖</span>
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                  AI 블로그 자동화 V3
-                </h1>
-                <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
-                  <div className="flex items-center space-x-1.5">
-                    <div className={`w-2 h-2 rounded-full ${aiModelStatus.writing !== '미설정' ? 'bg-green-500' : 'bg-red-500'
-                      }`}></div>
-                    <span>글쓰기: {aiModelStatus.writing}</span>
-                  </div>
-                  <div className="flex items-center space-x-1.5">
-                    <div className={`w-2 h-2 rounded-full ${aiModelStatus.image !== '미설정' ? 'bg-purple-500' : 'bg-red-500'
-                      }`}></div>
-                    <span>이미지: {aiModelStatus.image}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className="h-screen flex bg-gray-50 overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar currentModule={currentModule} onModuleChange={setCurrentModule} />
 
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => setShowLogs(!showLogs)}
-                className={`inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${showLogs
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 hover:bg-emerald-600'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 hover:-translate-y-0.5 shadow-sm'
-                  }`}
-              >
-                <span>📝</span>
-                <span>로그</span>
-              </button>
-              <button
-                onClick={() => setShowLLMSettings(true)}
-                className={`inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${showLLMSettings
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 hover:bg-emerald-600'
-                    : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 hover:-translate-y-0.5 shadow-sm'
-                  }`}
-              >
-                <span>🤖</span>
-                <span>API 설정</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <Header
+          title={title}
+          subtitle={subtitle}
+          aiModelStatus={aiModelStatus}
+          onLLMSettings={() => setShowLLMSettings(true)}
+          onShowLogs={() => setShowLogs(!showLogs)}
+          showLogs={showLogs}
+        />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden flex">
-        <div className={`${showLogs ? 'mr-80' : ''} w-full overflow-y-auto`}>
-          <div className="h-full">
+        {/* Main Content */}
+        <main className="flex-1 overflow-hidden flex">
+          <div className={`${showLogs ? 'mr-64' : ''} w-full overflow-y-auto`}>
             <ErrorBoundary>
-              <Suspense fallback={<LoadingFallback message="컴포넌트 로딩 중..." fullScreen />}>
-                {currentStep === 1 && <SetupContainer />}
-                {currentStep === 2 && <GenerationContainer />}
+              <Suspense fallback={<LoadingFallback message="모듈 로딩 중..." fullScreen />}>
+                {currentModule === 'blog' && <BlogAutomationPage />}
+                {currentModule === 'neighbor' && <NeighborAddPage />}
               </Suspense>
             </ErrorBoundary>
           </div>
-        </div>
-      </main>
+        </main>
 
-      {/* Fixed Log Panel */}
-      <LogPanel isVisible={showLogs} />
+        {/* Fixed Log Panel */}
+        <LogPanel isVisible={showLogs} />
+      </div>
 
       {/* LLM Settings Modal */}
       {showLLMSettings && (

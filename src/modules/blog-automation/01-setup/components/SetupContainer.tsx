@@ -11,8 +11,8 @@ import KeywordInputSection from './KeywordInputSection';
 import TitleRecommendationSection from './TitleRecommendationSection';
 import GenerationProgressSection from './GenerationProgressSection';
 import ManualUploadSection from './ManualUploadSection';
-import { TrendAnalysisResult } from '@/01-setup/types/setup.types';
-import { useSetup } from '@/01-setup/hooks/useSetup';
+import { TrendAnalysisResult } from '@/modules/blog-automation/01-setup/types/setup.types';
+import { useSetup } from '@/modules/blog-automation/01-setup/hooks/useSetup';
 
 const Step1Setup: React.FC = () => {
   // 커스텀 훅에서 모든 로직과 상태 가져오기
@@ -70,7 +70,7 @@ const Step1Setup: React.FC = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto p-5 bg-white min-h-screen">
+    <div className="w-full p-5 bg-white min-h-screen">
       {/* 문서 업로드 섹션 */}
       <DocumentUploadSection
         savedWritingStyles={savedWritingStyles}

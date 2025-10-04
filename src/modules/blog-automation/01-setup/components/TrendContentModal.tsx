@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { NaverTrendService } from '@/01-setup/services/naver-trend-service';
-import { BlogTrendAnalyzer } from '@/01-setup/services/blog-trend-analyzer';
-import { TrendContent, TrendAnalysisResult, TrendAnalysisProgress } from '@/01-setup/types/setup.types';
+import { NaverTrendService } from '@/modules/blog-automation/01-setup/services/naver-trend-service';
+import { BlogTrendAnalyzer } from '@/modules/blog-automation/01-setup/services/blog-trend-analyzer';
+import { TrendContent, TrendAnalysisResult, TrendAnalysisProgress } from '@/modules/blog-automation/01-setup/types/setup.types';
 import Button from '@/shared/components/ui/Button';
 import { useDialog } from '@/app/DialogContext';
 

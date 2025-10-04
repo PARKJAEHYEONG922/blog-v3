@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NaverTrendService } from '@/01-setup/services/naver-trend-service';
+import { NaverTrendService } from '@/modules/blog-automation/01-setup/services/naver-trend-service';
 import Button from '@/shared/components/ui/Button';
 import { useDialog } from '@/app/DialogContext';
 
