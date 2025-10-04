@@ -225,7 +225,7 @@ ${blogsInfo}
 
       // LLM 클라이언트 생성
       const client = LLMClientFactory.createClient({
-        provider: writingLLM.provider,
+        provider: writingLLM.provider as 'openai' | 'claude' | 'gemini' | 'runware',
         apiKey: apiKey,
         model: writingLLM.model
       });
@@ -352,7 +352,7 @@ ${blogsInfo}
 
       // LLM 클라이언트 생성
       const client = LLMClientFactory.createClient({
-        provider: writingLLM.provider,
+        provider: writingLLM.provider as 'openai' | 'claude' | 'gemini' | 'runware',
         apiKey: apiKey,
         model: writingLLM.model
       });

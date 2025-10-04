@@ -28,7 +28,7 @@ export class ImageService {
       }
 
       const writingConfig = settings.lastUsedSettings.writing;
-      const apiKey = settings.providerApiKeys?.[writingConfig.provider];
+      const apiKey = settings.providerApiKeys?.[writingConfig.provider as keyof typeof settings.providerApiKeys];
 
       if (!apiKey) {
         throw new Error(`${writingConfig.provider} API 키가 설정되지 않았습니다.`);

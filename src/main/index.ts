@@ -255,7 +255,7 @@ ipcMain.handle('image:generate', async (_event, prompt: string) => {
     }
 
     const imageConfig = settings.lastUsedSettings.image;
-    const apiKey = settings.providerApiKeys?.[imageConfig.provider];
+    const apiKey = settings.providerApiKeys?.[imageConfig.provider as keyof typeof settings.providerApiKeys];
 
     if (!apiKey) {
       throw new Error(`${imageConfig.provider} API 키가 설정되지 않았습니다.`);
@@ -364,7 +364,7 @@ ipcMain.handle('llm:generate-titles', async (_event, data: { systemPrompt: strin
     }
 
     const writingConfig = settings.lastUsedSettings.writing;
-    const apiKey = settings.providerApiKeys?.[writingConfig.provider];
+    const apiKey = settings.providerApiKeys?.[writingConfig.provider as keyof typeof settings.providerApiKeys];
 
     if (!apiKey) {
       return { success: false, error: `${writingConfig.provider} API 키가 설정되지 않았습니다.` };
