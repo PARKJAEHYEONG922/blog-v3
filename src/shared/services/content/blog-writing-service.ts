@@ -157,24 +157,30 @@ ${blogContent}
           
           // 마크다운 코드 블록 제거
           let jsonContent = cleanedResponse;
-          
+
           // 다양한 형식의 코드 블록 제거
           if (cleanedResponse.includes('```')) {
             jsonContent = cleanedResponse.replace(/```[a-zA-Z]*\n?/g, '').replace(/\n?```/g, '').trim();
           }
-          
-          // JSON 추출 시도
+
+          // JSON 추출 시도 (가장 큰 JSON 객체 찾기)
           const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             jsonContent = jsonMatch[0];
           }
-          
+
           // 배열로 시작하는 경우 처리
           const arrayMatch = jsonContent.match(/\[[\s\S]*\]/);
           if (!jsonMatch && arrayMatch) {
             jsonContent = `{"imagePrompts": ${arrayMatch[0]}}`;
           }
-          
+
+          // 잘린 JSON 복구 시도 (마지막 불완전한 객체 제거)
+          if (jsonContent.endsWith(',') || jsonContent.match(/[,{]\s*$/)) {
+            // 마지막 쉼표 제거 후 닫는 괄호 추가
+            jsonContent = jsonContent.replace(/,\s*$/, '') + ']}';
+          }
+
           imagePromptsData = JSON.parse(jsonContent);
         } catch (parseError) {
           handleError(parseError, `❌ 시도 ${attempt}: JSON 파싱 실패:`);
@@ -183,17 +189,18 @@ ${blogContent}
           try {
             console.log('🔄 대체 파싱 시도...');
             const prompts: ImagePrompt[] = [];
-            
-            const promptRegex = /["']prompt["']\s*:\s*["']([^"']+)["']/g;
+
+            // "prompt": "..." 패턴 매칭 (내부 따옴표 고려)
+            const promptRegex = /"prompt"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/g;
             let match;
             let index = 1;
-            
+
             while ((match = promptRegex.exec(responseContent)) !== null) {
               prompts.push({
                 index: index,
                 position: `이미지 ${index}`,
                 context: `이미지 ${index} 관련 내용`,
-                prompt: match[1]
+                prompt: match[1].replace(/\\"/g, '"').replace(/\\'/g, "'")
               });
               index++;
             }

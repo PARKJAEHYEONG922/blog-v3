@@ -466,21 +466,29 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   const handleAIImageGeneration = async (imageIndex: number, isPartOfBatch = false) => {
     const prompt = getCurrentPrompt(imageIndex);
     if (!hasImageClient || !prompt.trim()) return;
-    
+
     setImageStatus(prev => ({ ...prev, [imageIndex]: 'generating' }));
-    
+
     try {
+      // API 설정에서 최신 이미지 설정 가져오기
+      const llmSettings = await window.electronAPI.getLLMSettings();
+      const apiImageSettings = llmSettings?.lastUsedSettings?.image;
+
+      const actualStyle = apiImageSettings?.style || imageStyle;
+      const actualQuality = apiImageSettings?.quality || imageQuality;
+      const actualSize = apiImageSettings?.size || imageSize;
+
       // 프롬프트 (스타일은 options으로 전달)
       const enhancedPrompt = prompt;
 
       console.log(`이미지 ${imageIndex} 생성 시작:`, {
         prompt: enhancedPrompt,
-        style: imageStyle,
-        quality: imageQuality,
-        size: imageSize
+        style: actualStyle,
+        quality: actualQuality,
+        size: actualSize
       });
 
-      console.log('실제 전달되는 imageSize 값:', imageSize);
+      console.log('실제 전달되는 imageSize 값:', actualSize);
 
       // 이미지 옵션은 메인 프로세스에서 LLM 설정에서 가져오므로 여기서는 처리하지 않음
 

@@ -168,10 +168,34 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     newSettings[tab] = {
       ...newSettings[tab],
       provider: provider as 'openai' | 'claude' | 'gemini' | 'runware',
-      model: '', // 모델 초기화
+      model: '', // 모델 초기화 (사용자가 직접 선택)
       apiKey: providerApiKeys[provider as keyof ProviderApiKeys] || ''
     };
+
+    // 이미지 탭에서 provider 변경 시 해당 provider의 기본값으로 초기화
+    if (tab === 'image') {
+      if (provider === 'gemini') {
+        newSettings[tab].size = '1024x1024';
+        newSettings[tab].style = 'photographic';
+        newSettings[tab].quality = 'high';
+      } else if (provider === 'openai') {
+        newSettings[tab].size = '1024x1024';
+        newSettings[tab].style = undefined; // OpenAI는 스타일 없음
+        newSettings[tab].quality = 'high';
+      } else if (provider === 'runware') {
+        newSettings[tab].size = '1024x1024';
+        newSettings[tab].style = 'realistic';
+        newSettings[tab].quality = 'high';
+      }
+    }
+
     setSettings(newSettings);
+
+    // provider 변경 시 테스트 상태 초기화
+    setTestingStatus(prev => ({
+      ...prev,
+      [tab]: { testing: false, success: false, message: '' }
+    }));
   };
 
   const handleModelChange = (tab: keyof LLMSettings, model: string) => {
@@ -181,6 +205,12 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       model
     };
     setSettings(newSettings);
+
+    // 모델 변경 시 테스트 상태 초기화
+    setTestingStatus(prev => ({
+      ...prev,
+      [tab]: { testing: false, success: false, message: '' }
+    }));
   };
 
   const handleStyleChange = (tab: keyof LLMSettings, style: string) => {
@@ -190,6 +220,12 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       style
     };
     setSettings(newSettings);
+
+    // 스타일 변경 시 테스트 상태 초기화
+    setTestingStatus(prev => ({
+      ...prev,
+      [tab]: { testing: false, success: false, message: '' }
+    }));
   };
 
   const handleSizeChange = (tab: keyof LLMSettings, size: string) => {
@@ -199,6 +235,12 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       size
     };
     setSettings(newSettings);
+
+    // 사이즈 변경 시 테스트 상태 초기화
+    setTestingStatus(prev => ({
+      ...prev,
+      [tab]: { testing: false, success: false, message: '' }
+    }));
   };
 
   const handleQualityChange = (tab: keyof LLMSettings, quality: string) => {
@@ -208,6 +250,12 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       quality
     };
     setSettings(newSettings);
+
+    // 품질 변경 시 테스트 상태 초기화
+    setTestingStatus(prev => ({
+      ...prev,
+      [tab]: { testing: false, success: false, message: '' }
+    }));
   };
 
   const handleApiKeyChange = (provider: string, apiKey: string) => {
@@ -226,8 +274,8 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
   };
 
   const testApiKey = async (category: keyof LLMSettings) => {
-    const { provider, apiKey, model } = settings[category];
-    
+    const { provider, apiKey, model, size, style, quality } = settings[category];
+
     if (!apiKey || !provider || !model) {
       setTestingStatus(prev => ({
         ...prev,
@@ -243,8 +291,8 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     }));
 
     try {
-      // 실제 API 테스트
-      const result = await testAPIConnection(provider, apiKey);
+      // 실제 API 테스트 (category, model, size, style, quality 전달)
+      const result = await testAPIConnection(provider, apiKey, category, model, size, style, quality);
       
       if (result.success) {
         // 성공
@@ -319,14 +367,14 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
   };
 
   // API 키 삭제 함수
-  const deleteApiKey = (category: keyof LLMSettings) => {
-    // 해당 카테고리의 API 키와 관련 설정 초기화
+  const deleteApiKey = async (category: keyof LLMSettings) => {
+    // 해당 카테고리의 설정만 초기화 (다른 카테고리의 API 키는 유지)
     const newSettings = { ...settings };
-    newSettings[category] = { 
-      ...newSettings[category], 
-      apiKey: '' 
+    newSettings[category] = {
+      ...newSettings[category],
+      apiKey: '',
+      model: ''
     };
-    setSettings(newSettings);
 
     // 마지막 사용 설정 초기화
     const newLastUsedSettings = { ...lastUsedSettings };
@@ -335,6 +383,15 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
     } else {
       newLastUsedSettings[category] = { provider: 'gemini', model: '' };
     }
+
+    // 설정 파일에 직접 저장
+    await window.electronAPI?.saveLLMSettings?.({
+      ...newSettings,
+      lastUsedSettings: newLastUsedSettings
+    });
+
+    // State 업데이트 (providerApiKeys는 건드리지 않음 - 다른 카테고리가 사용 중일 수 있음)
+    setSettings(newSettings);
     setLastUsedSettings(newLastUsedSettings);
 
     // 테스트 상태 초기화
@@ -343,15 +400,6 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       [category]: { testing: false, success: false, message: '' }
     }));
 
-    // 제공자별 API 키도 초기화
-    const provider = settings[category].provider as keyof ProviderApiKeys;
-    if (provider) {
-      setProviderApiKeys(prev => ({
-        ...prev,
-        [provider]: ''
-      }));
-    }
-
     // 설정 변경 시 부모 컴포넌트에 알림
     if (onSettingsChange) {
       onSettingsChange();
@@ -359,12 +407,12 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
   };
 
   // 실제 API 연결 테스트 (Electron IPC 사용)
-  const testAPIConnection = async (provider: string, apiKey: string): Promise<{success: boolean, message: string}> => {
+  const testAPIConnection = async (provider: string, apiKey: string, category?: string, model?: string, size?: string, style?: string, quality?: string): Promise<{success: boolean, message: string}> => {
     console.log(`🔍 Testing ${provider} API with key: ${apiKey.substring(0, 10)}...`);
-    
+
     try {
       // Electron IPC를 통해 Main process에서 API 테스트 실행
-      const result = await window.electronAPI?.testLLMConfig?.({ provider, apiKey });
+      const result = await window.electronAPI?.testLLMConfig?.({ provider, apiKey, category, model, size, style, quality });
       
       console.log(`📡 ${provider} API 테스트 결과:`, result);
       

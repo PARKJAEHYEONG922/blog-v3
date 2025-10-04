@@ -331,30 +331,30 @@ ipcMain.handle('llm:save-settings', async (_event, settings: any) => {
   return true;
 });
 
-ipcMain.handle('llm:test-config', async (_event, config: { provider: string; apiKey: string; model?: string }) => {
+ipcMain.handle('llm:test-config', async (_event, config: { provider: string; apiKey: string; model?: string; category?: string; size?: string; style?: string; quality?: string }) => {
   try {
     const { LLMClientFactory } = await import('../shared/services/llm/llm-factory');
-
-    // provider별 기본 모델
-    const defaultModels: Record<string, string> = {
-      'gemini': 'gemini-2.0-flash-exp',
-      'openai': 'gpt-4o-mini',
-      'claude': 'claude-3-5-sonnet-20241022',
-      'runware': 'runware-sd3.5-turbo'
-    };
 
     const llmConfig = {
       provider: config.provider as 'gemini' | 'openai' | 'claude' | 'runware',
       apiKey: config.apiKey,
-      model: config.model || defaultModels[config.provider] || ''
+      model: config.model || ''
     };
 
     const client = LLMClientFactory.createClient(llmConfig);
 
-    // 간단한 테스트 메시지로 연결 확인
-    await client.generateText([
-      { role: 'user', content: 'test' }
-    ]);
+    // category가 'image'면 이미지 생성으로 테스트, 아니면 텍스트 생성으로 테스트
+    if (config.category === 'image') {
+      await client.generateImage('test image', {
+        style: config.style,
+        quality: config.quality,
+        size: config.size
+      });
+    } else {
+      await client.generateText([
+        { role: 'user', content: 'test' }
+      ]);
+    }
 
     return { success: true };
   } catch (error) {
