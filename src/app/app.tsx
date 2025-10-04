@@ -5,6 +5,7 @@ import LoadingFallback from '@/shared/components/ui/LoadingFallback';
 import { DialogProvider } from './DialogContext';
 import { WorkflowProvider, useWorkflow } from './WorkflowContext';
 import { handleError } from '@/shared/utils/error-handler';
+import type { UpdateInfo } from '@/shared/types/electron.types';
 
 // Code Splitting: 필요한 시점에만 로드
 const SetupContainer = lazy(() => import('@/01-setup').then(module => ({ default: module.SetupContainer })));
@@ -18,7 +19,7 @@ const AppContent: React.FC = () => {
   const [showLLMSettings, setShowLLMSettings] = useState<boolean>(false);
   const [showLogs, setShowLogs] = useState<boolean>(false);
   const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
-  const [updateInfo, setUpdateInfo] = useState<any>(null);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
   // AI 모델 상태
   const [aiModelStatus, setAiModelStatus] = useState({
@@ -52,7 +53,7 @@ const AppContent: React.FC = () => {
 
   // 업데이트 확인 결과 리스너
   useEffect(() => {
-    const handleUpdateCheckResult = (data: any) => {
+    const handleUpdateCheckResult = (data: UpdateInfo) => {
       setUpdateInfo(data);
       setShowUpdateModal(true);
     };

@@ -37,9 +37,9 @@ export interface AppConfig {
     };
     testingStatus?: {
       [provider: string]: {
+        testing: boolean;
         success: boolean;
         message: string;
-        timestamp: number;
       };
     };
   };

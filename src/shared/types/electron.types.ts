@@ -1,5 +1,13 @@
 // Electron 관련 타입 정의
 
+export interface UpdateInfo {
+  hasUpdate: boolean;
+  currentVersion?: string;
+  latestVersion?: string;
+  downloadUrl?: string;
+  error?: string;
+}
+
 export interface DownloadProgress {
   progress: number;
   downloadedBytes: number;
@@ -80,9 +88,9 @@ export interface ElectronAPI {
   // 시스템
   openExternal: (url: string) => Promise<void>;
   getAppVersion: () => Promise<string>;
-  checkForUpdates: () => Promise<any>; // TODO: UpdateInfo 타입 적용 필요
+  checkForUpdates: () => Promise<UpdateInfo>;
   downloadUpdate: (downloadUrl: string) => Promise<{ success: boolean; error?: string }>;
-  onUpdateCheckResult: (callback: (data: any) => void) => (() => void);
+  onUpdateCheckResult: (callback: (data: UpdateInfo) => void) => (() => void);
   onDownloadProgress: (callback: (data: DownloadProgress) => void) => (() => void);
 
   // 네이버 관련
