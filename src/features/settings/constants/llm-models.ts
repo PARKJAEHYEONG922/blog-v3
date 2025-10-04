@@ -12,9 +12,8 @@ export interface ModelInfo {
 export const MODELS_BY_PROVIDER: Record<string, { text?: ModelInfo[]; image?: ModelInfo[] }> = {
   claude: {
     text: [
-      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', description: '최신 고품질 모델', tier: 'premium' },
-      { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', description: '최고품질 모델', tier: 'premium' },
-      { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', description: '빠르고 경제적', tier: 'basic' }
+      { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', description: '최신 최고 성능 모델', tier: 'premium' },
+      { id: 'claude-opus-4-1-20250805', name: 'Claude Opus 4.1', description: '최고품질 모델', tier: 'premium' }
     ]
   },
   openai: {
