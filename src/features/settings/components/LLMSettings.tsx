@@ -21,6 +21,20 @@ interface ProviderApiKeys {
   runware: string;
 }
 
+interface Provider {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
+interface ModelInfo {
+  id: string;
+  name: string;
+  description: string;
+  tier: string;
+}
+
 const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) => {
   const [activeTab, setActiveTab] = useState<'writing' | 'image'>('writing');
   const [providerApiKeys, setProviderApiKeys] = useState<ProviderApiKeys>({
@@ -290,7 +304,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
           }
         }));
       }
-    } catch (error: any) {
+    } catch (error) {
       // 에러
       handleError(error, 'API 테스트 에러:');
       setTestingStatus(prev => ({
@@ -368,7 +382,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
       
       return result as { success: boolean, message: string };
       
-    } catch (error: any) {
+    } catch (error) {
       handleError(error, `❌ ${provider} API 테스트 실패:`);
       
       if (error instanceof Error) {
@@ -470,7 +484,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                 제공업체
               </label>
               <div className="flex gap-3 flex-wrap">
-                {getWritingProviders().map((provider: any) => (
+                {getWritingProviders().map((provider: Provider) => (
                   <button
                     key={provider.id}
                     onClick={() => handleProviderChange('writing', provider.id)}
@@ -499,7 +513,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                     className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 cursor-pointer"
                   >
                     <option value="">모델을 선택하세요</option>
-                    {getAvailableModels('writing', settings.writing.provider).map((model: any) => (
+                    {getAvailableModels('writing', settings.writing.provider).map((model: ModelInfo) => (
                       <option key={model.id} value={model.id}>
                         {model.name} - {model.description}
                       </option>
@@ -713,7 +727,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                 제공업체
               </label>
               <div className="flex gap-3 flex-wrap">
-                {getImageProviders().map((provider: any) => (
+                {getImageProviders().map((provider: Provider) => (
                   <button
                     key={provider.id}
                     onClick={() => handleProviderChange('image', provider.id)}
@@ -742,7 +756,7 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ onClose, onSettingsChange }) 
                     className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-700 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200 cursor-pointer"
                   >
                     <option value="">모델을 선택하세요</option>
-                    {getAvailableModels('image', settings.image.provider).map((model: any) => (
+                    {getAvailableModels('image', settings.image.provider).map((model: ModelInfo) => (
                       <option key={model.id} value={model.id}>
                         {model.name} - {model.description}
                       </option>

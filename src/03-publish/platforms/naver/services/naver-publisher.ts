@@ -223,10 +223,10 @@ export class NaverPublisher {
     copyToClipboard?: () => Promise<boolean>,
     saveAccount?: (username: string, password: string) => void,
     timeError?: boolean,
-    editedContent?: any,
+    editedContent?: { selectedTitle?: string; htmlContent?: string; content?: string },
     imageUrls?: Record<string, string>,
-    onComplete?: (data: any) => void,
-    workflowData?: any,  // 원본에서 data로 받던 WorkflowData
+    onComplete?: (data: { success: boolean; message: string; url?: string; generatedContent?: string }) => void,
+    workflowData?: WorkflowData,
     boardCategory?: string  // 게시판 카테고리 추가
   ): Promise<{ success: boolean; message: string; url?: string }> {
     
@@ -407,8 +407,12 @@ export class NaverPublisher {
           };
           
           // 상위 컴포넌트에 완료 알림
-          onComplete?.({ 
-            generatedContent: editedContent
+          const generatedContent = editedContent?.htmlContent || editedContent?.content || '';
+          onComplete?.({
+            success: true,
+            message: result.message,
+            url: result.url,
+            generatedContent
           });
           
           return result;

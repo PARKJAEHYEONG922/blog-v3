@@ -8,24 +8,24 @@ import { handleError } from '@/shared/utils/error-handler';
 
 import { useState, useCallback, useEffect } from 'react';
 import { useDialog } from '@/app/DialogContext';
-import { BlogWritingService } from '@/shared/services/content/blog-writing-service';
+import { BlogWritingService, type ImagePrompt } from '@/shared/services/content/blog-writing-service';
 
 export interface UseImageGenerationParams {
-  initialImagePrompts?: any[];
+  initialImagePrompts?: ImagePrompt[];
 }
 
 export interface UseImageGenerationReturn {
   // 이미지 상태
   imagePositions: string[];
   images: { [key: string]: string };
-  imagePrompts: any[];
+  imagePrompts: ImagePrompt[];
   isRegeneratingPrompts: boolean;
   imagePromptError: string | null;
 
   // 상태 업데이트
   setImages: (images: { [key: string]: string }) => void;
   setImagePositions: (positions: string[]) => void;
-  setImagePrompts: (prompts: any[]) => void;
+  setImagePrompts: (prompts: ImagePrompt[]) => void;
   setImagePromptError: (error: string | null) => void;
 
   // 비즈니스 로직
@@ -41,7 +41,7 @@ export const useImageGeneration = ({
 
   const [imagePositions, setImagePositions] = useState<string[]>([]);
   const [images, setImages] = useState<{[key: string]: string}>({});
-  const [imagePrompts, setImagePrompts] = useState<any[]>([]);
+  const [imagePrompts, setImagePrompts] = useState<ImagePrompt[]>([]);
   const [isRegeneratingPrompts, setIsRegeneratingPrompts] = useState(false);
   const [imagePromptError, setImagePromptError] = useState<string | null>(null);
 

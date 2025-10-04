@@ -79,7 +79,7 @@ export interface TrendAnalysisProgress {
 }
 
 export interface TrendAnalysisCache {
-  contents: any[];
+  contents: BlogContent[];
   mainKeyword: string;
   allTitles: string[];
   subKeywords: string[];
@@ -105,8 +105,15 @@ export interface ContentGenerationParams {
   selectedSeoGuide: SavedDocument;
 }
 
+export interface ImagePrompt {
+  index: number;
+  position: string;
+  context: string;
+  prompt: string;
+}
+
 export interface ImagePromptGenerationResult {
-  imagePrompts: any[];  // ImagePrompt 객체 배열 (index, position, context, prompt)
+  imagePrompts: ImagePrompt[];
   expectedImageCount: number;
   generatedImageCount: number;
   failed: boolean;

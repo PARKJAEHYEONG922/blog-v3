@@ -181,7 +181,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
       if (accounts.length > 0) {
         setSavedAccounts(accounts);
         // 가장 최근 사용한 계정을 기본으로 설정
-        const mostRecent = accounts.sort((a: any, b: any) => b.lastUsed - a.lastUsed)[0];
+        const mostRecent = accounts.sort((a: SavedAccount, b: SavedAccount) => (b.lastUsed || 0) - (a.lastUsed || 0))[0];
         const savedPassword = await window.electronAPI.getNaverPassword(mostRecent.id);
         if (savedPassword) {
           setNaverCredentials({
@@ -664,7 +664,7 @@ const NaverPublishUI: React.FC<PublishComponentProps> = ({
   /**
    * 날짜 선택 핸들러
    */
-  const handleDateSelect = (dayInfo: any) => {
+  const handleDateSelect = (dayInfo: { fullDate: string; isDisabled?: boolean } | null) => {
     if (!dayInfo || dayInfo.isDisabled) return;
     
     setScheduledDate(dayInfo.fullDate);

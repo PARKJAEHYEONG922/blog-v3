@@ -2542,9 +2542,9 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
     copyToClipboard?: () => Promise<boolean>,
     saveAccount?: (username: string, password: string) => void,
     timeError?: boolean,
-    editedContent?: any,
+    editedContent?: { selectedTitle?: string; htmlContent?: string; content?: string },
     imageUrls?: Record<string, string>,
-    onComplete?: (data: any) => void
+    onComplete?: (data: { success: boolean; message: string; url?: string; generatedContent?: string }) => void
   ): Promise<{ success: boolean; message: string; url?: string }> {
     if (!credentials.username || !credentials.password) {
       onStatusUpdate?.({ error: '아이디와 비밀번호를 입력해주세요.' });
@@ -2623,7 +2623,8 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         // 4단계: 본문 및 이미지 자동 입력
         onStatusUpdate?.({ error: '본문과 이미지를 자동으로 입력하는 중...' });
         
-        const contentSuccess = await this.inputContentWithImages(editedContent || '', imageUrls || {});
+        const content = editedContent?.htmlContent || editedContent?.content || '';
+        const contentSuccess = await this.inputContentWithImages(content, imageUrls || {});
         if (!contentSuccess) {
           console.warn('⚠️ 본문 및 이미지 자동 입력 실패, 수동으로 진행해주세요.');
         }
@@ -2702,7 +2703,8 @@ export class NaverBlogAutomation extends BaseBrowserAutomation implements INaver
         
         // 상위 컴포넌트에 완료 알림
         if (onComplete) {
-          onComplete({ generatedContent: editedContent });
+          const generatedContent = editedContent?.htmlContent || editedContent?.content || '';
+          onComplete({ success: true, message: result.message, url: result.url, generatedContent });
         }
         
         return result;

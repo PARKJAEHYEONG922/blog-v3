@@ -3,7 +3,7 @@
  */
 
 import { BlogPromptService } from '@/shared/services/content/blog-prompt-service';
-import { ContentGenerationParams, ImagePromptGenerationResult } from '../types/setup.types';
+import { ContentGenerationParams, ImagePromptGenerationResult, ImagePrompt } from '../types/setup.types';
 import { SavedDocument } from '@/shared/services/storage/storage-service';
 import { handleError } from '@/shared/utils/error-handler';
 
@@ -107,7 +107,7 @@ class ContentGenerationServiceClass {
   async generateImagePrompts(content: string, onStepChange: (step: string) => void): Promise<ImagePromptGenerationResult> {
     onStepChange('이미지 프롬프트 생성 중...');
 
-    let imagePrompts: any[] = [];
+    let imagePrompts: ImagePrompt[] = [];
 
     try {
       // 동적 import로 BlogWritingService 불러오기

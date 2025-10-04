@@ -7,6 +7,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { handleError } from '@/shared/utils/error-handler';
 import { useWorkflow } from '@/app/WorkflowContext';
 import { ContentProcessor } from '@/02-generation/services/content-processor';
+import type { WorkflowData } from '@/shared/types/common.types';
+import type { ImagePrompt } from '@/shared/services/content/blog-writing-service';
 
 // 전문 훅들 임포트
 import { useContentEditor } from './useContentEditor';
@@ -16,7 +18,7 @@ import { usePublish } from './usePublish';
 
 export interface UseGenerationReturn {
   // WorkflowContext
-  workflowData: any;
+  workflowData: WorkflowData;
   prevStep: () => void;
   reset: () => void;
 
@@ -38,7 +40,7 @@ export interface UseGenerationReturn {
   // 이미지 관련 상태 (from useImageGeneration)
   imagePositions: string[];
   images: { [key: string]: string };
-  imagePrompts: any[];
+  imagePrompts: ImagePrompt[];
   isRegeneratingPrompts: boolean;
   imagePromptError: string | null;
 
