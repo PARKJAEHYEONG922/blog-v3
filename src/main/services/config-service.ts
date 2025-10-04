@@ -1,7 +1,4 @@
 import Store from 'electron-store';
-import * as fs from 'fs';
-import * as path from 'path';
-import { app } from 'electron';
 
 /**
  * 통합 설정 인터페이스
@@ -77,80 +74,6 @@ export class ConfigService {
         }
       }
     });
-
-    // 구버전 설정 파일 자동 마이그레이션
-    this.migrateOldSettings();
-  }
-
-  /**
-   * 구버전 설정 파일들을 새로운 config.json으로 마이그레이션
-   */
-  private migrateOldSettings(): void {
-    const userDataPath = app.getPath('userData');
-
-    // 1. llm-settings.json 마이그레이션
-    const oldLLMSettingsPath = path.join(userDataPath, 'llm-settings.json');
-    if (fs.existsSync(oldLLMSettingsPath)) {
-      try {
-        const oldData = JSON.parse(fs.readFileSync(oldLLMSettingsPath, 'utf-8'));
-
-        // appliedSettings를 lastUsedSettings로 변환
-        if (oldData.appliedSettings) {
-          const { writing, image } = oldData.appliedSettings;
-
-          this.store.set('llm.lastUsedSettings', {
-            writing: {
-              provider: writing?.provider || 'gemini',
-              model: writing?.model || ''
-            },
-            image: {
-              provider: image?.provider || 'gemini',
-              model: image?.model || '',
-              style: image?.style || 'photographic',
-              quality: image?.quality || 'high',
-              size: image?.size || '1024x1024'
-            }
-          });
-        }
-
-        // providerApiKeys 마이그레이션
-        if (oldData.providerApiKeys) {
-          this.store.set('llm.providerApiKeys', oldData.providerApiKeys);
-        }
-
-        // testingStatus 마이그레이션
-        if (oldData.testingStatus) {
-          this.store.set('llm.testingStatus', oldData.testingStatus);
-        }
-
-        console.log('✅ llm-settings.json 마이그레이션 완료');
-
-        // 백업 후 삭제
-        const backupPath = oldLLMSettingsPath + '.backup';
-        fs.renameSync(oldLLMSettingsPath, backupPath);
-        console.log(`📦 구버전 파일 백업: ${backupPath}`);
-      } catch (error) {
-        console.error('❌ llm-settings.json 마이그레이션 실패:', error);
-      }
-    }
-
-    // 2. naver_cookies.txt 마이그레이션
-    const oldCookiesPath = path.join(userDataPath, 'naver_cookies.txt');
-    if (fs.existsSync(oldCookiesPath)) {
-      try {
-        const cookies = fs.readFileSync(oldCookiesPath, 'utf-8');
-        this.store.set('naver.cookies', cookies);
-
-        console.log('✅ naver_cookies.txt 마이그레이션 완료');
-
-        // 백업 후 삭제
-        const backupPath = oldCookiesPath + '.backup';
-        fs.renameSync(oldCookiesPath, backupPath);
-        console.log(`📦 구버전 파일 백업: ${backupPath}`);
-      } catch (error) {
-        console.error('❌ naver_cookies.txt 마이그레이션 실패:', error);
-      }
-    }
   }
 
   // ==================== LLM 설정 ====================

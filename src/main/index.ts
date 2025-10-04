@@ -5,7 +5,6 @@ import { ClaudeWebService } from './services/claude-web-service';
 import { ImageService } from './services/image-service';
 import { registerPlaywrightHandlers, playwrightService } from './services/playwright-service';
 import { getDefaultSEOGuideContent } from '../shared/services/content/default-seo-guide';
-import { CookieService } from './services/cookie-service';
 import { FileService } from './services/file-service';
 import { AppService } from './services/app-service';
 import { ConfigService } from './services/config-service';
