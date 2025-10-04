@@ -134,9 +134,11 @@ const Step2Generation: React.FC = () => {
       editorRef.current.innerHTML = editedContent;
       isEditorPopulatedRef.current = true;
       // DOM 업데이트 완료 후 글자 수 계산
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
         updateCharCount();
       }, 100);
+
+      return () => clearTimeout(timerId);
     }
   }, [editedContent]);
 
